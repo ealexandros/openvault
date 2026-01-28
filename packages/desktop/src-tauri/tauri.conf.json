@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "openvault",
+  "version": "1.0.0",
+  "identifier": "com.openvault.app",
+  "build": {
+    "beforeDevCommand": "bun run dev:next",
+    "devUrl": "http://localhost:8080",
+    "beforeBuildCommand": "bun run build:next",
+    "frontendDist": "../out"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "openvault",
+        "width": 800,
+        "height": 600,
+        "minWidth": 600,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": []
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "openvault-devtainer",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "runArgs": ["--name", "openvault-devtainer"],
+  "forwardPorts": [8080],
+
+  "postCreateCommand": "./.devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tauri-apps.tauri-vscode",
+        "tamasfe.even-better-toml",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {}
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    }
+  }
+}

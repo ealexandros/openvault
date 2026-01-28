@@ -1,0 +1,12 @@
+@keyframes loader-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.animate-loader-slide {
+  animation: loader-slide 2s infinite ease-in-out;
+}

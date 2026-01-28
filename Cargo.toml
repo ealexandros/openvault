@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+  "packages/desktop/src-tauri",
+  "packages/crypto-core"
+]
+
+resolver = "2"
