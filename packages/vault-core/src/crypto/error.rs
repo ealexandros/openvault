@@ -20,17 +20,11 @@ pub enum CryptoError {
     #[error("Invalid key length")]
     InvalidKeyLength,
 
-    #[error("Io error: {0}")]
-    Io(#[from] std::io::Error),
-
     #[error("Hkdf error: {0}")]
     Hkdf(String),
 
     #[error("Unknown algorithm: {0}")]
     UnknownAlgorithm(String),
-
-    #[error("Unknown error")]
-    Unknown,
 }
 
 pub type Result<T> = std::result::Result<T, CryptoError>;
