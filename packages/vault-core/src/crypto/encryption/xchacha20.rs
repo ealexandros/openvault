@@ -4,21 +4,18 @@ use chacha20poly1305::aead::{Aead, AeadCore, KeyInit, OsRng};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use std::io::{Read, Write};
 
+// @todo-now add parameters for the chunk size, tag size, nonce size
+// @todo-now remove all the consts from here..
+
+const DEFAULT_TAG_SIZE: usize = 16;
+const DEFAULT_CHUNK_SIZE: usize = 32 * 1024;
+const DEFAULT_NONCE_SIZE: usize = 24;
+
 #[derive(Debug, Default, Clone, Copy)]
 pub struct XChaCha20Poly1305Cipher;
 
-const KEY_SIZE: usize = 32;
-const NONCE_SIZE: usize = 24;
-const CHUNK_SIZE: usize = 32 * 1024;
-
-// @todo-now change the nonce every time..
-
 impl Cipher for XChaCha20Poly1305Cipher {
     fn encrypt(&self, key: &[u8], plaintext: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
-        if key.len() != KEY_SIZE {
-            return Err(CryptoError::InvalidKeyLength);
-        }
-
         let cipher = XChaCha20Poly1305::new(key.into());
         let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
 
@@ -30,13 +27,6 @@ impl Cipher for XChaCha20Poly1305Cipher {
     }
 
     fn decrypt(&self, key: &[u8], nonce: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>> {
-        if key.len() != KEY_SIZE {
-            return Err(CryptoError::InvalidKeyLength);
-        }
-        if nonce.len() != NONCE_SIZE {
-            return Err(CryptoError::Decryption("Invalid nonce length".to_string()));
-        }
-
         let cipher = XChaCha20Poly1305::new(key.into());
         let nonce = XNonce::from_slice(nonce);
 
@@ -47,84 +37,68 @@ impl Cipher for XChaCha20Poly1305Cipher {
         Ok(plaintext)
     }
 
-    fn encrypt_stream(
-        &self,
-        key: &[u8],
-        input: &mut dyn Read,
-        output: &mut dyn Write,
-    ) -> Result<()> {
-        if key.len() != KEY_SIZE {
-            return Err(CryptoError::InvalidKeyLength);
-        }
+    fn encrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
+        let cipher = XChaCha20Poly1305::new_from_slice(key)
+            .map_err(|_| CryptoError::Encryption("Invalid key length".into()))?;
 
-        let cipher = XChaCha20Poly1305::new(key.into());
-        let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
-        let nonce_bytes = nonce.as_slice();
+        let mut buffer = [0u8; DEFAULT_CHUNK_SIZE];
+        let mut nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
 
-        output
-            .write_all(nonce_bytes)
-            .map_err(|e| CryptoError::Encryption(format!("Failed to write nonce: {}", e)))?;
-
-        let mut buffer = [0u8; CHUNK_SIZE];
+        output.write_all(&nonce).map_err(CryptoError::io_enc)?;
 
         loop {
-            let n = input
-                .read(&mut buffer)
-                .map_err(|e| CryptoError::Encryption(format!("Read failed: {}", e)))?;
-
+            let n = input.read(&mut buffer).map_err(CryptoError::io_enc)?;
             if n == 0 {
                 break;
             }
 
-            let chunk = &buffer[..n];
             let ciphertext = cipher
-                .encrypt(&nonce, chunk)
-                .map_err(|_| CryptoError::Encryption("Chunk encryption failed".to_string()))?;
-            output
-                .write_all(&ciphertext)
-                .map_err(|e| CryptoError::Encryption(format!("Write failed: {}", e)))?;
+                .encrypt(&nonce, &buffer[..n])
+                .map_err(|_| CryptoError::Encryption("Chunk encryption failed".into()))?;
+
+            output.write_all(&ciphertext).map_err(CryptoError::io_enc)?;
+
+            increment_nonce(&mut nonce);
         }
 
         Ok(())
     }
 
-    fn decrypt_stream(
-        &self,
-        key: &[u8],
-        input: &mut dyn Read,
-        output: &mut dyn Write,
-    ) -> Result<()> {
-        if key.len() != KEY_SIZE {
-            return Err(CryptoError::InvalidKeyLength);
-        }
+    fn decrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
+        let cipher = XChaCha20Poly1305::new_from_slice(key)
+            .map_err(|_| CryptoError::Decryption("Invalid key length".into()))?;
 
-        let cipher = XChaCha20Poly1305::new(key.into());
-
-        let mut nonce_bytes = [0u8; NONCE_SIZE];
+        let mut nonce_bytes = [0u8; DEFAULT_NONCE_SIZE];
         input
             .read_exact(&mut nonce_bytes)
-            .map_err(|e| CryptoError::Decryption(format!("Failed to read nonce: {}", e)))?;
-        let nonce = XNonce::from_slice(&nonce_bytes);
+            .map_err(CryptoError::io_dec)?;
+        let mut nonce = XNonce::clone_from_slice(&nonce_bytes);
 
-        let mut buffer = [0u8; CHUNK_SIZE + 16];
+        let mut buffer = [0u8; DEFAULT_CHUNK_SIZE + DEFAULT_TAG_SIZE];
 
-        loop {
-            let n = input
-                .read(&mut buffer)
-                .map_err(|e| CryptoError::Decryption(format!("Read failed: {}", e)))?;
+        while let Ok(n) = input.read(&mut buffer).map_err(CryptoError::io_dec) {
             if n == 0 {
                 break;
             }
 
-            let chunk = &buffer[..n];
-            let plaintext = cipher
-                .decrypt(nonce, chunk)
-                .map_err(|_| CryptoError::Decryption("Chunk decryption failed".to_string()))?;
-            output
-                .write_all(&plaintext)
-                .map_err(|e| CryptoError::Decryption(format!("Write failed: {}", e)))?;
+            let plaintext = cipher.decrypt(&nonce, &buffer[..n]).map_err(|_| {
+                CryptoError::Decryption("Decryption failed: integrity check failed".into())
+            })?;
+
+            output.write_all(&plaintext).map_err(CryptoError::io_dec)?;
+
+            increment_nonce(&mut nonce);
         }
 
         Ok(())
+    }
+}
+
+fn increment_nonce(nonce: &mut XNonce) {
+    for byte in nonce.iter_mut().rev() {
+        *byte = byte.wrapping_add(1);
+        if *byte != 0 {
+            break;
+        }
     }
 }

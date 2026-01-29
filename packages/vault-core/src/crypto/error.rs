@@ -27,4 +27,13 @@ pub enum CryptoError {
     UnknownAlgorithm(String),
 }
 
-pub type Result<T> = std::result::Result<T, CryptoError>;
+pub type Result<T = ()> = std::result::Result<T, CryptoError>;
+
+impl CryptoError {
+    pub fn io_enc(e: std::io::Error) -> Self {
+        Self::Encryption(format!("I/O Error: {}", e))
+    }
+    pub fn io_dec(e: std::io::Error) -> Self {
+        Self::Decryption(format!("I/O Error: {}", e))
+    }
+}
