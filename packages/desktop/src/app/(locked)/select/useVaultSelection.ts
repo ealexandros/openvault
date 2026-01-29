@@ -28,11 +28,11 @@ export const useVaultSelection = () => {
       errorMessage: "Failed to open folder picker",
     });
 
-    if (!selected || typeof selected !== "string") return;
+    if (selected == null || typeof selected !== "string") return;
 
     setSelectedPath(selected);
 
-    const name = selected.split("/").pop() || selected;
+    const name = selected.split("/").pop() ?? selected;
     const newRecent: RecentVault = {
       id: crypto.randomUUID(),
       name,

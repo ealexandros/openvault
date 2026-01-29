@@ -20,6 +20,8 @@ export const useLocalStorage = <T>({
     const value = item != null ? safeJsonParse<T>(item) : null;
 
     if (value !== null) {
+      // @todo-soon fix this..
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStoredValue(value);
     }
 

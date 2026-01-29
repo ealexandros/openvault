@@ -6,13 +6,13 @@ import { cn } from "@/utils/cn";
 import { ActivityIcon, SearchIcon, ShieldAlertIcon } from "lucide-react";
 import { useState } from "react";
 
-interface LogEntry {
+type LogEntry = {
   id: string;
   action: string;
   timestamp: string;
   type: "info" | "success" | "warning" | "error";
   details?: string;
-}
+};
 
 const MOCK_LOGS: LogEntry[] = [
   { id: "1", action: "Vault Unlocked", timestamp: "2026-01-22 16:30", type: "success" },
@@ -62,7 +62,7 @@ const LogItem = ({ log }: { log: LogEntry }) => (
       </div>
       <div>
         <p className="text-sm font-medium">{log.action}</p>
-        {log.details && (
+        {log.details != null && (
           <p className="mt-0.5 text-[10px] text-muted-foreground">{log.details}</p>
         )}
       </div>
@@ -79,11 +79,15 @@ const LogsPage = () => {
 
   const filteredLogs = MOCK_LOGS.filter(
     log => logFilter === "all" || log.type === logFilter,
-  ).filter(
-    log =>
-      log.action.toLowerCase().includes(logSearch.toLowerCase()) ||
-      log.details?.toLowerCase().includes(logSearch.toLowerCase()),
-  );
+  ).filter(log => {
+    if (log.action.toLowerCase().includes(logSearch.toLowerCase())) {
+      return true;
+    }
+    if (log.details?.toLowerCase().includes(logSearch.toLowerCase()) === true) {
+      return true;
+    }
+    return false;
+  });
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -108,7 +112,7 @@ const LogsPage = () => {
             {["all", "info", "success", "warning", "error"].map(type => (
               <button
                 key={type}
-                onClick={() => setLogFilter(type as any)}
+                onClick={() => setLogFilter(type as LogEntry["type"] | "all")}
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase transition-all",
                   logFilter === type

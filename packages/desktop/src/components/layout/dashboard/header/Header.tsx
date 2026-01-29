@@ -12,7 +12,7 @@ export const DashboardHeader = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
 
-  const activeTitle = pathname.split("/").pop()?.replace("-", " ") || "Dashboard";
+  const activeTitle = pathname.split("/").pop()?.replace("-", " ") ?? "Dashboard";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

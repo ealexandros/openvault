@@ -7,16 +7,16 @@ import { useEffect, useState } from "react";
 
 // @todo-soon refactor this into a reusable component..
 
-interface PasswordSectionProps {
+type PasswordSectionProps = {
   passwordValue: string;
   verifyValue: string;
   passwordError?: string;
   passwordTouched?: boolean;
   verifyError?: string;
   verifyTouched?: boolean;
-  onChange: (e: React.ChangeEvent<any>) => void;
-  onBlur: (e: any) => void;
-}
+  onChange: (e: React.ChangeEvent<unknown>) => void;
+  onBlur: (e: unknown) => void;
+};
 
 export function PasswordSection({
   passwordValue,
@@ -42,6 +42,8 @@ export function PasswordSection({
   };
 
   useEffect(() => {
+    // @todo-soon fix this..
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStrength(getPasswordStrength(passwordValue));
   }, [passwordValue]);
 
@@ -86,7 +88,9 @@ export function PasswordSection({
             onChange={onChange}
             onBlur={onBlur}
             className={`h-12 rounded-2xl bg-muted/30 px-4 pr-12 focus:ring-primary/20 ${
-              passwordTouched && passwordError ? "border-red-500/50" : "border-border"
+              passwordTouched === true && passwordError != null
+                ? "border-red-500/50"
+                : "border-border"
             }`}
           />
           <button
@@ -120,7 +124,7 @@ export function PasswordSection({
             />
           ))}
         </div>
-        {passwordTouched && passwordError && (
+        {passwordTouched === true && passwordError != null && (
           <p className="ml-1 text-[10px] font-medium text-red-500">{passwordError}</p>
         )}
       </div>
@@ -137,10 +141,12 @@ export function PasswordSection({
           onChange={onChange}
           onBlur={onBlur}
           className={`h-12 rounded-2xl bg-muted/30 px-4 focus:ring-primary/20 ${
-            verifyTouched && verifyError ? "border-red-500/50" : "border-border"
+            verifyTouched === true && verifyError != null
+              ? "border-red-500/50"
+              : "border-border"
           }`}
         />
-        {verifyTouched && verifyError && (
+        {verifyTouched === true && verifyError != null && (
           <p className="ml-1 text-[10px] font-medium text-red-500">{verifyError}</p>
         )}
       </div>

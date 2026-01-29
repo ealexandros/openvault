@@ -19,7 +19,7 @@ const UnlockPage = () => {
     router,
   } = useVaultUnlock();
 
-  if (!selectedPath) {
+  if (selectedPath == null) {
     router.push(hrefs.home.get());
     return null;
   }

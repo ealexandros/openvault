@@ -15,7 +15,7 @@ export const safeAsync = async <T>({
     return await promise;
   } catch (error) {
     logger.error(errorMessage, error);
-    if (alertMessage) alert(alertMessage);
+    if (alertMessage != null) alert(alertMessage);
     return null;
   }
 };

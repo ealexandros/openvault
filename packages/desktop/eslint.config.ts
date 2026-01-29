@@ -1,16 +1,11 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import { Linter } from "eslint";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+import { defineConfig, globalIgnores } from "eslint/config";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const config: Linter.Config[] = [
+const config = defineConfig([
+  ...nextVitals,
+  ...nextTypeScript,
   {
     rules: {
       "no-console": ["warn"],
@@ -22,13 +17,13 @@ const config: Linter.Config[] = [
       eqeqeq: ["warn", "always", { null: "ignore" }],
     },
   },
-  ...compat.config({
-    parser: "@typescript-eslint/parser",
-    parserOptions: {
-      project: "./tsconfig.json",
-      tsconfigRootDir: __dirname,
+  {
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: __dirname,
+      },
     },
-    plugins: ["@typescript-eslint"],
     rules: {
       "@typescript-eslint/no-floating-promises": ["error"],
       "@typescript-eslint/no-misused-promises": [
@@ -52,8 +47,15 @@ const config: Linter.Config[] = [
       "@typescript-eslint/array-type": ["warn"],
       "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
     },
-  }),
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-];
+  },
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    "src/styles/**",
+    "src/components/ui/shadcn/**",
+  ]),
+]);
 
 export default config;

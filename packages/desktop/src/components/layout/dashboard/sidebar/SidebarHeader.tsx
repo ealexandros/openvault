@@ -12,7 +12,7 @@ export const SidebarHeader = ({ vaultName }: SidebarHeaderProps) => (
       </div>
       <div className="min-w-0">
         <h2 className="truncate text-sm font-semibold text-foreground">
-          {vaultName || "OpenVault"}
+          {vaultName ?? "OpenVault"}
         </h2>
         <p className="text-[10px] font-medium tracking-wider text-emerald-500 uppercase">
           Securely Unlocked

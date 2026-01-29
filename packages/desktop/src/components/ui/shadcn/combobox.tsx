@@ -2,12 +2,7 @@
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import * as React from "react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "./input-group";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./input-group";
 import { cn } from "@/utils/cn";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import { Button } from "./button";
@@ -18,7 +13,11 @@ const ComboboxValue = ({ ...props }: ComboboxPrimitive.Value.Props) => (
   <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />
 );
 
-const ComboboxTrigger = ({ className, children, ...props }: ComboboxPrimitive.Trigger.Props) => (
+const ComboboxTrigger = ({
+  className,
+  children,
+  ...props
+}: ComboboxPrimitive.Trigger.Props) => (
   <ComboboxPrimitive.Trigger
     data-slot="combobox-trigger"
     className={cn("[&_svg:not([class*='size-'])]:size-3.5", className)}

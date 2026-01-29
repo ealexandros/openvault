@@ -15,7 +15,7 @@ import { useState } from "react";
 
 type AdvancedSettingsProps = {
   algorithm: string;
-  setFieldValue: (field: string, value: any) => void;
+  setFieldValue: (field: string, value: string) => void;
 };
 
 export const AdvancedSettings = ({ algorithm, setFieldValue }: AdvancedSettingsProps) => {

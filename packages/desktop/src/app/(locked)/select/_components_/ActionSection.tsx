@@ -17,24 +17,24 @@ export const ActionSection = ({
     <div className="absolute -inset-0.5 rounded-2xl bg-linear-to-r from-primary/10 to-primary/5 opacity-50 blur-sm transition duration-500 group-hover:opacity-100" />
 
     <div
-      onClick={!selectedPath ? onSelectFolder : undefined}
+      onClick={selectedPath == null ? onSelectFolder : undefined}
       className={cn(
         "relative flex flex-col items-center justify-center space-y-4 rounded-2xl border border-border bg-card p-8 text-center backdrop-blur-xl transition-all",
-        !selectedPath && "cursor-pointer hover:bg-accent/30",
+        selectedPath == null && "cursor-pointer hover:bg-accent/30",
       )}>
       <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 transition-transform duration-300 group-hover:scale-105">
         <FolderOpenIcon className="h-6 w-6 text-primary" />
       </div>
       <div className="space-y-1">
         <h2 className="text-base font-medium">
-          {selectedPath ? "Folder selected" : "Open a folder"}
+          {selectedPath != null ? "Folder selected" : "Open a folder"}
         </h2>
         <p className="mx-auto max-w-[280px] truncate text-xs text-muted-foreground">
-          {selectedPath ? selectedPath : "Select a directory to encrypt or decrypt"}
+          {selectedPath ?? "Select a directory to encrypt or decrypt"}
         </p>
       </div>
 
-      {selectedPath ? (
+      {selectedPath != null ? (
         <div className="flex gap-2">
           <Button
             variant="outline"

@@ -8,11 +8,11 @@
     "dev:next": "next dev -p 8080",
     "build": "tauri build",
     "build:next": "next build",
-    "lint:check": "eslint src/**",
-    "lint:fix": "eslint --fix src/**",
-    "lint:debug": "TIMING=1 eslint src/**",
-    "prettier:check": "prettier --check .",
-    "prettier:write": "prettier --write .",
+    "lint:check": "eslint src --max-warnings=0",
+    "lint:fix": "eslint --fix src",
+    "lint:debug": "TIMING=1 eslint src",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write .",
     "tauri": "tauri"
   },
   "dependencies": {
@@ -38,13 +38,13 @@
     "zod-formik-adapter": "2.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/eslintrc": "3.3.1",
     "@tauri-apps/cli": "^2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "9.39.2",
     "eslint-config-next": "16.1.4",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.7.1",
@@ -58,13 +58,5 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ],
-  "lint-staged": {
-    "*.{json,js,jsx,ts,tsx,ejs,prisma}": [
-      "bun run prettier:write"
-    ],
-    "*.{js,jsx,ts,tsx}": [
-      "bun run lint:fix --max-warnings=0"
-    ]
-  }
+  ]
 }

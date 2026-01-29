@@ -34,9 +34,8 @@ export const useSetupVault = () => {
       verifyPassword: "",
     },
     validationSchema: toFormikValidationSchema(setupVaultSchema),
-    onSubmit: async values => {
+    onSubmit: () => {
       setIsEncrypting(true);
-      console.log("Form submitted:", values);
     },
   });
 
