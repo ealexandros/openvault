@@ -8,5 +8,11 @@
     "format:write": "cargo fmt",
     "check": "cargo check",
     "test": "cargo test"
+  },
+  "lint-staged": {
+    "*.rs": [
+      "cargo clippy",
+      "cargo fmt"
+    ]
   }
 }

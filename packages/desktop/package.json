@@ -58,5 +58,13 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "lint-staged": {
+    "*.{json,js,jsx,ts,tsx,ejs}": [
+      "bun run format:write"
+    ],
+    "*.{js,jsx,ts,tsx}": [
+      "bun run lint:fix --max-warnings=0"
+    ]
+  }
 }
