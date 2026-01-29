@@ -1,0 +1,12 @@
+{
+  "name": "vault-core",
+  "scripts": {
+    "build": "cargo build",
+    "lint:check": "cargo clippy",
+    "lint:fix": "cargo clippy --fix",
+    "format:check": "cargo fmt --check",
+    "format:write": "cargo fmt",
+    "check": "cargo check",
+    "test": "cargo test"
+  }
+}

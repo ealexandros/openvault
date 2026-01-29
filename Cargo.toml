@@ -2,7 +2,7 @@
 
 members = [
   "packages/desktop/src-tauri",
-  "packages/crypto-core"
+  "packages/vault-core"
 ]
 
 resolver = "2"
