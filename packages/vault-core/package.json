@@ -1,18 +1,16 @@
 {
-  "name": "vault-core",
+  "name": "@openvault/vault-core",
+  "version": "1.0.0",
   "scripts": {
     "build": "cargo build",
     "lint:check": "cargo clippy",
-    "lint:fix": "cargo clippy --fix",
+    "lint:fix": "cargo clippy --fix --allow-dirty --allow-staged",
     "format:check": "cargo fmt --check",
-    "format:write": "cargo fmt",
+    "format:write": "cargo fmt --allow-dirty --allow-staged",
     "check": "cargo check",
     "test": "cargo test"
   },
   "lint-staged": {
-    "*.rs": [
-      "cargo clippy",
-      "cargo fmt"
-    ]
+    "*.rs": []
   }
 }

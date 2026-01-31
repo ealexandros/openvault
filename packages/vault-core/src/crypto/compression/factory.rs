@@ -1,9 +1,17 @@
 use super::{Compressor, zstd};
-use crate::crypto::{CryptoError, Result};
+use crate::crypto::Result;
+use strum_macros::{AsRefStr, Display, EnumString};
 
-pub fn get(algorithm: &str) -> Result<Box<dyn Compressor>> {
-    match algorithm.to_ascii_lowercase().as_str() {
-        "zstd" => Ok(Box::new(zstd::Zstd)),
-        _ => Err(CryptoError::UnknownAlgorithm(algorithm.to_string())),
+#[derive(Debug, PartialEq, EnumString, Display, AsRefStr)]
+#[strum(serialize_all = "lowercase")]
+pub enum CompressionAlgorithm {
+    Zstd,
+}
+
+impl CompressionAlgorithm {
+    pub fn get(&self) -> Result<Box<dyn Compressor>> {
+        match self {
+            CompressionAlgorithm::Zstd => Ok(Box::new(zstd::Zstd)),
+        }
     }
 }
