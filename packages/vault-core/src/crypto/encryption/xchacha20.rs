@@ -76,7 +76,8 @@ impl Cipher for XChaCha20Poly1305Cipher {
 
         let mut buffer = [0u8; DEFAULT_CHUNK_SIZE + DEFAULT_TAG_SIZE];
 
-        while let Ok(n) = input.read(&mut buffer).map_err(CryptoError::io_dec) {
+        loop {
+            let n = input.read(&mut buffer).map_err(CryptoError::io_dec)?;
             if n == 0 {
                 break;
             }

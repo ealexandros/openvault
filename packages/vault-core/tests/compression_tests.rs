@@ -1,16 +1,26 @@
 use std::io::Cursor;
-use vault_core::crypto::compression::Compressor;
+use std::str::FromStr;
 use vault_core::crypto::compression::zstd::Zstd;
+use vault_core::crypto::compression::{Compressor, factory::CompressionAlgorithm};
 
 #[test]
 fn test_zstd_roundtrip() {
-    let compressor = Zstd;
+    let compressor = CompressionAlgorithm::Zstd.get().unwrap();
     let data = b"Hello world! This is a test string for Zstd compression.";
 
     let compressed = compressor.compress(data).unwrap();
     let decompressed = compressor.decompress(&compressed).unwrap();
 
     assert_eq!(data.to_vec(), decompressed);
+}
+
+#[test]
+fn test_compression_factory_from_str() {
+    let algo = CompressionAlgorithm::from_str("zstd").unwrap();
+    assert_eq!(algo, CompressionAlgorithm::Zstd);
+
+    let compressor = algo.get().unwrap();
+    assert!(compressor.compress(b"test").is_ok());
 }
 
 #[test]

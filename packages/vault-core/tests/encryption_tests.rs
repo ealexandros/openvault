@@ -1,12 +1,13 @@
 use std::io::Cursor;
-use vault_core::crypto::encryption::Cipher;
+use std::str::FromStr;
 use vault_core::crypto::encryption::xchacha20::XChaCha20Poly1305Cipher;
+use vault_core::crypto::encryption::{Cipher, factory::EncryptionAlgorithm};
 
 const KEY_SIZE: usize = 32;
 
 #[test]
 fn test_xchacha20_roundtrip() {
-    let cipher = XChaCha20Poly1305Cipher;
+    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.get().unwrap();
     let key = [42u8; KEY_SIZE];
     let plaintext = b"Secret message for XChaCha20";
 
@@ -14,6 +15,18 @@ fn test_xchacha20_roundtrip() {
     let decrypted = cipher.decrypt(&key, &nonce, &ciphertext).unwrap();
 
     assert_eq!(plaintext.to_vec(), decrypted);
+}
+
+#[test]
+fn test_encryption_factory_from_str() {
+    let algo = EncryptionAlgorithm::from_str("xchacha20").unwrap();
+    assert_eq!(algo, EncryptionAlgorithm::XChaCha20Poly1305);
+
+    let algo2 = EncryptionAlgorithm::from_str("xchacha20poly1305").unwrap();
+    assert_eq!(algo2, EncryptionAlgorithm::XChaCha20Poly1305);
+
+    let cipher = algo.get().unwrap();
+    assert!(cipher.encrypt(&[0u8; 32], b"test").is_ok());
 }
 
 #[test]
