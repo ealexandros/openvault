@@ -1,5 +1,5 @@
 {
-  "name": "@openvault/vault-core",
+  "name": "@openvault/core",
   "version": "1.0.0",
   "scripts": {
     "build": "cargo build",
