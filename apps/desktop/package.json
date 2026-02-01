@@ -62,7 +62,7 @@
       "bun run format:write"
     ],
     "*.{js,jsx,ts,tsx}": [
-      "bun run lint:fix --max-warnings=0"
+      "bun run lint:fix --max-warnings=0 --no-warn-ignored"
     ]
   }
 }
