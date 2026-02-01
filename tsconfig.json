@@ -1,0 +1,4 @@
+{
+  "extends": "@openvault/tooling/typescript/tsconfig.base.json",
+  "include": [".lintstagedrc.ts", "prettier.config.ts", "eslint.config.ts"]
+}

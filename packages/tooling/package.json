@@ -1,0 +1,31 @@
+{
+  "name": "@openvault/tooling",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./*.json": "./src/*.json",
+    "./prettier": "./src/prettier/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint:fix": "eslint --fix .",
+    "lint:check": "eslint .",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write ."
+  },
+  "dependencies": {
+    "@eslint/eslintrc": "3.3.1",
+    "eslint-config-next": "16.1.4",
+    "prettier-plugin-tailwindcss": "0.7.2",
+    "typescript-eslint": "8.54.0"
+  },
+  "devDependencies": {
+    "eslint": "9.39.2",
+    "prettier": "3.8.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "bun run lint:fix --max-warnings=0"
+    ]
+  }
+}

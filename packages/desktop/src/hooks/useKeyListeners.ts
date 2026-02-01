@@ -2,7 +2,7 @@ import { KeyCode } from "@/config/keycodes";
 import { useEffect } from "react";
 
 type KeyHandlerMap = {
-  [key in KeyCode]?: (event: KeyboardEvent) => Promise<unknown> | unknown;
+  [key in KeyCode]?: (event: KeyboardEvent) => Promise<unknown>;
 };
 
 type UseKeyListenersOptions = {
