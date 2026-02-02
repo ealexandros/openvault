@@ -1,5 +1,5 @@
+use openvault_core::utils::crc::{compute_crc, verify_crc};
 use serde::{Deserialize, Serialize};
-use vault_core::utils::crc::{compute_crc, verify_crc};
 
 #[derive(Serialize, Deserialize)]
 struct Test {

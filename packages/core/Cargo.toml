@@ -1,5 +1,5 @@
 [package]
-name = "vault-core"
+name = "openvault-core"
 version = "1.0.0"
 edition = "2024"
 
@@ -16,5 +16,6 @@ sha2 = "0.10.9"
 strum = "0.27.2"
 strum_macros = "0.27.2"
 thiserror = "2.0.18"
+walkdir = "2.5.0"
 zeroize = "1.8.2"
 zstd = "0.13.3"

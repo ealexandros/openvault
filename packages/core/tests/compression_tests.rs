@@ -1,7 +1,7 @@
+use openvault_core::crypto::compression::zstd::Zstd;
+use openvault_core::crypto::compression::{Compressor, factory::CompressionAlgorithm};
 use std::io::Cursor;
 use std::str::FromStr;
-use vault_core::crypto::compression::zstd::Zstd;
-use vault_core::crypto::compression::{Compressor, factory::CompressionAlgorithm};
 
 #[test]
 fn test_zstd_roundtrip() {

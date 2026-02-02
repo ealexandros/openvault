@@ -1,7 +1,7 @@
+use openvault_core::crypto::encryption::xchacha20::XChaCha20Poly1305Cipher;
+use openvault_core::crypto::encryption::{Cipher, factory::EncryptionAlgorithm};
 use std::io::Cursor;
 use std::str::FromStr;
-use vault_core::crypto::encryption::xchacha20::XChaCha20Poly1305Cipher;
-use vault_core::crypto::encryption::{Cipher, factory::EncryptionAlgorithm};
 
 const KEY_SIZE: usize = 32;
 

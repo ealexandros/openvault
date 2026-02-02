@@ -1,4 +1,4 @@
-use vault_core::utils::io::{read_u64_le, write_u64_le};
+use openvault_core::utils::io::{read_u64_le, write_u64_le};
 
 #[test]
 fn test_read_write_u64() {
