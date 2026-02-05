@@ -1,5 +1,6 @@
 pub mod compression;
 pub mod encryption;
 pub mod kdf;
+pub mod rand;
 
-pub use crate::errors::{Error, Result};
+pub use rand::random_bytes;

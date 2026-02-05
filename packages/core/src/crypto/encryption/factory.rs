@@ -1,10 +1,11 @@
 use super::{Cipher, xchacha20};
-use crate::crypto::Result;
+use crate::errors::Result;
 use strum_macros::{AsRefStr, Display, EnumString};
 
-#[derive(Debug, PartialEq, EnumString, Display, AsRefStr)]
+#[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum EncryptionAlgorithm {
+    #[default]
     #[strum(serialize = "xchacha20poly1305", serialize = "xchacha20")]
     XChaCha20Poly1305,
 }

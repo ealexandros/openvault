@@ -1,78 +1,113 @@
-use std::io;
 use thiserror::Error;
 
-#[derive(Error, Debug)]
-pub enum Error {
-    #[error("I/O error: {0}")]
-    Io(#[from] io::Error),
-
-    #[error("Compression error: {0}")]
-    Compression(String),
-
-    #[error("Decompression error: {0}")]
-    Decompression(String),
-
-    #[error("Encryption error: {0}")]
-    Encryption(String),
-
-    #[error("Decryption error: {0}")]
-    Decryption(String),
-
-    #[error("Key derivation error: {0}")]
-    Kdf(String),
+#[derive(Debug, Error)]
+pub enum KdfError {
+    #[error("HKDF expand failed")]
+    HkdfExpand,
 
     #[error("Invalid key length")]
     InvalidKeyLength,
 
-    #[error("Hkdf error: {0}")]
-    Hkdf(String),
+    #[error("Key derivation failed")]
+    DerivationFailed,
+}
 
-    #[error("Unknown algorithm: {0}")]
-    UnknownAlgorithm(String),
+#[derive(Debug, Error)]
+pub enum CryptoError {
+    #[error("Encryption failed")]
+    Encryption,
 
-    #[error("Serialization error: {0}")]
-    Serialization(String),
+    #[error("Decryption failed")]
+    Decryption,
 
-    #[error("Bincode error: {0}")]
-    Bincode(String),
+    #[error("Invalid key length")]
+    InvalidKeyLength,
+}
 
-    #[error("JSON error: {0}")]
-    Json(#[from] serde_json::Error),
+#[derive(Debug, Error)]
+pub enum VaultError {
+    #[error("Invalid vault magic")]
+    InvalidMagic,
+
+    #[error("Invalid vault checksum")]
+    InvalidChecksum,
+
+    #[error("Invalid vault format")]
+    InvalidFormat,
+
+    #[error("Unsupported vault version")]
+    UnsupportedVersion,
 
     #[error("WalkDir error: {0}")]
     WalkDir(String),
 
-    #[error("Vault error: {0}")]
-    Vault(String),
+    #[error("Vault I/O error")]
+    Io(#[from] std::io::Error),
+
+    #[error("{0}")]
+    Generic(String),
+}
+
+#[derive(Debug, Error)]
+pub enum CompressionError {
+    #[error("Compression failed: {0}")]
+    Compress(String),
+
+    #[error("Decompression failed: {0}")]
+    Decompress(String),
+}
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Json(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    Compression(#[from] CompressionError),
+
+    #[error(transparent)]
+    Kdf(#[from] KdfError),
+
+    #[error(transparent)]
+    Crypto(#[from] CryptoError),
+
+    #[error(transparent)]
+    Vault(#[from] VaultError),
+
+    #[error("WalkDir error: {0}")]
+    WalkDir(String),
+
+    #[error("Invalid path")]
+    InvalidPath,
+
+    #[error("Unsupported command: {0}")]
+    Unsupported(String),
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
 impl Error {
-    pub fn io_enc(e: io::Error) -> Self {
-        Self::Encryption(format!("I/O Error: {}", e))
-    }
-    pub fn io_dec(e: io::Error) -> Self {
-        Self::Decryption(format!("I/O Error: {}", e))
-    }
     pub fn dir_not_found() -> Self {
-        let error = io::Error::new(io::ErrorKind::NotFound, "Directory not found");
+        let error = std::io::Error::new(std::io::ErrorKind::NotFound, "Directory not found");
         Self::Io(error)
     }
     pub fn dir_not_a_dir() -> Self {
-        let error = io::Error::new(io::ErrorKind::InvalidInput, "Not a directory");
+        let error = std::io::Error::new(std::io::ErrorKind::InvalidInput, "Not a directory");
         Self::Io(error)
     }
     pub fn file_exists() -> Self {
-        let error = io::Error::new(io::ErrorKind::AlreadyExists, "File already exists");
+        let error = std::io::Error::new(std::io::ErrorKind::AlreadyExists, "File already exists");
         Self::Io(error)
     }
     pub fn file_not_found() -> Self {
-        let error = io::Error::new(io::ErrorKind::NotFound, "File not found");
+        let error = std::io::Error::new(std::io::ErrorKind::NotFound, "File not found");
         Self::Io(error)
     }
     pub fn file_not_a_file() -> Self {
-        let error = io::Error::new(io::ErrorKind::InvalidInput, "Not a file");
+        let error = std::io::Error::new(std::io::ErrorKind::InvalidInput, "Not a file");
         Self::Io(error)
     }
 }

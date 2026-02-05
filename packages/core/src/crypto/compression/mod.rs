@@ -1,4 +1,4 @@
-use crate::crypto::Result;
+use crate::errors::Result;
 use std::fmt::Debug;
 use std::io::{Read, Write};
 

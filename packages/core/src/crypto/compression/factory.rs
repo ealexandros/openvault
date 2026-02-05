@@ -1,10 +1,11 @@
 use super::{Compressor, zstd};
-use crate::crypto::Result;
+use crate::errors::Result;
 use strum_macros::{AsRefStr, Display, EnumString};
 
-#[derive(Debug, PartialEq, EnumString, Display, AsRefStr)]
+#[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum CompressionAlgorithm {
+    #[default]
     Zstd,
 }
 
