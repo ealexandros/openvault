@@ -1,5 +1,5 @@
 use crate::constants::{DEFAULT_COMPRESSION, NONCE_LEN};
-use crate::errors::{Result, VaultError};
+use crate::errors::Result;
 use crate::utils::fs::PathExt;
 use crate::vault::v1::structure::{FileEntry, FolderEntry};
 use std::path::Path;
@@ -10,7 +10,7 @@ pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileEntry>, Vec<FolderEntry>)
     let mut folders = vec![FolderEntry::root()];
 
     for entry in WalkDir::new(root).sort_by_file_name() {
-        let entry = entry.map_err(|e| VaultError::WalkDir(e.to_string()))?;
+        let entry = entry?;
         let path = entry.path();
 
         if path == root {
@@ -25,9 +25,7 @@ pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileEntry>, Vec<FolderEntry>)
         }
 
         if entry.file_type().is_file() {
-            let metadata = entry
-                .metadata()
-                .map_err(|e| VaultError::WalkDir(e.to_string()))?;
+            let metadata = entry.metadata()?;
 
             files.push(FileEntry {
                 path: relative,

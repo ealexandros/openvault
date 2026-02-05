@@ -1,4 +1,4 @@
-use openvault_core::utils::fs::{PathExt, create_new_file, ensure_file_exists};
+use openvault_core::utils::fs::PathExt;
 use std::fs::{self, File};
 
 fn setup_temp_dir(name: &str) -> std::path::PathBuf {
@@ -18,7 +18,7 @@ fn create_file_exclusive_ok() {
     let dir = setup_temp_dir("create_file_ok");
     let file_path = dir.join("output.vault");
 
-    let file = create_new_file(&file_path);
+    let file = file_path.create_new_file();
     assert!(file.is_ok());
 }
 
@@ -28,7 +28,7 @@ fn create_file_exclusive_fails_if_exists() {
     let file_path = dir.join("output.vault");
 
     File::create(&file_path).unwrap();
-    let result = create_new_file(&file_path);
+    let result = file_path.create_new_file();
 
     assert!(result.is_err());
 }
@@ -62,7 +62,7 @@ fn test_ensure_file_exists() {
     fs::create_dir(&dir_path).unwrap();
     File::create(&file_path).unwrap();
 
-    assert!(ensure_file_exists(&file_path).is_ok());
-    assert!(ensure_file_exists(&dir_path).is_err());
-    assert!(ensure_file_exists(&dir.join("nonexistent")).is_err());
+    assert!(file_path.ensure_file_exists().is_ok());
+    assert!(dir_path.ensure_file_exists().is_err());
+    assert!(dir.join("nonexistent").ensure_file_exists().is_err());
 }

@@ -1,5 +1,5 @@
 use crate::constants;
-use crate::errors::{Result, VaultError};
+use crate::errors::{Error, Result};
 use crate::utils::io::ReadExt;
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crc32fast::Hasher;
@@ -42,7 +42,7 @@ impl VaultHeader {
         let magic = reader.read_exact_array::<{ constants::VAULT_MAGIC_LEN }>()?;
 
         if &magic != constants::VAULT_MAGIC {
-            return Err(VaultError::InvalidMagic.into());
+            return Err(Error::InvalidVaultMagic);
         }
 
         let version = reader.read_u8()?;
@@ -68,7 +68,7 @@ impl VaultHeader {
         let expected_crc = hasher.finalize();
 
         if crc != expected_crc {
-            return Err(VaultError::InvalidChecksum.into());
+            return Err(Error::InvalidVaultChecksum);
         }
 
         Ok(Self {

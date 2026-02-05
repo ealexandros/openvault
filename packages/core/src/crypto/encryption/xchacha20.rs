@@ -1,17 +1,14 @@
 use super::Cipher;
-use crate::errors::{CryptoError, Error, Result};
+use crate::constants::NONCE_LEN;
+use crate::errors::{Error, Result};
 use chacha20poly1305::aead::{Aead, AeadCore, KeyInit, OsRng};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use std::io::{Read, Write};
 
-// @todo-now add parameters for the chunk size, tag size, nonce size
-// @todo-now remove all the consts from here..
-
 const DEFAULT_TAG_SIZE: usize = 16;
 const DEFAULT_CHUNK_SIZE: usize = 32 * 1024;
-const DEFAULT_NONCE_SIZE: usize = 24;
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default)]
 pub struct XChaCha20Poly1305Cipher;
 
 impl Cipher for XChaCha20Poly1305Cipher {
@@ -21,7 +18,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
 
         let ciphertext = cipher
             .encrypt(&nonce, plaintext)
-            .map_err(|_| CryptoError::Encryption)?;
+            .map_err(|_| Error::EncryptionFailed)?;
 
         Ok((ciphertext, nonce.to_vec()))
     }
@@ -32,14 +29,13 @@ impl Cipher for XChaCha20Poly1305Cipher {
 
         let plaintext = cipher
             .decrypt(nonce, ciphertext)
-            .map_err(|_| CryptoError::Decryption)?;
+            .map_err(|_| Error::DecryptionFailed)?;
 
         Ok(plaintext)
     }
 
     fn encrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
-        let cipher =
-            XChaCha20Poly1305::new_from_slice(key).map_err(|_| CryptoError::InvalidKeyLength)?;
+        let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
         let mut buffer = [0u8; DEFAULT_CHUNK_SIZE];
         let mut nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
@@ -54,7 +50,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
 
             let ciphertext = cipher
                 .encrypt(&nonce, &buffer[..n])
-                .map_err(|_| CryptoError::Encryption)?;
+                .map_err(|_| Error::EncryptionFailed)?;
 
             output.write_all(&ciphertext).map_err(Error::Io)?;
 
@@ -65,10 +61,9 @@ impl Cipher for XChaCha20Poly1305Cipher {
     }
 
     fn decrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
-        let cipher =
-            XChaCha20Poly1305::new_from_slice(key).map_err(|_| CryptoError::InvalidKeyLength)?;
+        let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
-        let mut nonce_bytes = [0u8; DEFAULT_NONCE_SIZE];
+        let mut nonce_bytes = [0u8; NONCE_LEN];
         input.read_exact(&mut nonce_bytes).map_err(Error::Io)?;
         let mut nonce = XNonce::clone_from_slice(&nonce_bytes);
 
@@ -82,7 +77,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
 
             let plaintext = cipher
                 .decrypt(&nonce, &buffer[..n])
-                .map_err(|_| CryptoError::Decryption)?;
+                .map_err(|_| Error::DecryptionFailed)?;
 
             output.write_all(&plaintext).map_err(Error::Io)?;
 

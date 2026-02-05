@@ -3,7 +3,7 @@ mod writer;
 
 use crate::crypto::kdf;
 use crate::errors::Result;
-use crate::utils::fs;
+use crate::utils::fs::PathExt;
 use crate::vault::shared::commands::CreateConfig;
 use crate::vault::v1::commands::create::scanner::scan_filesystem;
 use crate::vault::v1::commands::create::writer::VaultWriter;
@@ -22,8 +22,8 @@ pub fn run(source_path: &Path, password: &[u8], config: Option<CreateConfig>) ->
 
     let file_path = Path::new(&config.output_path).join(config.filename);
 
-    fs::remove_file_if_exists(&file_path).unwrap();
-    let mut output_file = fs::create_new_file(&file_path).unwrap();
+    file_path.remove_file_if_exists().unwrap();
+    let mut output_file = file_path.create_new_file().unwrap();
 
     output_file.seek(SeekFrom::Start(VAULT_HEADER_SIZE))?;
 

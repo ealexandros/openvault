@@ -1,63 +1,6 @@
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum KdfError {
-    #[error("HKDF expand failed")]
-    HkdfExpand,
-
-    #[error("Invalid key length")]
-    InvalidKeyLength,
-
-    #[error("Key derivation failed")]
-    DerivationFailed,
-}
-
-#[derive(Debug, Error)]
-pub enum CryptoError {
-    #[error("Encryption failed")]
-    Encryption,
-
-    #[error("Decryption failed")]
-    Decryption,
-
-    #[error("Invalid key length")]
-    InvalidKeyLength,
-}
-
-#[derive(Debug, Error)]
-pub enum VaultError {
-    #[error("Invalid vault magic")]
-    InvalidMagic,
-
-    #[error("Invalid vault checksum")]
-    InvalidChecksum,
-
-    #[error("Invalid vault format")]
-    InvalidFormat,
-
-    #[error("Unsupported vault version")]
-    UnsupportedVersion,
-
-    #[error("WalkDir error: {0}")]
-    WalkDir(String),
-
-    #[error("Vault I/O error")]
-    Io(#[from] std::io::Error),
-
-    #[error("{0}")]
-    Generic(String),
-}
-
-#[derive(Debug, Error)]
-pub enum CompressionError {
-    #[error("Compression failed: {0}")]
-    Compress(String),
-
-    #[error("Decompression failed: {0}")]
-    Decompress(String),
-}
-
-#[derive(Debug, Error)]
 pub enum Error {
     #[error(transparent)]
     Io(#[from] std::io::Error),
@@ -66,48 +9,64 @@ pub enum Error {
     Json(#[from] serde_json::Error),
 
     #[error(transparent)]
-    Compression(#[from] CompressionError),
+    WalkDir(#[from] walkdir::Error),
 
-    #[error(transparent)]
-    Kdf(#[from] KdfError),
+    #[error("KDF derivation failed")]
+    KdfDerivationFailed,
 
-    #[error(transparent)]
-    Crypto(#[from] CryptoError),
+    #[error("HKDF expand failed")]
+    HkdfExpandFailed,
 
-    #[error(transparent)]
-    Vault(#[from] VaultError),
+    #[error("Encryption failed")]
+    EncryptionFailed,
 
-    #[error("WalkDir error: {0}")]
-    WalkDir(String),
+    #[error("Decryption failed")]
+    DecryptionFailed,
+
+    #[error("Invalid key length")]
+    InvalidKeyLength,
+
+    #[error("Compression failed: {0}")]
+    CompressionFailed(String),
+
+    #[error("Decompression failed: {0}")]
+    DecompressionFailed(String),
+
+    #[error("Invalid vault magic")]
+    InvalidVaultMagic,
+
+    #[error("Invalid vault checksum")]
+    InvalidVaultChecksum,
+
+    #[error("Invalid vault format")]
+    InvalidVaultFormat,
+
+    #[error("Unsupported vault version")]
+    UnsupportedVaultVersion,
 
     #[error("Invalid path")]
     InvalidPath,
 
     #[error("Unsupported command: {0}")]
-    Unsupported(String),
+    UnsupportedCommand(String),
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
 impl Error {
     pub fn dir_not_found() -> Self {
-        let error = std::io::Error::new(std::io::ErrorKind::NotFound, "Directory not found");
-        Self::Io(error)
+        std::io::Error::new(std::io::ErrorKind::NotFound, "Directory not found").into()
     }
     pub fn dir_not_a_dir() -> Self {
-        let error = std::io::Error::new(std::io::ErrorKind::InvalidInput, "Not a directory");
-        Self::Io(error)
+        std::io::Error::new(std::io::ErrorKind::InvalidInput, "Not a directory").into()
     }
     pub fn file_exists() -> Self {
-        let error = std::io::Error::new(std::io::ErrorKind::AlreadyExists, "File already exists");
-        Self::Io(error)
+        std::io::Error::new(std::io::ErrorKind::AlreadyExists, "File already exists").into()
     }
     pub fn file_not_found() -> Self {
-        let error = std::io::Error::new(std::io::ErrorKind::NotFound, "File not found");
-        Self::Io(error)
+        std::io::Error::new(std::io::ErrorKind::NotFound, "File not found").into()
     }
     pub fn file_not_a_file() -> Self {
-        let error = std::io::Error::new(std::io::ErrorKind::InvalidInput, "Not a file");
-        Self::Io(error)
+        std::io::Error::new(std::io::ErrorKind::InvalidInput, "Not a file").into()
     }
 }

@@ -4,6 +4,9 @@ use std::path::Path;
 
 pub trait PathExt {
     fn relative_to(&self, root: &Path) -> Result<String>;
+    fn ensure_file_exists(&self) -> Result;
+    fn create_new_file(&self) -> Result<File>;
+    fn remove_file_if_exists(&self) -> Result;
 }
 
 impl PathExt for Path {
@@ -16,28 +19,28 @@ impl PathExt for Path {
             .collect::<Vec<_>>()
             .join("/"))
     }
-}
 
-pub fn ensure_file_exists(path: &Path) -> Result<()> {
-    if !path.exists() {
-        return Err(Error::file_not_found());
+    fn ensure_file_exists(&self) -> Result {
+        if !self.exists() {
+            return Err(Error::file_not_found());
+        }
+        if !self.is_file() {
+            return Err(Error::file_not_a_file());
+        }
+        Ok(())
     }
-    if !path.is_file() {
-        return Err(Error::file_not_a_file());
-    }
-    Ok(())
-}
 
-pub fn create_new_file(path: &Path) -> Result<File> {
-    if path.exists() {
-        return Err(Error::file_exists());
+    fn create_new_file(&self) -> Result<File> {
+        if self.exists() {
+            return Err(Error::file_exists());
+        }
+        File::create(self).map_err(Error::Io)
     }
-    File::create(path).map_err(Error::Io)
-}
 
-pub fn remove_file_if_exists(path: &Path) -> Result {
-    if path.exists() {
-        std::fs::remove_file(path).map_err(Error::Io)?;
+    fn remove_file_if_exists(&self) -> Result {
+        if self.exists() {
+            std::fs::remove_file(self).map_err(Error::Io)?;
+        }
+        Ok(())
     }
-    Ok(())
 }

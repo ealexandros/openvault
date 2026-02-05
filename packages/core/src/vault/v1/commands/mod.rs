@@ -19,14 +19,14 @@ impl VaultCommands for Commands {
     }
 
     fn open(&self, _path: &Path, _password: &[u8], _config: OpenConfig) -> Result<()> {
-        Err(Error::Unsupported("open (v1)".to_string()))
+        Err(Error::UnsupportedCommand("open (v1)".to_string()))
     }
 
     fn update(&self, _path: &Path, _password: &[u8], _config: UpdateConfig) -> Result<()> {
-        Err(Error::Unsupported("update (v1)".to_string()))
+        Err(Error::UnsupportedCommand("update (v1)".to_string()))
     }
 
     fn delete(&self, _path: &Path, _password: &[u8], _config: DeleteConfig) -> Result<()> {
-        Err(Error::Unsupported("delete (v1)".to_string()))
+        Err(Error::UnsupportedCommand("delete (v1)".to_string()))
     }
 }

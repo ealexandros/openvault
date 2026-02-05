@@ -1,6 +1,6 @@
 use crate::{
     constants::{KEY_LEN, SALT_LEN},
-    errors::{KdfError, Result},
+    errors::{Error, Result},
 };
 use argon2::{Algorithm, Argon2, Params, Version};
 use hkdf::Hkdf;
@@ -19,7 +19,7 @@ pub fn derive_master_key(password: &[u8], salt: &[u8]) -> Result<Zeroizing<[u8; 
 
     argon2
         .hash_password_into(password, salt, &mut key)
-        .map_err(|_| KdfError::DerivationFailed)?;
+        .map_err(|_| Error::KdfDerivationFailed)?;
 
     Ok(Zeroizing::new(key))
 }
@@ -29,7 +29,7 @@ pub fn derive_subkey(master_key: &[u8], info: &[u8]) -> Result<Zeroizing<[u8; KE
     let mut okm = [0u8; KEY_LEN];
 
     hkdf.expand(info, &mut okm)
-        .map_err(|_| KdfError::HkdfExpand)?;
+        .map_err(|_| Error::HkdfExpandFailed)?;
 
     Ok(Zeroizing::new(okm))
 }
