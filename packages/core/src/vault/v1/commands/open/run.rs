@@ -24,8 +24,7 @@ pub fn run(source: &Path, password: &[u8], _: Option<OpenConfig>) -> Result<Vaul
     input.seek(SeekFrom::Start(header.metadata_offset))?;
     let meta_data = input.read_exact_vec(header.metadata_size as usize)?;
 
-    let decrypted_meta =
-        cipher.decrypt(metadata_key.as_ref(), &header.metadata_nonce, &meta_data)?;
+    let decrypted_meta = cipher.decrypt(metadata_key.as_ref(), &meta_data)?;
 
     let metadata: VaultMeta =
         postcard::from_bytes(&decrypted_meta).map_err(|_| Error::InvalidVaultFormat)?;

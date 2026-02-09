@@ -11,8 +11,8 @@ fn test_xchacha20_roundtrip() {
     let key = [42u8; KEY_SIZE];
     let plaintext = b"Secret message for XChaCha20";
 
-    let (ciphertext, nonce) = cipher.encrypt(&key, plaintext).unwrap();
-    let decrypted = cipher.decrypt(&key, &nonce, &ciphertext).unwrap();
+    let encrypted_blob = cipher.encrypt(&key, plaintext).unwrap();
+    let decrypted = cipher.decrypt(&key, &encrypted_blob).unwrap();
 
     assert_eq!(plaintext.to_vec(), decrypted);
 }

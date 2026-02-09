@@ -33,13 +33,12 @@ impl<'a> VaultWriter<'a> {
 
         let data = postcard::to_stdvec(&vault.metadata).map_err(|_| Error::InvalidVaultFormat)?;
 
-        let (enc, nonce) = self.cipher.encrypt(key, &data)?;
+        let ciphertext = self.cipher.encrypt(key, &data)?;
 
-        self.output.write_all(&enc)?;
+        self.output.write_all(&ciphertext)?;
 
         vault.header.metadata_offset = pos;
-        vault.header.metadata_size = enc.len() as u32;
-        vault.header.metadata_nonce = nonce.try_into().map_err(|_| Error::EncryptionFailed)?;
+        vault.header.metadata_size = ciphertext.len() as u32;
 
         Ok(())
     }

@@ -4,7 +4,7 @@ use crate::utils::io::ReadExt;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 
-pub const VAULT_HEADER_SIZE: u64 = 63;
+pub const VAULT_HEADER_SIZE: u64 = 39;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VaultHeader {
@@ -13,7 +13,6 @@ pub struct VaultHeader {
     pub salt: [u8; constants::SALT_LEN],
     pub metadata_offset: u64,
     pub metadata_size: u32,
-    pub metadata_nonce: [u8; constants::NONCE_LEN],
     pub crc: u32,
 }
 
@@ -25,7 +24,6 @@ impl Default for VaultHeader {
             salt: [0u8; constants::SALT_LEN],
             metadata_offset: 0,
             metadata_size: 0,
-            metadata_nonce: [0u8; constants::NONCE_LEN],
             crc: 0,
         }
     }
