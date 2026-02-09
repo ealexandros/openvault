@@ -1,13 +1,16 @@
-use crate::constants::{DEFAULT_COMPRESSION, NONCE_LEN};
-use crate::errors::Result;
-use crate::utils::fs::PathExt;
-use crate::vault::v1::structure::{FileEntry, FolderEntry};
+use crate::crypto::hashing;
+use crate::errors::{Error, Result};
+use crate::vault::v1::schema::entries::{FileMeta, FolderMeta};
 use std::path::Path;
 use walkdir::WalkDir;
 
-pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileEntry>, Vec<FolderEntry>)> {
+fn to_vault_path(path: &Path) -> String {
+    format!("/{}", path.to_string_lossy())
+}
+
+pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileMeta>, Vec<FolderMeta>)> {
     let mut files = Vec::new();
-    let mut folders = vec![FolderEntry::root()];
+    let mut folders = vec![FolderMeta::root()];
 
     for entry in WalkDir::new(root).sort_by_file_name() {
         let entry = entry?;
@@ -17,25 +20,32 @@ pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileEntry>, Vec<FolderEntry>)
             continue;
         }
 
-        let relative = path.relative_to(root)?;
+        let relative = path.strip_prefix(root).map_err(|_| Error::InvalidPath)?;
+        let vault_path = to_vault_path(relative);
+        let parent_id = relative.parent().map(|p| hashing::crc32(&to_vault_path(p)));
+
+        let id = hashing::crc32(&vault_path);
 
         if entry.file_type().is_dir() {
-            folders.push(FolderEntry::new(relative));
+            folders.push(FolderMeta::new(id, parent_id, vault_path));
             continue;
         }
 
-        if entry.file_type().is_file() {
-            let metadata = entry.metadata()?;
+        let name = relative
+            .file_name()
+            .map(|s| s.to_string_lossy().into_owned())
+            .ok_or(Error::InvalidPath)?;
 
-            files.push(FileEntry {
-                path: relative,
-                offset: 0,
-                compressed_size: 0,
-                original_size: metadata.len(),
-                nonce: [0u8; NONCE_LEN],
-                compression: DEFAULT_COMPRESSION.to_string(),
-            });
-        }
+        let metadata = entry.metadata()?;
+        let relative_path = relative.to_path_buf();
+
+        files.push(FileMeta::new(
+            id,
+            parent_id,
+            name,
+            metadata.len(),
+            relative_path,
+        ));
     }
 
     Ok((files, folders))

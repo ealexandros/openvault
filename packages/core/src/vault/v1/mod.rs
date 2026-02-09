@@ -1,2 +1,4 @@
+pub mod builder;
 pub mod commands;
-pub mod structure;
+pub mod keys;
+pub mod schema;

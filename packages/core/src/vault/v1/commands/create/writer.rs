@@ -1,80 +1,69 @@
-use crate::constants::KEY_LEN;
 use crate::crypto::{compression::Compressor, encryption::Cipher};
-use crate::errors::Result;
-use crate::vault::v1::structure::{FileEntry, FolderEntry, IndexEntry, VAULT_HEADER_SIZE, Vault};
-use byteorder::{LittleEndian, WriteBytesExt};
-use rand::RngCore;
+use crate::errors::{Error, Result};
+use crate::vault::v1::schema::header::VAULT_HEADER_SIZE;
+use crate::vault::v1::schema::vault::Vault;
 use std::fs::File;
-use std::io::{self, Seek, Write};
+use std::io::{Seek, Write};
 use std::path::Path;
-use zeroize::Zeroizing;
 
 pub struct VaultWriter<'a> {
-    pub key: &'a Zeroizing<[u8; KEY_LEN]>,
-    pub source: &'a Path,
-    pub output: &'a mut File,
-    pub compressor: Box<dyn Compressor>,
-    pub cipher: Box<dyn Cipher>,
+    source: &'a Path,
+    output: &'a File,
+    cipher: Box<dyn Cipher>,
+    compressor: Box<dyn Compressor>,
 }
 
 impl<'a> VaultWriter<'a> {
-    pub fn write_file(&mut self, entry: &mut FileEntry) -> Result<()> {
-        let full_path = self.source.join(&entry.path);
-        let mut source_file = File::open(full_path)?;
+    pub fn new(
+        source: &'a Path,
+        output: &'a File,
+        cipher: Box<dyn Cipher>,
+        compressor: Box<dyn Compressor>,
+    ) -> Self {
+        Self {
+            source,
+            output,
+            cipher,
+            compressor,
+        }
+    }
 
-        rand::rng().fill_bytes(&mut entry.nonce);
+    pub fn write_metadata(&mut self, vault: &mut Vault, key: &[u8]) -> Result {
+        let pos = self.output.stream_position()?;
 
-        let start_pos = self.output.stream_position()?;
+        let data = postcard::to_stdvec(&vault.metadata).map_err(|_| Error::InvalidVaultFormat)?;
 
-        let mut buffer = Vec::new();
-        self.compressor
-            .compress_stream(&mut source_file, &mut buffer)?;
+        let (enc, nonce) = self.cipher.encrypt(key, &data)?;
 
-        self.cipher
-            .encrypt_stream(self.key.as_ref(), &mut &buffer[..], self.output)?;
+        self.output.write_all(&enc)?;
 
-        let end_pos = self.output.stream_position()?;
-        entry.offset = start_pos - VAULT_HEADER_SIZE;
-        entry.compressed_size = end_pos - start_pos;
+        vault.header.metadata_offset = pos;
+        vault.header.metadata_size = enc.len() as u32;
+        vault.header.metadata_nonce = nonce.try_into().map_err(|_| Error::EncryptionFailed)?;
 
         Ok(())
     }
-}
 
-impl<'a> VaultWriter<'a> {
-    pub fn finalize(
-        &mut self,
-        vault: &mut Vault,
-        files: Vec<FileEntry>,
-        folders: Vec<FolderEntry>,
-    ) -> Result<()> {
-        let index_pos = self.output.stream_position()?;
+    pub fn write_files(&mut self, vault: &mut Vault, key: &[u8]) -> Result {
+        let files = vault.metadata.filesystem.files.iter_mut();
 
-        vault.header.files_offset = VAULT_HEADER_SIZE;
-        vault.header.index_offset = index_pos;
-        vault.files_index.entries = files.into_iter().map(IndexEntry::File).collect();
-        vault.folder_index.entries = folders;
+        for file in files {
+            let full_path = self.source.join(file.relative_path.as_path());
+            let mut input = File::open(full_path)?;
 
-        let indices = (
-            &vault.files_index,
-            &vault.notes_index,
-            &vault.logs_index,
-            &vault.folder_index,
-        );
+            let start = self.output.stream_position()?;
 
-        let encoded = postcard::to_allocvec(&indices).map_err(|_| io::Error::other("Ser error"))?;
+            let mut buf = Vec::new();
+            self.compressor.compress_stream(&mut input, &mut buf)?;
 
-        let (enc_data, enc_meta) = self.cipher.encrypt(self.key.as_ref(), &encoded)?;
+            self.cipher
+                .encrypt_stream(key, &mut &buf[..], &mut self.output)?;
 
-        self.output
-            .write_u32::<LittleEndian>(enc_data.len() as u32)?;
-        self.output
-            .write_u32::<LittleEndian>(enc_meta.len() as u32)?;
-        self.output.write_all(&enc_data)?;
-        self.output.write_all(&enc_meta)?;
+            let end = self.output.stream_position()?;
 
-        self.output.rewind()?;
-        vault.header.write_to_stream(self.output)?;
+            file.blob.offset = start - VAULT_HEADER_SIZE;
+            file.blob.size = end - start;
+        }
 
         Ok(())
     }
