@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "vault-core"
+name = "openvault-core"
 version = "1.0.0"

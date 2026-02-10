@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::constants::SALT_LEN;
 use crate::vault::v1::schema::entries::{FileSystemMeta, LogMeta, NoteMeta, SecretMeta};
 use crate::vault::v1::schema::header::VaultHeader;
 
@@ -20,4 +21,16 @@ pub struct VaultMeta {
 pub struct Vault {
     pub header: VaultHeader,
     pub metadata: VaultMeta,
+}
+
+impl Vault {
+    pub fn new(salt: [u8; SALT_LEN]) -> Self {
+        Self {
+            header: VaultHeader {
+                salt,
+                ..Default::default()
+            },
+            metadata: VaultMeta::default(),
+        }
+    }
 }

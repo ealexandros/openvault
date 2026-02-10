@@ -5,10 +5,10 @@ use crate::crypto::kdf;
 use crate::errors::Result;
 use crate::utils::fs::{create_new_file, remove_file_if_exists};
 use crate::vault::shared::commands::CreateConfig;
-use crate::vault::v1::builder::VaultBuilder;
 use crate::vault::v1::io::{self, IoContext};
 use crate::vault::v1::keys::VaultKeys;
 use crate::vault::v1::schema::header::VAULT_HEADER_SIZE;
+use crate::vault::v1::schema::vault::Vault;
 
 pub fn run(source: &Path, password: &[u8], config: Option<CreateConfig>) -> Result {
     let config = config.unwrap_or_default();
@@ -29,10 +29,9 @@ pub fn run(source: &Path, password: &[u8], config: Option<CreateConfig>) -> Resu
 
     let mut output = create_new_file(&output_path)?;
 
-    let mut vault = VaultBuilder::new(salt)
-        .add_files(files)
-        .add_folders(folders)
-        .build();
+    let mut vault = Vault::new(salt);
+    vault.metadata.filesystem.files = files;
+    vault.metadata.filesystem.folders = folders;
 
     output.seek(SeekFrom::Start(VAULT_HEADER_SIZE as u64))?;
 

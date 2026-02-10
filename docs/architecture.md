@@ -12,11 +12,10 @@ A vault file is structured as follows:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│  HEADER (fixed 63 bytes)                                        │
+│  HEADER (fixed bytes)                                           │
 │    - magic: "OPENV0"                                            │
 │    - metadata_offset: Points to the Metadata Block (at EOF)     │
 │    - metadata_size: Size of the metadata                        │
-│    - metadata_nonce: Nonce used for metadata encryption         │
 ├─────────────────────────────────────────────────────────────────┤
 │  BLOB REGION (variable size)                                    │
 │    [Blob 0] [Blob 1] [DEAD SPACE] [Blob 2] ...                  │
@@ -28,7 +27,7 @@ A vault file is structured as follows:
 
 ### 1. The Header (Fixed Size)
 
-The header is always 63 bytes and located at the very start of the file. It contains the essential entry points needed to "boot" the vault. Crucially, it stores the **offset**, **size**, and **nonce** for the Metadata Block.
+The header is always fixed size and located at the very start of the file. It contains the essential entry points needed to "boot" the vault. Crucially, it stores the **offset** and **size** for the Metadata Block.
 
 ### 2. The Blob Region
 
