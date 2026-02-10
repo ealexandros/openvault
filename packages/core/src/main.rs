@@ -1,12 +1,7 @@
-use openvault_core::{
-    crypto::{
-        compression::factory::CompressionAlgorithm, encryption::factory::EncryptionAlgorithm,
-    },
-    vault::{
-        shared::commands::{CreateConfig, OpenConfig},
-        versions::VaultVersion,
-    },
-};
+use openvault_core::crypto::compression::factory::CompressionAlgorithm;
+use openvault_core::crypto::encryption::factory::EncryptionAlgorithm;
+use openvault_core::vault::shared::commands::{CreateConfig, OpenConfig};
+use openvault_core::vault::versions::VaultVersion;
 use std::path::Path;
 
 // @todo-now this needs to be remove after testing

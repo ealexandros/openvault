@@ -1,23 +1,22 @@
 use std::io::{Seek, SeekFrom};
 use std::path::Path;
-use zeroize::Zeroize;
 
 use crate::crypto::kdf;
 use crate::errors::Result;
 use crate::utils::fs::{create_new_file, remove_file_if_exists};
 use crate::vault::shared::commands::CreateConfig;
 use crate::vault::v1::builder::VaultBuilder;
-use crate::vault::v1::commands::create::scanner::scan_filesystem;
-use crate::vault::v1::commands::create::writer::VaultWriter;
+use crate::vault::v1::io::{self, IoContext};
 use crate::vault::v1::keys::VaultKeys;
+use crate::vault::v1::schema::header::VAULT_HEADER_SIZE;
 
 pub fn run(source: &Path, password: &[u8], config: Option<CreateConfig>) -> Result {
     let config = config.unwrap_or_default();
 
-    let (files, folders) = scan_filesystem(source)?;
+    let (files, folders) = io::scanner::scan_filesystem(source)?;
 
     let salt = kdf::generate_default_salt();
-    let mut master_key = kdf::derive_master_key(password, &salt)?;
+    let master_key = kdf::derive_master_key(password, &salt)?;
 
     let metadata_key = VaultKeys::Metadata.derive(&master_key)?;
     let files_key = VaultKeys::Files.derive(&master_key)?;
@@ -35,23 +34,22 @@ pub fn run(source: &Path, password: &[u8], config: Option<CreateConfig>) -> Resu
         .add_folders(folders)
         .build();
 
-    vault.header.write_to_stream(&mut output)?;
+    output.seek(SeekFrom::Start(VAULT_HEADER_SIZE as u64))?;
 
-    let mut writer = VaultWriter::new(
-        source,
-        &output,
-        config.cipher.get()?,
-        config.compression.get()?,
-    );
+    let cipher = config.cipher.get()?;
+    let compressor = config.compression.get()?;
 
-    writer.write_files(&mut vault, files_key.as_ref())?;
-    writer.write_metadata(&mut vault, metadata_key.as_ref())?;
+    let ctx = IoContext {
+        cipher: cipher.as_ref(),
+        compressor: Some(compressor.as_ref()),
+    };
 
-    output.seek(SeekFrom::Start(0))?;
+    for file in vault.metadata.filesystem.files.iter_mut() {
+        io::blob::write_file(file, source, &mut output, files_key.as_ref(), &ctx)?;
+    }
 
-    vault.header.write_to_stream(&mut output)?;
-
-    master_key.zeroize();
+    io::metadata::write_metadata(&mut vault, &mut output, metadata_key.as_ref(), &ctx)?;
+    io::header::write_header_at_top(&mut vault.header, &mut output)?;
 
     Ok(())
 }

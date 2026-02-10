@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 use crate::crypto::compression::factory::CompressionAlgorithm;
-use serde::{Deserialize, Serialize};
 
 /// Metadata for a folder in the filesystem
 #[derive(Clone, Debug, Serialize, Deserialize)]

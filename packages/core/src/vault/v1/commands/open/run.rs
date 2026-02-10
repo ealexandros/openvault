@@ -1,33 +1,35 @@
 use std::fs::File;
-use std::io::{Seek, SeekFrom};
 use std::path::Path;
 
 use crate::crypto::encryption::factory::EncryptionAlgorithm;
 use crate::crypto::kdf;
 use crate::errors::{Error, Result};
-use crate::utils::io::ReadExt;
 use crate::vault::shared::commands::OpenConfig;
+use crate::vault::v1::io::{self, IoContext};
 use crate::vault::v1::keys::VaultKeys;
-use crate::vault::v1::schema::header::VaultHeader;
 use crate::vault::v1::schema::vault::{Vault, VaultMeta};
 
 pub fn run(source: &Path, password: &[u8], _: Option<OpenConfig>) -> Result<Vault> {
     let mut input = File::open(source).map_err(Error::Io)?;
 
-    let header = VaultHeader::read_from_stream(&mut input)?;
+    let header = io::header::read_header_at_top(&mut input)?;
 
     let master_key = kdf::derive_master_key(password, &header.salt)?;
     let metadata_key = VaultKeys::Metadata.derive(&master_key)?;
 
     let cipher = EncryptionAlgorithm::XChaCha20Poly1305.get()?;
 
-    input.seek(SeekFrom::Start(header.metadata_offset))?;
-    let meta_data = input.read_exact_vec(header.metadata_size as usize)?;
+    let mut vault = Vault {
+        header,
+        metadata: VaultMeta::default(),
+    };
 
-    let decrypted_meta = cipher.decrypt(metadata_key.as_ref(), &meta_data)?;
+    let ctx = IoContext {
+        cipher: cipher.as_ref(),
+        compressor: None,
+    };
 
-    let metadata: VaultMeta =
-        postcard::from_bytes(&decrypted_meta).map_err(|_| Error::InvalidVaultFormat)?;
+    io::metadata::read_metadata(&mut vault, &mut input, metadata_key.as_ref(), &ctx)?;
 
-    Ok(Vault { header, metadata })
+    Ok(vault)
 }

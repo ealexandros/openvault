@@ -3,8 +3,6 @@ use serde::{Deserialize, Serialize};
 use crate::vault::v1::schema::entries::{FileSystemMeta, LogMeta, NoteMeta, SecretMeta};
 use crate::vault::v1::schema::header::VaultHeader;
 
-// @todo-soon re-think if impl needed in vault-meta
-
 /// VaultMeta contains all metadata for vault contents.
 /// Serialized as a single encrypted block at EOF.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
