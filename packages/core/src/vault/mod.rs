@@ -1,3 +1,5 @@
-pub mod shared;
-pub mod v1;
+pub mod crypto;
 pub mod versions;
+
+pub mod boot_header;
+pub mod features;

@@ -1,0 +1,13 @@
+{
+  "name": "@openvault/crypto",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cargo build",
+    "lint:check": "cargo clippy --",
+    "lint:fix": "cargo clippy --fix --allow-dirty --allow-staged",
+    "format:check": "cargo fmt --check",
+    "format:write": "cargo fmt --all",
+    "check": "cargo check",
+    "test": "cargo test"
+  }
+}
