@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use openvault_crypto::keys::SALT_LEN;
+use openvault_crypto::keys::Salt;
 
 pub const VAULT_MAGIC: &[u8; 6] = b"OPENV0";
 pub const VAULT_MAGIC_LEN: usize = VAULT_MAGIC.len();
@@ -12,7 +12,7 @@ pub const PAYLOAD_SIZE: usize = VAULT_HEADER_SIZE - CRC_SIZE;
 pub struct VaultHeader {
     pub magic: [u8; VAULT_MAGIC_LEN],
     pub version: u8,
-    pub salt: [u8; SALT_LEN],
+    pub salt: Salt,
     pub metadata_offset: u64,
     pub metadata_size: u32,
     #[serde(skip)]
@@ -24,7 +24,7 @@ impl Default for VaultHeader {
         Self {
             magic: *VAULT_MAGIC,
             version: 1,
-            salt: [0u8; SALT_LEN],
+            salt: Salt::default(),
             metadata_offset: 0,
             metadata_size: 0,
             crc: 0,

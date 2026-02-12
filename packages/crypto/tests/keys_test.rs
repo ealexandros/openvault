@@ -1,9 +1,9 @@
-use openvault_crypto::keys::{DerivedKey, MasterKey, generate_default_salt};
+use openvault_crypto::keys::{DerivedKey, MasterKey, random_salt};
 
 #[test]
 fn test_keys_consistency() {
     let password = b"password123";
-    let salt = generate_default_salt();
+    let salt = random_salt();
     let key1 = MasterKey::derive(password, &salt).unwrap();
     let key2 = MasterKey::derive(password, &salt).unwrap();
 
@@ -14,8 +14,8 @@ fn test_keys_consistency() {
 fn test_keys_random_salt() {
     let password = b"password123";
 
-    let salt1 = generate_default_salt();
-    let salt2 = generate_default_salt();
+    let salt1 = random_salt();
+    let salt2 = random_salt();
     let key1 = MasterKey::derive(password, &salt1).unwrap();
     let key2 = MasterKey::derive(password, &salt2).unwrap();
 
@@ -26,7 +26,7 @@ fn test_keys_random_salt() {
 #[test]
 fn test_subkey_expansion() {
     let password = b"password123";
-    let salt = generate_default_salt();
+    let salt = random_salt();
     let master_key = MasterKey::derive(password, &salt).unwrap();
 
     let info1 = b"encryption";

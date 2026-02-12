@@ -9,6 +9,8 @@ use crate::errors::{Error, Result};
 pub const MKEY_LEN: usize = 32;
 pub const SALT_LEN: usize = 16;
 
+pub type Salt = [u8; SALT_LEN];
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct MasterKey(Zeroizing<[u8; MKEY_LEN]>);
 
@@ -36,6 +38,12 @@ impl MasterKey {
         Ok(Self(Zeroizing::new(key)))
     }
 
+    pub fn derive_with_random_salt(password: &[u8]) -> Result<(Self, Salt)> {
+        let salt = random_salt();
+        let key = Self::derive(password, &salt)?;
+        Ok((key, salt))
+    }
+
     pub fn expand<const N: usize>(&self, info: &[u8]) -> Result<DerivedKey<N>> {
         let hkdf = Hkdf::<Sha256>::new(None, self.as_bytes());
         let mut okm = [0u8; N];
@@ -47,8 +55,8 @@ impl MasterKey {
     }
 }
 
-pub fn generate_default_salt() -> [u8; SALT_LEN] {
-    let mut salt = [0u8; SALT_LEN];
+pub fn random_salt() -> Salt {
+    let mut salt = Salt::default();
     OsRng.fill_bytes(&mut salt);
     salt
 }
