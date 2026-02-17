@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::domain::totp::TOTP;
@@ -17,8 +18,11 @@ impl EncryptedField {
     }
 }
 
+// @todo-now consider adding folders for organisation
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SecretEntry {
+    pub id: Uuid,
     pub name: String,
     pub username: String,
     pub password: EncryptedField,
@@ -31,6 +35,7 @@ pub struct SecretEntry {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SecretEntryView {
+    pub id: Uuid,
     pub name: String,
     pub username: String,
     pub website: String,
@@ -61,6 +66,7 @@ impl SecretEntry {
         let now = Utc::now();
 
         Ok(Self {
+            id: Uuid::new_v4(),
             name,
             username,
             password,
@@ -117,6 +123,7 @@ impl Drop for SecretEntry {
 impl From<&SecretEntry> for SecretEntryView {
     fn from(entry: &SecretEntry) -> Self {
         Self {
+            id: entry.id.clone(),
             name: entry.name.clone(),
             username: entry.username.clone(),
             website: entry.website.clone(),

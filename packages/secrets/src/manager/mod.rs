@@ -1,8 +1,8 @@
+pub mod codec;
 pub mod params;
 
-pub mod codec;
-
 use openvault_crypto::keys::MasterKey;
+use uuid::Uuid;
 
 use crate::domain::entry::{EncryptedField, SecretEntryView};
 use crate::domain::store::{SecretsChange, SecretsStore, Snapshot};
@@ -16,6 +16,8 @@ pub struct SecretManager {
     key: MasterKey,
     store: SecretsStore,
 }
+
+// @todo-now fix the uuid and the where it is initialized
 
 impl SecretManager {
     pub fn unlock(key: MasterKey, chunks: Vec<Vec<u8>>) -> Result<SecretManager> {
@@ -63,31 +65,33 @@ impl SecretManager {
         self.store.list()
     }
 
-    pub fn get(&self, name: &str) -> Option<SecretEntryView> {
-        self.store.get(name)
+    pub fn get(&self, id: &Uuid) -> Option<SecretEntryView> {
+        self.store.get(id)
     }
 
-    pub fn reveal_password(&self, name: &str) -> Result<String> {
+    pub fn reveal_password(&self, id: &Uuid) -> Result<String> {
         let encrypted = self
             .store
-            .get_encrypted_password(name)
-            .ok_or_else(|| SecretError::NotFound(name.to_string()))?;
+            .get_encrypted_password(id)
+            .ok_or_else(|| SecretError::NotFound(id.to_string()))?;
 
         codec::decrypt_password(encrypted.as_bytes(), &self.key)
     }
 
-    pub fn add(&mut self, params: AddSecretEntryParams) -> Result {
+    pub fn add(&mut self, params: AddSecretEntryParams) -> Result<Uuid> {
         let entry = params.into_entry(&self.key)?;
-        self.store.add(entry)
+        let id = entry.id;
+        self.store.add(entry)?;
+        Ok(id)
     }
 
-    pub fn update(&mut self, name: String, params: UpdateSecretEntryParams) -> Result {
+    pub fn update(&mut self, id: &Uuid, params: UpdateSecretEntryParams) -> Result {
         let patch = params.into_patch(&self.key)?;
-        self.store.update(name, patch)
+        self.store.update(id.clone(), patch)
     }
 
-    pub fn delete(&mut self, name: String) -> Result {
-        self.store.delete(name)
+    pub fn delete(&mut self, id: &Uuid) -> Result {
+        self.store.delete(id.clone())
     }
 
     pub fn export(&self) -> Result<Vec<u8>> {

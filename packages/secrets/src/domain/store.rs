@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use uuid::Uuid;
 
 use crate::domain::entry::{EncryptedField, SecretEntry, SecretEntryPatch, SecretEntryView};
 use crate::errors::{Result, SecretError};
@@ -8,23 +9,18 @@ use crate::errors::{Result, SecretError};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Snapshot {
-    pub entries: HashMap<String, SecretEntry>,
+    pub entries: HashMap<Uuid, SecretEntry>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SecretDelta {
     Added(SecretEntry),
-    Updated {
-        name: String,
-        patch: SecretEntryPatch,
-    },
-    Deleted {
-        name: String,
-    },
+    Updated { id: Uuid, patch: SecretEntryPatch },
+    Deleted { id: Uuid },
 }
 
 impl Snapshot {
-    pub fn new(entries: HashMap<String, SecretEntry>) -> Self {
+    pub fn new(entries: HashMap<Uuid, SecretEntry>) -> Self {
         Self { entries }
     }
 }
@@ -39,7 +35,7 @@ const SNAPSHOT_INTERVAL: usize = 30;
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 pub struct SecretsStore {
-    entries: HashMap<String, SecretEntry>,
+    entries: HashMap<Uuid, SecretEntry>,
     deltas: Vec<SecretDelta>,
     deltas_count: usize,
 }
@@ -66,22 +62,22 @@ impl SecretsStore {
     fn apply_delta(&mut self, delta: &SecretDelta) -> Result {
         match delta {
             SecretDelta::Added(entry) => {
-                if self.entries.contains_key(&entry.name) {
+                if self.entries.contains_key(&entry.id) {
                     return Err(SecretError::AlreadyExists(entry.name.clone()));
                 }
-                self.entries.insert(entry.name.clone(), entry.clone());
+                self.entries.insert(entry.id.clone(), entry.clone());
             }
-            SecretDelta::Updated { name, patch } => {
+            SecretDelta::Updated { id, patch } => {
                 let entry = self
                     .entries
-                    .get_mut(name)
-                    .ok_or_else(|| SecretError::NotFound(name.clone()))?;
+                    .get_mut(id)
+                    .ok_or_else(|| SecretError::NotFound(id.to_string()))?;
                 entry.patch(patch.clone())?;
             }
-            SecretDelta::Deleted { name } => {
+            SecretDelta::Deleted { id } => {
                 self.entries
-                    .remove(name)
-                    .ok_or_else(|| SecretError::InvalidName(name.clone()))?;
+                    .remove(id)
+                    .ok_or_else(|| SecretError::NotFound(id.to_string()))?;
             }
         }
         Ok(())
@@ -98,20 +94,20 @@ impl SecretsStore {
         self.record(SecretDelta::Added(entry))
     }
 
-    pub fn update(&mut self, name: String, patch: SecretEntryPatch) -> Result {
-        self.record(SecretDelta::Updated { name, patch })
+    pub fn update(&mut self, id: Uuid, patch: SecretEntryPatch) -> Result {
+        self.record(SecretDelta::Updated { id, patch })
     }
 
-    pub fn delete(&mut self, name: String) -> Result {
-        self.record(SecretDelta::Deleted { name })
+    pub fn delete(&mut self, id: Uuid) -> Result {
+        self.record(SecretDelta::Deleted { id })
     }
 
-    pub fn get(&self, name: &str) -> Option<SecretEntryView> {
-        self.entries.get(name).map(|e| e.into())
+    pub fn get(&self, id: &Uuid) -> Option<SecretEntryView> {
+        self.entries.get(id).map(|e| e.into())
     }
 
-    pub fn get_encrypted_password(&self, name: &str) -> Option<EncryptedField> {
-        self.entries.get(name).map(|e| e.password.clone())
+    pub fn get_encrypted_password(&self, id: &Uuid) -> Option<EncryptedField> {
+        self.entries.get(id).map(|e| e.password.clone())
     }
 
     pub fn list(&self) -> Vec<SecretEntryView> {
@@ -139,7 +135,7 @@ impl SecretsStore {
         self.deltas_count = 0;
     }
 
-    pub fn entries(&self) -> &HashMap<String, SecretEntry> {
+    pub fn entries(&self) -> &HashMap<Uuid, SecretEntry> {
         &self.entries
     }
 }

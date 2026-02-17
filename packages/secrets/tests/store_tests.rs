@@ -64,7 +64,8 @@ fn test_store_restore() {
         None,
     )
     .unwrap();
-    store.add(entry).unwrap();
+
+    store.add(entry.clone()).unwrap();
 
     let change = store.snapshot();
     let snapshot = match change {
@@ -74,5 +75,5 @@ fn test_store_restore() {
 
     let restored_store = SecretsStore::restore(snapshot, vec![]).unwrap();
     assert_eq!(restored_store.list().len(), 1);
-    assert_eq!(restored_store.get("test").unwrap().username, "user");
+    assert_eq!(restored_store.get(&entry.id).unwrap().username, "user");
 }

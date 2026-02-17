@@ -48,3 +48,13 @@ fn test_master_key_as_bytes() {
 
     assert_eq!(key.as_bytes().len(), 32);
 }
+
+#[test]
+fn test_master_key_with_random_salt() {
+    let password = b"password123";
+    let (key1, salt1) = MasterKey::derive_with_random_salt(password).unwrap();
+    let (key2, salt2) = MasterKey::derive_with_random_salt(password).unwrap();
+
+    assert_ne!(key1, key2);
+    assert_ne!(salt1, salt2);
+}

@@ -6,30 +6,30 @@ use zeroize::Zeroizing;
 
 use crate::errors::{Error, Result};
 
-pub const MKEY_LEN: usize = 32;
-pub const SALT_LEN: usize = 16;
+pub const MKEY_SIZE: usize = 32;
+pub const SALT_SIZE: usize = 16;
 
-pub type Salt = [u8; SALT_LEN];
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct MasterKey(Zeroizing<[u8; MKEY_LEN]>);
+pub type Salt = [u8; SALT_SIZE];
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct DerivedKey<const N: usize = MKEY_LEN>(Zeroizing<[u8; N]>);
+pub struct MasterKey(Zeroizing<[u8; MKEY_SIZE]>);
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct DerivedKey<const N: usize = MKEY_SIZE>(Zeroizing<[u8; N]>);
 
 impl MasterKey {
-    pub fn new(key: [u8; MKEY_LEN]) -> Self {
+    pub fn new(key: [u8; MKEY_SIZE]) -> Self {
         Self(Zeroizing::new(key))
     }
 
-    pub fn as_bytes(&self) -> &[u8; MKEY_LEN] {
+    pub fn as_bytes(&self) -> &[u8; MKEY_SIZE] {
         &self.0
     }
 
     pub fn derive(password: &[u8], salt: &[u8]) -> Result<Self> {
         let params = Params::default();
         let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
-        let mut key = [0u8; MKEY_LEN];
+        let mut key = [0u8; MKEY_SIZE];
 
         argon2
             .hash_password_into(password, salt, &mut key)

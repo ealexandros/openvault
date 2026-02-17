@@ -3,6 +3,8 @@ use strum_macros::{AsRefStr, Display, EnumString};
 use crate::compression::{Compressor, zstd};
 use crate::errors::Result;
 
+// @todo-soon rethink about name and Box<...>, consider rust-delegate
+
 #[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum CompressionAlgorithm {

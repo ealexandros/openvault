@@ -1,10 +1,10 @@
-use openvault_crypto::compression::factory::CompressionAlgorithm;
-use openvault_crypto::encryption::factory::EncryptionAlgorithm;
+use openvault_crypto::compression::CompressionAlgorithm;
+use openvault_crypto::encryption::EncryptionAlgorithm;
 use openvault_crypto::keys::MasterKey;
 
 use crate::errors::{Result, SecretError};
 
-// @todo-soon codec should be part of the sdk package and based on the version of the vault
+// @todo-now codec should be part of the sdk package and based on the version of the vault
 
 pub fn encrypt(plaintext: &[u8], key: &MasterKey) -> Result<Vec<u8>> {
     let compressor = CompressionAlgorithm::default()

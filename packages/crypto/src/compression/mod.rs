@@ -3,6 +3,8 @@ use std::io::{Read, Write};
 
 use crate::errors::Result;
 
+pub use factory::CompressionAlgorithm;
+
 pub trait Compressor: Debug + Send + Sync {
     fn compress(&self, data: &[u8]) -> Result<Vec<u8>>;
     fn decompress(&self, data: &[u8]) -> Result<Vec<u8>>;

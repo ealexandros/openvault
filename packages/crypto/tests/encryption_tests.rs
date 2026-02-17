@@ -1,5 +1,5 @@
 use openvault_crypto::encryption::xchacha20::XChaCha20Poly1305Cipher;
-use openvault_crypto::encryption::{Cipher, factory::EncryptionAlgorithm};
+use openvault_crypto::encryption::{Cipher, EncryptionAlgorithm};
 use std::io::Cursor;
 use std::str::FromStr;
 

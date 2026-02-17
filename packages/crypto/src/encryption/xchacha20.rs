@@ -2,10 +2,8 @@ use chacha20poly1305::aead::{Aead, AeadCore, KeyInit, OsRng};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use std::io::{Read, Write};
 
-use crate::encryption::Cipher;
+use crate::encryption::{Cipher, NONCE_SIZE};
 use crate::errors::{Error, Result};
-
-pub const NONCE_LEN: usize = 24;
 
 const DEFAULT_TAG_SIZE: usize = 16;
 const DEFAULT_CHUNK_SIZE: usize = 32 * 1024;
@@ -23,7 +21,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
             .encrypt(&nonce, plaintext)
             .map_err(|_| Error::EncryptionFailed)?;
 
-        let mut output = Vec::with_capacity(NONCE_LEN + ciphertext.len());
+        let mut output = Vec::with_capacity(NONCE_SIZE + ciphertext.len());
         output.extend_from_slice(nonce.as_slice());
         output.extend_from_slice(&ciphertext);
 
@@ -31,13 +29,13 @@ impl Cipher for XChaCha20Poly1305Cipher {
     }
 
     fn decrypt(&self, key: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>> {
-        if ciphertext.len() < NONCE_LEN {
+        if ciphertext.len() < NONCE_SIZE {
             return Err(Error::DecryptionFailed);
         }
 
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
-        let (nonce_bytes, ciphertext) = ciphertext.split_at(NONCE_LEN);
+        let (nonce_bytes, ciphertext) = ciphertext.split_at(NONCE_SIZE);
         let nonce = XNonce::from_slice(nonce_bytes);
 
         let plaintext = cipher
@@ -76,7 +74,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
     fn decrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
-        let mut nonce_bytes = [0u8; NONCE_LEN];
+        let mut nonce_bytes = [0u8; NONCE_SIZE];
         input.read_exact(&mut nonce_bytes).map_err(Error::Io)?;
         let mut nonce = XNonce::clone_from_slice(&nonce_bytes);
 

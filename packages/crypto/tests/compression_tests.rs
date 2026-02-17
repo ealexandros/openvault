@@ -1,5 +1,5 @@
 use openvault_crypto::compression::zstd::Zstd;
-use openvault_crypto::compression::{Compressor, factory::CompressionAlgorithm};
+use openvault_crypto::compression::{CompressionAlgorithm, Compressor};
 use std::io::Cursor;
 use std::str::FromStr;
 

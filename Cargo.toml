@@ -13,8 +13,9 @@ resolver = "3"
 openvault-sdk = { path = "packages/sdk" }
 openvault-crypto = { path = "packages/crypto" }
 openvault-secrets = { path = "packages/secrets" }
+chrono = { version = "0.4.43", features = ["serde"] }
 strum = "0.27.2"
 strum_macros = "0.27.2"
 thiserror = "2.0.18"
+uuid = { version = "1.20.0", features = ["v4", "serde"] }
 zeroize = { version = "1.8.2", features = ["zeroize_derive"] }
-chrono = { version = "0.4.43", features = ["serde"] }
