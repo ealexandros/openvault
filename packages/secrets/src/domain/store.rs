@@ -65,7 +65,7 @@ impl SecretsStore {
                 if self.entries.contains_key(&entry.id) {
                     return Err(SecretError::AlreadyExists(entry.name.clone()));
                 }
-                self.entries.insert(entry.id.clone(), entry.clone());
+                self.entries.insert(entry.id, entry.clone());
             }
             SecretDelta::Updated { id, patch } => {
                 let entry = self

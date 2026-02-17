@@ -87,11 +87,11 @@ impl SecretManager {
 
     pub fn update(&mut self, id: &Uuid, params: UpdateSecretEntryParams) -> Result {
         let patch = params.into_patch(&self.key)?;
-        self.store.update(id.clone(), patch)
+        self.store.update(*id, patch)
     }
 
     pub fn delete(&mut self, id: &Uuid) -> Result {
-        self.store.delete(id.clone())
+        self.store.delete(*id)
     }
 
     pub fn export(&self) -> Result<Vec<u8>> {

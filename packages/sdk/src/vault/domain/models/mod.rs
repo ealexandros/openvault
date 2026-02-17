@@ -1,4 +1,2 @@
-pub mod file;
-pub mod folder;
+pub mod filesystem;
 pub mod note;
-pub mod secret;

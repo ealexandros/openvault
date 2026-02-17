@@ -123,7 +123,7 @@ impl Drop for SecretEntry {
 impl From<&SecretEntry> for SecretEntryView {
     fn from(entry: &SecretEntry) -> Self {
         Self {
-            id: entry.id.clone(),
+            id: entry.id,
             name: entry.name.clone(),
             username: entry.username.clone(),
             website: entry.website.clone(),
