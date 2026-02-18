@@ -1,4 +1,4 @@
-use openvault_secrets::domain::totp::TOTP;
+use openvault_secrets::domain::secrets::totp::TOTP;
 use std::num::{NonZeroU8, NonZeroU64};
 
 #[test]

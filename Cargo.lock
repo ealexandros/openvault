@@ -2553,23 +2553,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "openvault-crypto"
+name = "openvault-core"
 version = "0.0.0"
-dependencies = [
- "argon2",
- "chacha20poly1305",
- "hkdf",
- "sha2",
- "strum",
- "strum_macros",
- "thiserror 2.0.18",
- "zeroize",
- "zstd",
-]
-
-[[package]]
-name = "openvault-sdk"
-version = "1.0.0"
 dependencies = [
  "byteorder",
  "chrono",
@@ -2586,6 +2571,25 @@ dependencies = [
  "walkdir",
  "zeroize",
 ]
+
+[[package]]
+name = "openvault-crypto"
+version = "0.0.0"
+dependencies = [
+ "argon2",
+ "chacha20poly1305",
+ "hkdf",
+ "sha2",
+ "strum",
+ "strum_macros",
+ "thiserror 2.0.18",
+ "zeroize",
+ "zstd",
+]
+
+[[package]]
+name = "openvault-sdk"
+version = "0.0.0"
 
 [[package]]
 name = "openvault-secrets"

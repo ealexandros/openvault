@@ -1,8 +1,8 @@
-use chacha20poly1305::aead::{Aead, AeadCore, KeyInit, OsRng};
+use chacha20poly1305::aead::{Aead, KeyInit, Payload};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use std::io::{Read, Write};
 
-use crate::encryption::{Cipher, NONCE_SIZE};
+use crate::encryption::{Cipher, NONCE_SIZE, Nonce};
 use crate::errors::{Error, Result};
 
 const DEFAULT_TAG_SIZE: usize = 16;
@@ -12,34 +12,31 @@ const DEFAULT_CHUNK_SIZE: usize = 32 * 1024;
 pub struct XChaCha20Poly1305Cipher;
 
 impl Cipher for XChaCha20Poly1305Cipher {
-    fn encrypt(&self, key: &[u8], plaintext: &[u8]) -> Result<Vec<u8>> {
+    fn encrypt(&self, key: &[u8], nonce: &Nonce, plaintext: &[u8], aad: &[u8]) -> Result<Vec<u8>> {
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
+        let nonce = XNonce::from_slice(nonce.as_bytes());
 
-        let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
-
+        let payload = Payload {
+            msg: plaintext,
+            aad,
+        };
         let ciphertext = cipher
-            .encrypt(&nonce, plaintext)
+            .encrypt(nonce, payload)
             .map_err(|_| Error::EncryptionFailed)?;
 
-        let mut output = Vec::with_capacity(NONCE_SIZE + ciphertext.len());
-        output.extend_from_slice(nonce.as_slice());
-        output.extend_from_slice(&ciphertext);
-
-        Ok(output)
+        Ok(ciphertext)
     }
 
-    fn decrypt(&self, key: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>> {
-        if ciphertext.len() < NONCE_SIZE {
-            return Err(Error::DecryptionFailed);
-        }
-
+    fn decrypt(&self, key: &[u8], nonce: &Nonce, ciphertext: &[u8], aad: &[u8]) -> Result<Vec<u8>> {
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
+        let nonce = XNonce::from_slice(nonce.as_bytes());
 
-        let (nonce_bytes, ciphertext) = ciphertext.split_at(NONCE_SIZE);
-        let nonce = XNonce::from_slice(nonce_bytes);
-
+        let payload = Payload {
+            msg: ciphertext,
+            aad,
+        };
         let plaintext = cipher
-            .decrypt(nonce, ciphertext)
+            .decrypt(nonce, payload)
             .map_err(|_| Error::DecryptionFailed)?;
 
         Ok(plaintext)
@@ -48,8 +45,8 @@ impl Cipher for XChaCha20Poly1305Cipher {
     fn encrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
-        let mut nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
-        output.write_all(nonce.as_slice()).map_err(Error::Io)?;
+        let mut nonce = Nonce::random();
+        output.write_all(nonce.as_bytes()).map_err(Error::Io)?;
 
         let mut buffer = [0u8; DEFAULT_CHUNK_SIZE];
 
@@ -59,13 +56,14 @@ impl Cipher for XChaCha20Poly1305Cipher {
                 break;
             }
 
+            let x_nonce = XNonce::from_slice(nonce.as_bytes());
             let ciphertext = cipher
-                .encrypt(&nonce, &buffer[..n])
+                .encrypt(x_nonce, &buffer[..n])
                 .map_err(|_| Error::EncryptionFailed)?;
 
             output.write_all(&ciphertext).map_err(Error::Io)?;
 
-            increment_nonce(&mut nonce);
+            nonce.increment();
         }
 
         Ok(())
@@ -76,7 +74,8 @@ impl Cipher for XChaCha20Poly1305Cipher {
 
         let mut nonce_bytes = [0u8; NONCE_SIZE];
         input.read_exact(&mut nonce_bytes).map_err(Error::Io)?;
-        let mut nonce = XNonce::clone_from_slice(&nonce_bytes);
+
+        let mut nonce = Nonce::new(nonce_bytes);
 
         let mut buffer = [0u8; DEFAULT_CHUNK_SIZE + DEFAULT_TAG_SIZE];
 
@@ -86,24 +85,16 @@ impl Cipher for XChaCha20Poly1305Cipher {
                 break;
             }
 
+            let x_nonce = XNonce::from_slice(nonce.as_bytes());
             let plaintext = cipher
-                .decrypt(&nonce, &buffer[..n])
+                .decrypt(x_nonce, &buffer[..n])
                 .map_err(|_| Error::DecryptionFailed)?;
 
             output.write_all(&plaintext).map_err(Error::Io)?;
 
-            increment_nonce(&mut nonce);
+            nonce.increment();
         }
 
         Ok(())
-    }
-}
-
-fn increment_nonce(nonce: &mut XNonce) {
-    for byte in nonce.iter_mut().rev() {
-        *byte = byte.wrapping_add(1);
-        if *byte != 0 {
-            break;
-        }
     }
 }

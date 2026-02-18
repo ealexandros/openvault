@@ -1,23 +1,26 @@
 pub mod codec;
 pub mod params;
+pub mod views;
 
 use openvault_crypto::keys::MasterKey;
 use uuid::Uuid;
 
-use crate::domain::entry::{EncryptedField, SecretEntryView};
-use crate::domain::store::{SecretsChange, SecretsStore, Snapshot};
+use crate::domain::folders::normalize_folder_path;
+use crate::domain::records::{SecretsChange, Snapshot};
+use crate::domain::store::SecretStore;
 use crate::errors::{Result, SecretError};
 use crate::manager::params::{AddSecretEntryParams, UpdateSecretEntryParams};
+use crate::manager::views::{FolderListing, LoginEntryView, build_folder_listing};
+use crate::wire::v1::changes::SecretsChunkV1;
+use crate::wire::v1::mapper as wire_mapper;
 
 // @todo-soon consider adding derived key for data fields
 
 #[derive(Debug)]
 pub struct SecretManager {
     key: MasterKey,
-    store: SecretsStore,
+    store: SecretStore,
 }
-
-// @todo-now fix the uuid and the where it is initialized
 
 impl SecretManager {
     pub fn unlock(key: MasterKey, chunks: Vec<Vec<u8>>) -> Result<SecretManager> {
@@ -30,13 +33,13 @@ impl SecretManager {
         Ok(Self { key, store })
     }
 
-    fn restore_store(key: &MasterKey, chunks: &[Vec<u8>]) -> Result<SecretsStore> {
+    fn restore_store(key: &MasterKey, chunks: &[Vec<u8>]) -> Result<SecretStore> {
         let mut snapshot = Snapshot::default();
         let mut deltas = Vec::new();
 
         for chunk in chunks {
             let decrypted = codec::decrypt(chunk, key)?;
-            let changes: Vec<SecretsChange> = codec::deserialize(&decrypted)?;
+            let changes = decode_changes(&decrypted)?;
 
             for change in changes {
                 match change {
@@ -49,7 +52,7 @@ impl SecretManager {
             }
         }
 
-        SecretsStore::restore(snapshot, deltas)
+        SecretStore::restore(snapshot, deltas)
     }
 }
 
@@ -57,32 +60,49 @@ impl SecretManager {
     pub fn create(key: MasterKey) -> Self {
         Self {
             key,
-            store: SecretsStore::new(),
+            store: SecretStore::new(),
         }
     }
 
-    pub fn list(&self) -> Vec<SecretEntryView> {
-        self.store.list()
+    pub fn list_all(&self) -> Vec<LoginEntryView> {
+        self.store
+            .list_all()
+            .into_iter()
+            .map(|entry| LoginEntryView::from(&entry))
+            .collect()
     }
 
-    pub fn get(&self, id: &Uuid) -> Option<SecretEntryView> {
-        self.store.get(id)
+    pub fn browse_folder(&self, folder: &str) -> FolderListing {
+        let current_folder = normalize_folder_path(folder);
+        let entries = self
+            .store
+            .list_by_folder(&current_folder)
+            .into_iter()
+            .map(|entry| LoginEntryView::from(&entry))
+            .collect();
+        let subfolders = self.store.list_subfolders(&current_folder);
+
+        build_folder_listing(&current_folder, entries, subfolders)
     }
 
-    pub fn reveal_password(&self, id: &Uuid) -> Result<String> {
+    pub fn get_entry(&self, id: &Uuid) -> Option<LoginEntryView> {
+        self.store
+            .get_entry(id)
+            .map(|entry| LoginEntryView::from(&entry))
+    }
+
+    pub fn show_password(&self, id: &Uuid) -> Result<String> {
         let encrypted = self
             .store
-            .get_encrypted_password(id)
+            .show_password(id)
             .ok_or_else(|| SecretError::NotFound(id.to_string()))?;
 
         codec::decrypt_password(encrypted.as_bytes(), &self.key)
     }
 
-    pub fn add(&mut self, params: AddSecretEntryParams) -> Result<Uuid> {
+    pub fn insert(&mut self, params: AddSecretEntryParams) -> Result<Uuid> {
         let entry = params.into_entry(&self.key)?;
-        let id = entry.id;
-        self.store.add(entry)?;
-        Ok(id)
+        self.store.insert(entry)
     }
 
     pub fn update(&mut self, id: &Uuid, params: UpdateSecretEntryParams) -> Result {
@@ -95,22 +115,41 @@ impl SecretManager {
     }
 
     pub fn export(&self) -> Result<Vec<u8>> {
-        let snapshot = self.store.snapshot();
-        let serialized = codec::serialize(&snapshot)?;
+        let chunk = wire_mapper::encode_changes(vec![self.store.create_snapshot()]);
+        let serialized = codec::serialize(&chunk)?;
         codec::encrypt(&serialized, &self.key)
     }
 
     pub fn export_changes(&self) -> Result<Vec<u8>> {
-        let changes = self.store.pending_change();
-        let serialized = codec::serialize(&changes)?;
+        let changes: Vec<SecretsChange> = self.store.pending_changes().into_iter().collect();
+        let chunk = wire_mapper::encode_changes(changes);
+        let serialized = codec::serialize(&chunk)?;
         codec::encrypt(&serialized, &self.key)
     }
 
-    pub fn clear_deltas(&mut self) {
-        self.store.clear_deltas()
+    pub fn reset_sync_state(&mut self) {
+        self.store.reset_sync_state();
     }
 
     pub fn lock(self) {
         drop(self);
     }
+}
+
+fn decode_changes(payload: &[u8]) -> Result<Vec<SecretsChange>> {
+    if let Ok(chunk) = codec::deserialize::<SecretsChunkV1>(payload) {
+        return wire_mapper::decode_chunk(chunk);
+    }
+
+    if let Ok(changes) = codec::deserialize::<Vec<SecretsChange>>(payload) {
+        return Ok(changes);
+    }
+
+    if let Ok(maybe_change) = codec::deserialize::<Option<SecretsChange>>(payload) {
+        return Ok(maybe_change.into_iter().collect());
+    }
+
+    Err(SecretError::DeserializationError(
+        "Unable to decode secrets change payload".to_string(),
+    ))
 }

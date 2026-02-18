@@ -2,14 +2,16 @@ use chrono::Utc;
 use openvault_crypto::keys::MasterKey;
 use validator::Validate;
 
-use crate::SecretEntry;
-use crate::domain::entry::SecretEntryPatch;
-use crate::domain::totp::TOTP;
+use crate::domain::secrets::crypto::EncryptedField;
+use crate::domain::secrets::login::{LoginEntry, LoginEntryPatch};
+use crate::domain::secrets::totp::TOTP;
 use crate::errors::{Result, SecretError};
-use crate::manager::{EncryptedField, codec};
+use crate::manager::codec;
 
 #[derive(Debug, Validate)]
 pub struct AddSecretEntryParams {
+    #[validate(length(max = 255))]
+    pub folder: String,
     #[validate(length(min = 1, message = "Name cannot be empty"))]
     pub name: String,
     #[validate(length(min = 1, message = "Username cannot be empty"))]
@@ -25,6 +27,8 @@ pub struct AddSecretEntryParams {
 
 #[derive(Debug, Validate)]
 pub struct UpdateSecretEntryParams {
+    #[validate(length(max = 255))]
+    pub folder: Option<String>,
     #[validate(length(min = 1, message = "Name cannot be empty"))]
     pub name: Option<String>,
     #[validate(length(min = 1, message = "Username cannot be empty"))]
@@ -39,14 +43,15 @@ pub struct UpdateSecretEntryParams {
 }
 
 impl AddSecretEntryParams {
-    pub fn into_entry(self, key: &MasterKey) -> Result<SecretEntry> {
+    pub fn into_entry(self, key: &MasterKey) -> Result<LoginEntry> {
         self.validate()
             .map_err(|e| SecretError::InvalidInput(e.to_string()))?;
 
         let encrypted = codec::encrypt_password(self.password.as_bytes(), key)?;
-        let password = EncryptedField::new(encrypted.into_bytes());
+        let password = EncryptedField::new(encrypted);
 
-        SecretEntry::new(
+        LoginEntry::new(
+            Some(self.folder),
             self.name,
             self.username,
             password,
@@ -58,19 +63,20 @@ impl AddSecretEntryParams {
 }
 
 impl UpdateSecretEntryParams {
-    pub fn into_patch(self, key: &MasterKey) -> Result<SecretEntryPatch> {
+    pub fn into_patch(self, key: &MasterKey) -> Result<LoginEntryPatch> {
         self.validate()
             .map_err(|e| SecretError::InvalidInput(e.to_string()))?;
 
         let password = if let Some(p) = self.password {
             let encrypted = codec::encrypt_password(p.as_bytes(), key)?;
-            Some(EncryptedField::new(encrypted.into_bytes()))
+            Some(EncryptedField::new(encrypted))
         } else {
             None
         };
 
-        Ok(SecretEntryPatch {
+        Ok(LoginEntryPatch {
             name: self.name,
+            folder: self.folder,
             username: self.username,
             password,
             website: self.website,

@@ -10,3 +10,8 @@
 
 - If a React component contains complex logic, extract it into a custom hook. The hook should have the name of the component with a **use** prefix in a separate file.
 - If there is a reusable component, extract it into a separate file somewhere in the `components` directory.
+
+- MUST: Frequently re-evaluate and refactor variable names to be more accurate and descriptive.
+- MUST: Do not type cast ("as") unless absolutely necessary
+  MUST: Remove unused code and don't repeat yourself.
+- MUST: Always search the codebase, think of many solutions, then implement the most elegant solution.

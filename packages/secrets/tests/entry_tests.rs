@@ -1,7 +1,8 @@
 use chrono::Utc;
-use openvault_secrets::SecretEntryPatch;
-use openvault_secrets::domain::entry::{EncryptedField, SecretEntry};
-use openvault_secrets::domain::totp::TOTP;
+use openvault_secrets::LoginEntryPatch;
+use openvault_secrets::domain::secrets::crypto::EncryptedField;
+use openvault_secrets::domain::secrets::login::LoginEntry;
+use openvault_secrets::domain::secrets::totp::TOTP;
 
 fn ef(s: &str) -> EncryptedField {
     EncryptedField::new(s.as_bytes().to_vec())
@@ -9,7 +10,8 @@ fn ef(s: &str) -> EncryptedField {
 
 #[test]
 fn test_secret_entry_update() {
-    let mut entry = SecretEntry::new(
+    let mut entry = LoginEntry::new(
+        Some("personal".into()),
         "service".into(),
         "user1".into(),
         ef("pass1"),
@@ -19,7 +21,8 @@ fn test_secret_entry_update() {
     )
     .unwrap();
 
-    let update = SecretEntryPatch {
+    let update = LoginEntryPatch {
+        folder: Some("work".into()),
         name: Some("service2".into()),
         username: Some("user2".into()),
         password: Some(ef("pass2")),
@@ -34,6 +37,7 @@ fn test_secret_entry_update() {
     entry.patch(update).unwrap();
 
     assert_eq!(entry.username, "user2");
+    assert_eq!(entry.folder, "/work");
     assert_eq!(entry.password, ef("pass2"));
     assert_eq!(entry.website, "site2");
     assert_eq!(entry.comments, "comment2");
@@ -42,7 +46,8 @@ fn test_secret_entry_update() {
 
 #[test]
 fn test_secret_entry_partial_update() {
-    let mut entry = SecretEntry::new(
+    let mut entry = LoginEntry::new(
+        None,
         "service".into(),
         "user1".into(),
         ef("pass1"),
@@ -52,7 +57,7 @@ fn test_secret_entry_partial_update() {
     )
     .unwrap();
 
-    let update = SecretEntryPatch {
+    let update = LoginEntryPatch {
         password: Some(ef("new_pass")),
         ..Default::default()
     };
@@ -65,7 +70,8 @@ fn test_secret_entry_partial_update() {
 
 #[test]
 fn test_secret_entry_remove_totp() {
-    let mut entry = SecretEntry::new(
+    let mut entry = LoginEntry::new(
+        None,
         "service".into(),
         "user".into(),
         ef("pass"),
@@ -77,7 +83,7 @@ fn test_secret_entry_remove_totp() {
 
     assert!(entry.totp.is_some());
 
-    let update = SecretEntryPatch {
+    let update = LoginEntryPatch {
         totp: Some(None),
         ..Default::default()
     };

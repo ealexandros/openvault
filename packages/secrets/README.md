@@ -4,14 +4,13 @@ This package implements the core logic for managing sensitive data, including se
 
 ## Overview
 
-The Secrets package acts as the centralized manager for user credentials and confidential information. It handles encryption/decryption of the vault, secure memory management, and data serialization.
+The Secrets package acts as the centralized manager for user credentials and confidential information. It maps vault bytes into secret domain structs and exports updated bytes for persistence.
 
 ## Key Components
 
 - **Secret Manager**: The primary entry point for interacting with the vault. It handles unlocking, adding, updating, and retrieving secrets.
-- **Store**: An in-memory representation of the vault state, managing snapshots and delta updates for efficient synchronization.
-- **Domain Models**: Strongly typed structures for `SecretEntry`, `TOTP`, and metadata.
-- **Codec**: Handles serialization (using `postcard`) and encryption of the vault data.
+- **Vault**: An in-memory domain aggregate that manages snapshots, deltas, and folder-oriented indexing.
+- **Domain Models**: Strongly typed structures for `SecretEntry`, `TOTP`, metadata, and folders.
 
 ## Usage
 
@@ -19,7 +18,7 @@ The Secrets package acts as the centralized manager for user credentials and con
 
 ```rust
 use openvault_crypto::keys::MasterKey;
-use openvault_secrets::manager::SecretManager;
+use openvault_secrets::SecretManager;
 
 // Unlock an existing vault or create a new one
 let master_key = MasterKey::derive(b"password", &salt)?;
@@ -29,23 +28,30 @@ let manager = SecretManager::unlock(master_key, encrypted_chunks)?;
 ### Manage Secrets
 
 ```rust
+use openvault_crypto::keys::MasterKey;
 use openvault_secrets::manager::params::AddSecretEntryParams;
+use openvault_secrets::SecretManager;
 
-// Add a new secret
-manager.add(AddSecretEntryParams {
-    name: "github.com".to_string(),
-    username: Some("alex".to_string()),
-    password: Some("s3cr3t".to_string()),
-    ..Default::default()
+let key = MasterKey::new([0u8; 32]);
+let mut manager = SecretManager::create(key);
+
+let id = manager.add(AddSecretEntryParams {
+    folder: "/work".to_string(),
+    name: "github".to_string(),
+    username: "alex".to_string(),
+    password: "s3cr3t".to_string(),
+    website: "https://github.com".to_string(),
+    comments: "".to_string(),
+    totp: None,
 })?;
 
 // Retrieve a secret view (safe for UI)
-if let Some(view) = manager.get("github.com") {
+if let Some(view) = manager.get(&id) {
     println!("User: {:?}", view.username);
 }
 
 // Reveal sensitive password (decrypted on demand)
-let password = manager.reveal_password("github.com")?;
+let password = manager.show_password(&id)?;
 ```
 
 ### Export Data
