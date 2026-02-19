@@ -54,7 +54,14 @@ pub trait VersionHandler {
         reader: &mut dyn ReadSeek,
         offset: u64,
         keyring: &Keyring,
-    ) -> Result<(Record, Vec<u8>)>;
+    ) -> Result<Record>;
+
+    fn read_record_payload(
+        &self,
+        reader: &mut dyn ReadSeek,
+        record_offset: u64,
+        keyring: &Keyring,
+    ) -> Result<Vec<u8>>;
 
     /// Replays records from `start_offset` and returns decrypted `(offset, record, payload)` tuples.
     fn replay_from(

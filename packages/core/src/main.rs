@@ -6,12 +6,12 @@ use openvault_core::vault::boot_header::BootHeader;
 use openvault_core::vault::crypto::keyring::Keyring;
 use openvault_core::vault::features::FeatureType;
 use openvault_core::vault::versions::factory::LATEST_VERSION;
-use openvault_core::vault::versions::get_handler;
+use openvault_core::vault::versions::resolve;
 use openvault_core::vault::versions::shared::record::{Record, RecordKind};
 use openvault_crypto::keys::MasterKey;
 
 fn main() -> Result<()> {
-    let handler = get_handler(LATEST_VERSION)?;
+    let handler = resolve(LATEST_VERSION)?;
 
     let mut file = File::options()
         .read(true)
@@ -40,10 +40,11 @@ fn main() -> Result<()> {
         key_epoch: 0,
     };
 
-    let first_offset = handler.append_record(&mut file, &record, b"", &keyring)?;
+    let first_offset = handler.append_record(&mut file, &record, b"aabbcc", &keyring)?;
     handler.append_record(&mut file, &record, b"", &keyring)?;
 
-    let (record, payload) = handler.read_record(&mut file, first_offset, &keyring)?;
+    let record = handler.read_record(&mut file, first_offset, &keyring)?;
+    let payload = handler.read_record_payload(&mut file, first_offset, &keyring)?;
 
     println!("Record: {:#?}", record);
     println!("Payload: {:#?}", payload);
