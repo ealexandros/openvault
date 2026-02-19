@@ -20,6 +20,10 @@ pub trait VersionHandler {
 
     fn read_subheader(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result<Subheader>;
 
+    fn read_blob(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result<Vec<u8>>;
+
+    fn write_blob(&self, writer: &mut dyn WriteSeek, blob: &[u8], keyring: &Keyring) -> Result;
+
     fn write_subheader(
         &self,
         writer: &mut dyn WriteSeek,

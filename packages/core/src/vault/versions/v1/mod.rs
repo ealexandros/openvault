@@ -25,6 +25,14 @@ impl VersionHandler for V1Handler {
         io::read_subheader(reader, keyring)
     }
 
+    fn read_blob(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result<Vec<u8>> {
+        io::read_blob(reader, keyring)
+    }
+
+    fn write_blob(&self, writer: &mut dyn WriteSeek, blob: &[u8], keyring: &Keyring) -> Result {
+        io::write_blob(writer, blob, keyring)
+    }
+
     fn write_subheader(
         &self,
         writer: &mut dyn WriteSeek,

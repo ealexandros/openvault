@@ -4,6 +4,7 @@ pub enum AadDomain {
     Checkpoint,
     Record,
     Payload,
+    Blob,
 }
 
 pub fn encode_aad(domain: AadDomain, offset: u64) -> Vec<u8> {
@@ -14,6 +15,7 @@ pub fn encode_aad(domain: AadDomain, offset: u64) -> Vec<u8> {
         AadDomain::Checkpoint => 2,
         AadDomain::Record => 3,
         AadDomain::Payload => 4,
+        AadDomain::Blob => 5,
     });
     aad.extend_from_slice(&offset.to_le_bytes());
 
