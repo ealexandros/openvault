@@ -66,8 +66,17 @@ impl VersionHandler for V1Handler {
         reader: &mut dyn ReadSeek,
         record_offset: u64,
         keyring: &Keyring,
-    ) -> Result<(Record, Vec<u8>)> {
+    ) -> Result<Record> {
         io::read_record(reader, record_offset, keyring)
+    }
+
+    fn read_record_payload(
+        &self,
+        reader: &mut dyn ReadSeek,
+        record_offset: u64,
+        keyring: &Keyring,
+    ) -> Result<Vec<u8>> {
+        io::read_record_payload(reader, record_offset, keyring)
     }
 
     fn replay_from(

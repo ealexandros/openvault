@@ -5,9 +5,7 @@ use openvault_crypto::encryption::Nonce;
 use crate::errors::{Error, Result};
 use crate::vault::crypto::envelope::Envelope;
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::frame::{
-    FRAME_HEADER_SIZE, FrameHeader, read_frame, read_frame_payload, write_frame,
-};
+use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::shared::traits::{ReadSeek, WriteSeek};
 use crate::vault::versions::v1::io::aad::{AadDomain, encode_aad};
@@ -23,38 +21,69 @@ pub fn append_record(
     let mut subheader = read_subheader_from_rw(writer, keyring)?;
     let offset = writer.seek(SeekFrom::End(0))?;
 
-    let nonce = Nonce::random();
     let envelope = Envelope::default();
     let envelope_key = keyring.envelope_key_bytes();
 
-    let aad = encode_aad(AadDomain::Record, offset);
+    // 1. Write Record Header Frame
+    let record_nonce = Nonce::random();
+    let record_aad = encode_aad(AadDomain::Record, offset);
+    let record_wire = encode_record(record)?;
+    let record_ciphertext =
+        envelope.seal_bytes(&record_wire, envelope_key, &record_nonce, &record_aad)?;
+    write_frame(writer, &record_nonce, &record_ciphertext)?;
 
-    let record_wire = encode_record(record, payload)?;
-    let ciphertext = envelope.seal_bytes(&record_wire, envelope_key, &nonce, &aad)?;
+    // 2. Write Payload Frame
+    let payload_offset = writer.seek(SeekFrom::Current(0))?;
+    let payload_nonce = Nonce::random();
+    let payload_aad = encode_aad(AadDomain::Payload, payload_offset);
+    let payload_ciphertext =
+        envelope.seal_bytes(payload, envelope_key, &payload_nonce, &payload_aad)?;
+    write_frame(writer, &payload_nonce, &payload_ciphertext)?;
 
-    write_frame(writer, &nonce, &ciphertext)?;
     subheader.delta_offset = offset;
     write_subheader(writer, &subheader, keyring)?;
 
     Ok(offset)
 }
 
-pub fn read_record(
-    reader: &mut dyn ReadSeek,
-    offset: u64,
-    keyring: &Keyring,
-) -> Result<(Record, Vec<u8>)> {
+pub fn read_record(reader: &mut dyn ReadSeek, offset: u64, keyring: &Keyring) -> Result<Record> {
     reader.seek(SeekFrom::Start(offset))?;
-
-    let (frame, ciphertext) = read_frame(reader)?;
 
     let envelope = Envelope::default();
     let envelope_key = keyring.envelope_key_bytes();
-    let aad = encode_aad(AadDomain::Record, offset);
 
-    let record_wire = envelope.open_bytes(&ciphertext, envelope_key, &frame.nonce, &aad)?;
+    // Read Record Header
+    let (header_frame, record_ciphertext) = read_frame(reader)?;
+    let record_aad = encode_aad(AadDomain::Record, offset);
+    let record_wire = envelope.open_bytes(
+        &record_ciphertext,
+        envelope_key,
+        &header_frame.nonce,
+        &record_aad,
+    )?;
 
     decode_record(&record_wire)
+}
+
+pub fn read_record_payload(
+    reader: &mut dyn ReadSeek,
+    _record_offset: u64,
+    keyring: &Keyring,
+) -> Result<Vec<u8>> {
+    let envelope = Envelope::default();
+    let envelope_key = keyring.envelope_key_bytes();
+
+    // Read Payload
+    let payload_offset = reader.seek(SeekFrom::Current(0))?;
+    let (payload_frame, payload_ciphertext) = read_frame(reader)?;
+    let payload_aad = encode_aad(AadDomain::Payload, payload_offset);
+
+    envelope.open_bytes(
+        &payload_ciphertext,
+        envelope_key,
+        &payload_frame.nonce,
+        &payload_aad,
+    )
 }
 
 pub fn replay_from(
@@ -75,25 +104,31 @@ pub fn replay_from(
     let mut out = Vec::new();
 
     while reader.seek(SeekFrom::Current(0))? < end_offset {
-        let frame_offset = reader.seek(SeekFrom::Current(0))?;
-        let remaining = end_offset.saturating_sub(frame_offset);
-        if remaining < FRAME_HEADER_SIZE as u64 {
-            return Err(Error::InvalidVaultFormat);
-        }
+        let record_offset = reader.seek(SeekFrom::Current(0))?;
 
-        let frame = FrameHeader::read_from(reader)?;
-        let frame_total_size = FRAME_HEADER_SIZE as u64 + frame.size as u64;
-        if frame_offset + frame_total_size > end_offset {
-            return Err(Error::InvalidVaultFormat);
-        }
+        // 1. Read Record Header
+        let (header_frame, record_ciphertext) = read_frame(reader)?;
+        let record_aad = encode_aad(AadDomain::Record, record_offset);
+        let record_wire = envelope.open_bytes(
+            &record_ciphertext,
+            envelope_key,
+            &header_frame.nonce,
+            &record_aad,
+        )?;
+        let record = decode_record(&record_wire)?;
 
-        let ciphertext = read_frame_payload(reader, frame.size)?;
-        let aad = encode_aad(AadDomain::Record, frame_offset);
+        // 2. Read Payload
+        let payload_offset = reader.seek(SeekFrom::Current(0))?;
+        let (payload_frame, payload_ciphertext) = read_frame(reader)?;
+        let payload_aad = encode_aad(AadDomain::Payload, payload_offset);
+        let payload = envelope.open_bytes(
+            &payload_ciphertext,
+            envelope_key,
+            &payload_frame.nonce,
+            &payload_aad,
+        )?;
 
-        let record_wire = envelope.open_bytes(&ciphertext, envelope_key, &frame.nonce, &aad)?;
-
-        let (record, payload) = decode_record(&record_wire)?;
-        out.push((frame_offset, record, payload));
+        out.push((record_offset, record, payload));
     }
 
     Ok(out)
@@ -108,7 +143,7 @@ mod tests {
     use crate::vault::versions::shared::record::{Record, RecordKind};
     use crate::vault::versions::v1::io::init_layout;
 
-    use super::{append_record, read_record, replay_from};
+    use super::{append_record, read_record, read_record_payload, replay_from};
 
     fn test_keyring() -> Keyring {
         let salt = openvault_crypto::keys::random_salt();
@@ -134,8 +169,10 @@ mod tests {
 
         let offset =
             append_record(&mut io, &record, &payload, &keyring).expect("append should succeed");
-        let (decoded_record, decoded_payload) =
-            read_record(&mut io, offset, &keyring).expect("read should succeed");
+        let decoded_record =
+            read_record(&mut io, offset, &keyring).expect("read record should succeed");
+        let decoded_payload =
+            read_record_payload(&mut io, offset, &keyring).expect("read payload should succeed");
 
         assert_eq!(decoded_record, record);
         assert_eq!(decoded_payload, payload);
@@ -151,7 +188,7 @@ mod tests {
         let payload_b = b"BB".to_vec();
 
         let record_a = Record {
-            kind: RecordKind::Snapshot,
+            kind: RecordKind::Delta,
             feature_id: FeatureType::Secrets,
             payload_version: 1,
             sequence: 1,

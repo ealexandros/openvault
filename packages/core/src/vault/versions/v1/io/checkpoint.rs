@@ -7,7 +7,7 @@ use crate::vault::crypto::envelope::Envelope;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::traits::{ReadSeek, WriteSeek};
-use crate::vault::versions::v1::io::aad::{encode_aad, AadDomain};
+use crate::vault::versions::v1::io::aad::{AadDomain, encode_aad};
 use crate::vault::versions::v1::io::subheader::{read_subheader_from_rw, write_subheader};
 
 pub fn read_checkpoint(
@@ -59,7 +59,7 @@ mod tests {
 
     use super::{read_checkpoint, write_checkpoint};
     use crate::vault::versions::v1::io::init_layout;
-    use crate::vault::versions::v1::io::record::{append_record, read_record};
+    use crate::vault::versions::v1::io::record::{append_record, read_record, read_record_payload};
     use crate::vault::versions::v1::io::subheader::read_subheader;
 
     fn test_keyring() -> Keyring {
@@ -94,8 +94,10 @@ mod tests {
         assert_eq!(subheader.delta_offset, record_offset);
         assert_eq!(subheader.checkpoint_offset, checkpoint_offset);
 
-        let (decoded_record, decoded_payload) =
+        let decoded_record =
             read_record(&mut io, subheader.delta_offset, &keyring).expect("read record");
+        let decoded_payload =
+            read_record_payload(&mut io, subheader.delta_offset, &keyring).expect("read payload");
         assert_eq!(decoded_record, record);
         assert_eq!(decoded_payload, payload);
 

@@ -4,7 +4,7 @@ pub mod record;
 pub mod subheader;
 
 pub use checkpoint::{read_checkpoint, write_checkpoint};
-pub use record::{append_record, read_record, replay_from};
+pub use record::{append_record, read_record, read_record_payload, replay_from};
 pub use subheader::{read_subheader, write_subheader};
 
 use crate::errors::Result;

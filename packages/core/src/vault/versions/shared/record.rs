@@ -5,9 +5,8 @@ use crate::vault::features::FeatureType;
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum RecordKind {
-    Snapshot = 1,
-    Delta = 2,
-    Blob = 3,
+    Delta = 1,
+    Blob = 2,
 }
 
 impl From<RecordKind> for u8 {
