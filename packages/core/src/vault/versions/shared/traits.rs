@@ -63,13 +63,13 @@ pub trait VersionHandler {
         keyring: &Keyring,
     ) -> Result<Vec<u8>>;
 
-    /// Replays records from `start_offset` and returns decrypted `(offset, record, payload)` tuples.
+    /// Replays records from `start_offset` and performs an action (e.g. printing or rebuilding state).
     fn replay_from(
         &self,
         reader: &mut dyn ReadSeek,
         start_offset: u64,
         keyring: &Keyring,
-    ) -> Result<Vec<(u64, Record, Vec<u8>)>>;
+    ) -> Result;
 
     /// Rewrites the vault into `writer` and returns the resulting subheader.
     fn compact(

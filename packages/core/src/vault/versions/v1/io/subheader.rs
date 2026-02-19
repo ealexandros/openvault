@@ -20,7 +20,7 @@ pub fn write_subheader(writer: &mut dyn WriteSeek, data: &Subheader, keyring: &K
     let aad = encode_aad(AadDomain::Subheader, SUBHEADER_OFFSET);
     let key = keyring.envelope_key_bytes();
 
-    let ciphertext = cipher.encrypt(key, &nonce, &data.to_bytes(), &aad)?;
+    let ciphertext = cipher.encrypt(key, &nonce, &data.to_bytes()?, &aad)?;
 
     writer.seek(SeekFrom::Start(SUBHEADER_OFFSET))?;
     write_frame(writer, &nonce, &ciphertext)

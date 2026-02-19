@@ -9,6 +9,7 @@ use crate::vault::versions::factory::LATEST_VERSION;
 pub const VAULT_MAGIC: &[u8; 6] = b"OPENV0";
 pub const VAULT_MAGIC_SIZE: usize = VAULT_MAGIC.len();
 pub const CRC_SIZE: usize = 4;
+
 pub const VAULT_PAYLOAD_SIZE: usize = size_of::<BootHeader>();
 pub const VAULT_TOTAL_SIZE: usize = VAULT_PAYLOAD_SIZE + CRC_SIZE;
 
@@ -74,6 +75,7 @@ impl BootHeader {
 
     pub fn read_from<R: Seek + Read>(reader: &mut R) -> Result<Self> {
         reader.seek(SeekFrom::Start(0))?;
+
         let mut buffer = [0u8; VAULT_TOTAL_SIZE];
         reader.read_exact(&mut buffer)?;
         Self::from_bytes(&buffer)
