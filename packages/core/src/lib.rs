@@ -1,4 +1,4 @@
 pub mod errors;
-pub mod vault;
-
+pub mod features;
 pub mod internal;
+pub mod vault;
