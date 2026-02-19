@@ -30,23 +30,29 @@ fn main() -> Result<()> {
 
     handler.init_layout(&mut file, &keyring)?;
 
-    let record = Record {
+    let record1 = Record {
         kind: RecordKind::Delta,
-        feature_id: FeatureType::Filesystem,
+        feature_id: FeatureType::Notes,
         payload_version: 1,
         sequence: 1,
         prev_offset: 0,
         key_epoch: 0,
     };
 
-    let first_offset = handler.append_record(&mut file, &record, b"aabbcc", &keyring)?;
-    // handler.append_record(&mut file, &record, b"", &keyring)?;
+    let first_offset = handler.append_record(&mut file, &record1, b"aabbcc", &keyring)?;
 
-    // let record = handler.read_record(&mut file, first_offset, &keyring)?;
-    let payload = handler.read_record_payload(&mut file, first_offset, &keyring)?;
+    let record2 = Record {
+        kind: RecordKind::Delta,
+        feature_id: FeatureType::Filesystem,
+        payload_version: 1,
+        sequence: 1,
+        prev_offset: first_offset,
+        key_epoch: 200,
+    };
 
-    // println!("Record: {:#?}", record);
-    println!("Payload: {:#?}", payload);
+    let second_offset = handler.append_record(&mut file, &record2, b"", &keyring)?;
+
+    let _ = handler.replay_from(&mut file, second_offset, &keyring);
 
     Ok(())
 }

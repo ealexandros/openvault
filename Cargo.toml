@@ -13,6 +13,7 @@ openvault-core = { path = "packages/core" }
 openvault-crypto = { path = "packages/crypto" }
 openvault-secrets = { path = "packages/secrets" }
 openvault-sdk = { path = "packages/sdk" }
+byteorder = { version = "1.5.0" }
 chrono = { version = "0.4.43", features = ["serde"] }
 strum = "0.27.2"
 strum_macros = "0.27.2"

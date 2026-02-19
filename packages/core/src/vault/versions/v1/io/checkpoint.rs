@@ -90,13 +90,13 @@ mod tests {
             write_checkpoint(&mut io, &checkpoint_payload, &keyring).expect("write checkpoint");
 
         let subheader = read_subheader(&mut io, &keyring).expect("read subheader");
-        assert_eq!(subheader.delta_offset, record_offset);
+        assert_eq!(subheader.tail_record_offset, record_offset);
         assert_eq!(subheader.checkpoint_offset, checkpoint_offset);
 
         let decoded_record =
-            read_record(&mut io, subheader.delta_offset, &keyring).expect("read record");
-        let decoded_payload =
-            read_record_payload(&mut io, subheader.delta_offset, &keyring).expect("read payload");
+            read_record(&mut io, subheader.tail_record_offset, &keyring).expect("read record");
+        let decoded_payload = read_record_payload(&mut io, subheader.tail_record_offset, &keyring)
+            .expect("read payload");
         assert_eq!(decoded_record, record);
         assert_eq!(decoded_payload, payload);
 
