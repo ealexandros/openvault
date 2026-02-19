@@ -48,12 +48,18 @@ pub fn append_record(
     let mut subheader = read_subheader_from_rw(writer, keyring)?;
     writer.seek(SeekFrom::End(0))?;
 
-    let record_wire = encode_record(record)?;
+    let mut record = record.clone();
+
+    record.sequence = subheader.last_sequence + 1;
+    record.prev_offset = subheader.tail_record_offset;
+
+    let record_wire = encode_record(&record)?;
     let record_offset = seal_frame(writer, AadDomain::Record, &record_wire, keyring)?;
 
     seal_frame(writer, AadDomain::Payload, payload, keyring)?;
 
     subheader.tail_record_offset = record_offset;
+    subheader.last_sequence += 1;
     write_subheader(writer, &subheader, keyring)?;
 
     Ok(record_offset)

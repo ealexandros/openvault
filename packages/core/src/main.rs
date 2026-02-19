@@ -39,20 +39,24 @@ fn main() -> Result<()> {
         key_epoch: 0,
     };
 
-    let first_offset = handler.append_record(&mut file, &record1, b"aabbcc", &keyring)?;
+    handler.append_record(&mut file, &record1, b"aabbcc", &keyring)?;
 
     let record2 = Record {
         kind: RecordKind::Delta,
         feature_id: FeatureType::Filesystem,
         payload_version: 1,
         sequence: 1,
-        prev_offset: first_offset,
+        prev_offset: 0,
         key_epoch: 200,
     };
 
     let _ = handler.append_record(&mut file, &record2, b"", &keyring)?;
 
     let _ = handler.replay(&mut file, &keyring);
+
+    let header = handler.read_subheader(&mut file, &keyring)?;
+
+    println!("{:?}", header);
 
     Ok(())
 }
