@@ -80,7 +80,6 @@ mod tests {
             payload_version: 1,
             sequence: 1,
             prev_offset: 0,
-            payload_size: payload.len() as u32,
             key_epoch: 0,
         };
 

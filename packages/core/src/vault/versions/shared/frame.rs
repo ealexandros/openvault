@@ -1,10 +1,10 @@
 use std::io::{Read, Write};
 
-use openvault_crypto::encryption::{NONCE_SIZE, Nonce};
+use openvault_crypto::encryption::Nonce;
 
 use crate::errors::{Error, Result};
 
-pub const FRAME_HEADER_SIZE: usize = 4 + NONCE_SIZE;
+pub const FRAME_HEADER_SIZE: usize = size_of::<FrameHeader>();
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FrameHeader {
@@ -72,5 +72,6 @@ pub fn write_frame<W: Write + ?Sized>(writer: &mut W, nonce: &Nonce, ciphertext:
     let header = FrameHeader::new(ciphertext.len() as u32, *nonce);
     header.write_to(writer)?;
     writer.write_all(ciphertext)?;
+
     Ok(())
 }
