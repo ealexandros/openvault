@@ -1,6 +1,7 @@
 pub mod checkpoint;
 pub mod io;
 pub mod mapper;
+pub mod replay;
 
 use crate::errors::{Error, Result};
 use crate::vault::crypto::keyring::Keyring;
@@ -79,13 +80,8 @@ impl VersionHandler for V1Handler {
         io::read_record_payload(reader, record_offset, keyring)
     }
 
-    fn replay_from(
-        &self,
-        reader: &mut dyn ReadSeek,
-        start_offset: u64,
-        keyring: &Keyring,
-    ) -> Result<Vec<(u64, Record, Vec<u8>)>> {
-        io::replay_from(reader, start_offset, keyring)
+    fn replay(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result {
+        replay::replay_state(reader, keyring)
     }
 
     fn compact(

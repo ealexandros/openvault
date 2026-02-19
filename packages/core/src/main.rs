@@ -50,9 +50,9 @@ fn main() -> Result<()> {
         key_epoch: 200,
     };
 
-    let second_offset = handler.append_record(&mut file, &record2, b"", &keyring)?;
+    let _ = handler.append_record(&mut file, &record2, b"", &keyring)?;
 
-    let _ = handler.replay_from(&mut file, second_offset, &keyring);
+    let _ = handler.replay(&mut file, &keyring);
 
     Ok(())
 }
