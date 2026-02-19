@@ -2,7 +2,7 @@ use std::io::{Read, Seek, Write};
 
 use crate::errors::Result;
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::record::Record;
+use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
 
 pub trait ReadSeek: Read + Seek {}
@@ -48,7 +48,7 @@ pub trait VersionHandler {
     fn append_record(
         &self,
         writer: &mut dyn WriteSeek,
-        record: &Record,
+        record: &RecordHeader,
         payload: &[u8],
         keyring: &Keyring,
     ) -> Result<u64>;
@@ -58,14 +58,7 @@ pub trait VersionHandler {
         reader: &mut dyn ReadSeek,
         offset: u64,
         keyring: &Keyring,
-    ) -> Result<Record>;
-
-    fn read_record_payload(
-        &self,
-        reader: &mut dyn ReadSeek,
-        offset: u64,
-        keyring: &Keyring,
-    ) -> Result<Vec<u8>>;
+    ) -> Result<(RecordHeader, Vec<u8>)>;
 
     fn replay(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result;
 

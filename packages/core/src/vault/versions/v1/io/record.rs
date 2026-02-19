@@ -1,6 +1,6 @@
 use crate::errors::Result;
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::record::Record;
+use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::traits::{ReadSeek, WriteSeek};
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
@@ -10,7 +10,7 @@ use std::io::SeekFrom;
 
 pub fn append_record(
     writer: &mut dyn WriteSeek,
-    record: &Record,
+    record: &RecordHeader,
     payload: &[u8],
     keyring: &Keyring,
 ) -> Result<u64> {
@@ -22,10 +22,8 @@ pub fn append_record(
     record.sequence = subheader.last_sequence + 1;
     record.prev_record_offset = subheader.tail_record_offset;
 
-    let record_wire = encode_record(&record)?;
+    let record_wire = encode_record(&record, payload)?;
     let record_offset = seal_frame(writer, AadDomain::Record, &record_wire, keyring)?;
-
-    seal_frame(writer, AadDomain::Payload, payload, keyring)?;
 
     subheader.tail_record_offset = record_offset;
     subheader.last_sequence += 1;
@@ -34,19 +32,15 @@ pub fn append_record(
     Ok(record_offset)
 }
 
-pub fn read_record(reader: &mut dyn ReadSeek, offset: u64, keyring: &Keyring) -> Result<Record> {
-    reader.seek(SeekFrom::Start(offset))?;
-    let record_wire = open_frame(reader, AadDomain::Record, keyring)?;
-    decode_record(&record_wire)
-}
-
-pub fn read_record_payload(
+pub fn read_record(
     reader: &mut dyn ReadSeek,
     offset: u64,
     keyring: &Keyring,
-) -> Result<Vec<u8>> {
-    read_record(reader, offset, keyring)?;
-    open_frame(reader, AadDomain::Payload, keyring)
+) -> Result<(RecordHeader, Vec<u8>)> {
+    reader.seek(SeekFrom::Start(offset))?;
+    let record_wire = open_frame(reader, AadDomain::Record, keyring)?;
+    let (record, payload) = decode_record(&record_wire)?;
+    Ok((record, payload))
 }
 
 pub struct RecordIterator<'a> {
@@ -64,14 +58,13 @@ impl<'a> RecordIterator<'a> {
         }
     }
 
-    fn next_internal(&mut self) -> Result<Option<(u64, Record, Vec<u8>)>> {
+    fn next_internal(&mut self) -> Result<Option<(u64, RecordHeader, Vec<u8>)>> {
         if self.current_offset == 0 {
             return Ok(None);
         }
 
         let offset = self.current_offset;
-        let record = read_record(self.reader, offset, self.keyring)?;
-        let payload = open_frame(self.reader, AadDomain::Payload, self.keyring)?;
+        let (record, payload) = read_record(self.reader, offset, self.keyring)?;
 
         self.current_offset = record.prev_record_offset;
         Ok(Some((offset, record, payload)))
@@ -79,7 +72,7 @@ impl<'a> RecordIterator<'a> {
 }
 
 impl<'a> Iterator for RecordIterator<'a> {
-    type Item = Result<(u64, Record, Vec<u8>)>;
+    type Item = Result<(u64, RecordHeader, Vec<u8>)>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next_internal().transpose()

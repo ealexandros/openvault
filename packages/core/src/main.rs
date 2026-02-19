@@ -7,7 +7,7 @@ use openvault_core::vault::crypto::keyring::Keyring;
 use openvault_core::vault::features::FeatureType;
 use openvault_core::vault::versions;
 use openvault_core::vault::versions::factory::LATEST_VERSION;
-use openvault_core::vault::versions::shared::record::Record;
+use openvault_core::vault::versions::shared::record::RecordHeader;
 use openvault_crypto::keys::MasterKey;
 
 fn main() -> Result<()> {
@@ -30,22 +30,20 @@ fn main() -> Result<()> {
 
     handler.init_layout(&mut file, &keyring)?;
 
-    let record1 = Record {
+    let record1 = RecordHeader {
         feature_id: FeatureType::Notes,
         version: 1,
         sequence: 1,
         prev_record_offset: 0,
-        payload: vec![],
     };
 
     handler.append_record(&mut file, &record1, b"aabbcc", &keyring)?;
 
-    let record2 = Record {
+    let record2 = RecordHeader {
         feature_id: FeatureType::Filesystem,
         version: 1,
         sequence: 1,
         prev_record_offset: 0,
-        payload: vec![],
     };
 
     let _ = handler.append_record(&mut file, &record2, b"", &keyring)?;

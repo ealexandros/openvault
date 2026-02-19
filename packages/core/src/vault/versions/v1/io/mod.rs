@@ -7,7 +7,7 @@ pub mod subheader;
 
 pub use blob::{read_blob, write_blob};
 pub use checkpoint::{read_checkpoint, write_checkpoint};
-pub use record::{append_record, read_record, read_record_payload};
+pub use record::{append_record, read_record};
 pub use subheader::{read_subheader, write_subheader};
 
 use crate::errors::Result;

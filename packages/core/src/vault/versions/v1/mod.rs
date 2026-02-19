@@ -5,7 +5,7 @@ pub mod replay;
 
 use crate::errors::{Error, Result};
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::record::Record;
+use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::{ReadSeek, VersionHandler, WriteSeek};
 
@@ -63,7 +63,7 @@ impl VersionHandler for V1Handler {
     fn append_record(
         &self,
         writer: &mut dyn WriteSeek,
-        record: &Record,
+        record: &RecordHeader,
         payload_plaintext: &[u8],
         keyring: &Keyring,
     ) -> Result<u64> {
@@ -75,17 +75,8 @@ impl VersionHandler for V1Handler {
         reader: &mut dyn ReadSeek,
         record_offset: u64,
         keyring: &Keyring,
-    ) -> Result<Record> {
+    ) -> Result<(RecordHeader, Vec<u8>)> {
         io::read_record(reader, record_offset, keyring)
-    }
-
-    fn read_record_payload(
-        &self,
-        reader: &mut dyn ReadSeek,
-        record_offset: u64,
-        keyring: &Keyring,
-    ) -> Result<Vec<u8>> {
-        io::read_record_payload(reader, record_offset, keyring)
     }
 
     fn replay(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result {
