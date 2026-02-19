@@ -1,4 +1,5 @@
 use argon2::password_hash::rand_core::{OsRng, RngCore};
+use std::io::Read;
 
 use crate::errors::{Error, Result};
 
@@ -9,8 +10,14 @@ pub const NONCE_SIZE: usize = 24;
 pub struct Nonce([u8; NONCE_SIZE]);
 
 impl Nonce {
-    pub const fn new(bytes: [u8; NONCE_SIZE]) -> Self {
+    pub fn new(bytes: [u8; NONCE_SIZE]) -> Self {
         Self(bytes)
+    }
+
+    pub fn read_from<R: Read + ?Sized>(reader: &mut R) -> Result<Self> {
+        let mut bytes = [0u8; NONCE_SIZE];
+        reader.read_exact(&mut bytes)?;
+        Ok(Self(bytes))
     }
 
     pub fn random() -> Self {
@@ -40,17 +47,13 @@ impl Nonce {
 
     pub fn increment(&mut self) {
         for byte in self.0.iter_mut().rev() {
-            *byte = byte.wrapping_add(1);
+            let (new, overflow) = byte.overflowing_add(1);
 
-            if *byte != 0 {
+            *byte = new;
+
+            if !overflow {
                 break;
             }
         }
-    }
-}
-
-impl From<[u8; NONCE_SIZE]> for Nonce {
-    fn from(value: [u8; NONCE_SIZE]) -> Self {
-        Self(value)
     }
 }

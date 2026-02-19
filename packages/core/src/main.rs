@@ -5,20 +5,20 @@ use openvault_core::errors::Result;
 use openvault_core::vault::boot_header::BootHeader;
 use openvault_core::vault::crypto::keyring::Keyring;
 use openvault_core::vault::features::FeatureType;
+use openvault_core::vault::versions;
 use openvault_core::vault::versions::factory::LATEST_VERSION;
-use openvault_core::vault::versions::resolve;
 use openvault_core::vault::versions::shared::record::{Record, RecordKind};
 use openvault_crypto::keys::MasterKey;
 
 fn main() -> Result<()> {
-    let handler = resolve(LATEST_VERSION)?;
+    let handler = versions::resolve_latest()?;
 
     let mut file = File::options()
         .read(true)
         .write(true)
         .create(true)
         .truncate(true)
-        .open("vault.ov")?;
+        .open("./temp/vault.ov")?;
 
     let (password, salt) = MasterKey::derive_with_random_salt(b"password")?;
 
