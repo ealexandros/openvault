@@ -2,7 +2,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 
 use crate::errors::{Error, Result};
 
-pub const SUBHEADER_SIZE: usize = 16;
+pub const SUBHEADER_SIZE: usize = size_of::<Subheader>();
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Subheader {

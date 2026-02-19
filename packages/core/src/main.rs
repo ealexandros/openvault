@@ -36,17 +36,16 @@ fn main() -> Result<()> {
         payload_version: 1,
         sequence: 1,
         prev_offset: 0,
-        payload_size: 0,
         key_epoch: 0,
     };
 
     let first_offset = handler.append_record(&mut file, &record, b"aabbcc", &keyring)?;
-    handler.append_record(&mut file, &record, b"", &keyring)?;
+    // handler.append_record(&mut file, &record, b"", &keyring)?;
 
-    let record = handler.read_record(&mut file, first_offset, &keyring)?;
+    // let record = handler.read_record(&mut file, first_offset, &keyring)?;
     let payload = handler.read_record_payload(&mut file, first_offset, &keyring)?;
 
-    println!("Record: {:#?}", record);
+    // println!("Record: {:#?}", record);
     println!("Payload: {:#?}", payload);
 
     Ok(())

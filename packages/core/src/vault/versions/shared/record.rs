@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
+use std::mem::size_of;
 
 use crate::vault::features::FeatureType;
+
+pub const RECORD_SIZE: usize = size_of::<Record>();
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -22,7 +25,7 @@ pub struct Record {
     pub payload_version: u16,
     pub sequence: u64,
     pub prev_offset: u64,
-    pub payload_size: u32,
     // @todo-soon not used yet
+    // pub payload_size: u32,
     pub key_epoch: u16,
 }

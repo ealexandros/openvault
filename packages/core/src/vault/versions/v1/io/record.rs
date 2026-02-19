@@ -5,7 +5,7 @@ use openvault_crypto::encryption::Nonce;
 use crate::errors::{Error, Result};
 use crate::vault::crypto::envelope::Envelope;
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::frame::{read_frame, write_frame};
+use crate::vault::versions::shared::frame::{FrameHeader, read_frame, write_frame};
 use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::shared::traits::{ReadSeek, WriteSeek};
 use crate::vault::versions::v1::io::aad::{AadDomain, encode_aad};
@@ -24,7 +24,6 @@ pub fn append_record(
     let envelope = Envelope::default();
     let envelope_key = keyring.envelope_key_bytes();
 
-    // 1. Write Record Header Frame
     let record_nonce = Nonce::random();
     let record_aad = encode_aad(AadDomain::Record, offset);
     let record_wire = encode_record(record)?;
@@ -32,7 +31,6 @@ pub fn append_record(
         envelope.seal_bytes(&record_wire, envelope_key, &record_nonce, &record_aad)?;
     write_frame(writer, &record_nonce, &record_ciphertext)?;
 
-    // 2. Write Payload Frame
     let payload_offset = writer.seek(SeekFrom::Current(0))?;
     let payload_nonce = Nonce::random();
     let payload_aad = encode_aad(AadDomain::Payload, payload_offset);
@@ -52,7 +50,6 @@ pub fn read_record(reader: &mut dyn ReadSeek, offset: u64, keyring: &Keyring) ->
     let envelope = Envelope::default();
     let envelope_key = keyring.envelope_key_bytes();
 
-    // Read Record Header
     let (header_frame, record_ciphertext) = read_frame(reader)?;
     let record_aad = encode_aad(AadDomain::Record, offset);
     let record_wire = envelope.open_bytes(
@@ -67,16 +64,22 @@ pub fn read_record(reader: &mut dyn ReadSeek, offset: u64, keyring: &Keyring) ->
 
 pub fn read_record_payload(
     reader: &mut dyn ReadSeek,
-    _record_offset: u64,
+    record_offset: u64,
     keyring: &Keyring,
 ) -> Result<Vec<u8>> {
+    reader.seek(SeekFrom::Start(record_offset))?;
+
+    let record_frame = FrameHeader::read_from(reader)?;
+
+    reader.seek(SeekFrom::Current(record_frame.size.into()))?;
+
+    let payload_offset = reader.stream_position()?;
+    let payload_aad = encode_aad(AadDomain::Payload, payload_offset);
+
+    let (payload_frame, payload_ciphertext) = read_frame(reader)?;
+
     let envelope = Envelope::default();
     let envelope_key = keyring.envelope_key_bytes();
-
-    // Read Payload
-    let payload_offset = reader.seek(SeekFrom::Current(0))?;
-    let (payload_frame, payload_ciphertext) = read_frame(reader)?;
-    let payload_aad = encode_aad(AadDomain::Payload, payload_offset);
 
     envelope.open_bytes(
         &payload_ciphertext,
@@ -163,7 +166,6 @@ mod tests {
             payload_version: 1,
             sequence: 1,
             prev_offset: 0,
-            payload_size: payload.len() as u32,
             key_epoch: 0,
         };
 
@@ -193,7 +195,6 @@ mod tests {
             payload_version: 1,
             sequence: 1,
             prev_offset: 0,
-            payload_size: payload_a.len() as u32,
             key_epoch: 0,
         };
 
@@ -203,7 +204,6 @@ mod tests {
             payload_version: 1,
             sequence: 2,
             prev_offset: 0,
-            payload_size: payload_b.len() as u32,
             key_epoch: 0,
         };
 
