@@ -3,7 +3,6 @@ members = [
   "apps/desktop/src-tauri",
   "packages/crypto",
   "packages/core",
-  "packages/secrets", 
   "packages/sdk"
 ]
 resolver = "3"
@@ -11,7 +10,6 @@ resolver = "3"
 [workspace.dependencies]
 openvault-core = { path = "packages/core" }
 openvault-crypto = { path = "packages/crypto" }
-openvault-secrets = { path = "packages/secrets" }
 openvault-sdk = { path = "packages/sdk" }
 byteorder = { version = "1.5.0" }
 chrono = { version = "0.4.43", features = ["serde"] }
