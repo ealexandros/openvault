@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 
 use openvault_core::errors::Result;
 use openvault_core::vault::boot_header::BootHeader;
@@ -44,6 +44,20 @@ fn main() -> Result<()> {
 
     let header = handler.read_subheader(&mut file, &keyring)?;
 
+    let mut blob = File::options()
+        .read(true)
+        .write(true)
+        .open("./temp/in.txt")?;
+
+    let mut blob_bytes = Vec::new();
+
+    blob.read_to_end(&mut blob_bytes)?;
+
+    let blob_ref = handler.write_blob(&mut file, &blob_bytes, &keyring)?;
+    let blob = handler.read_blob(&mut file, &blob_ref, &keyring)?;
+
+    println!("{:?}", blob_ref);
+    println!("{:?}", String::from_utf8(blob).unwrap());
     println!("{:?}", header);
 
     Ok(())

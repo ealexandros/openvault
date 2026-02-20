@@ -148,4 +148,18 @@ mod tests {
 
         assert_eq!(restored, payload);
     }
+
+    #[test]
+    fn blob_roundtrip_small() {
+        let keyring = test_keyring();
+        let mut io = Cursor::new(Vec::new());
+        init_layout(&mut io, &keyring).expect("init layout");
+
+        let payload = vec![1, 2, 3, 4, 5];
+
+        let blob_ref = write_blob(&mut io, &payload, &keyring).expect("write blob");
+        let restored = read_blob(&mut io, &blob_ref, &keyring).expect("read blob");
+
+        assert_eq!(restored, payload);
+    }
 }
