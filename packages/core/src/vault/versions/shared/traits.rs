@@ -1,4 +1,5 @@
 use crate::errors::Result;
+use crate::features::blob_ref::BlobRef;
 use crate::internal::io_ext::{Reader, Rw, Writer};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
@@ -12,9 +13,14 @@ pub trait VersionHandler {
 
     fn read_subheader(&self, reader: &mut Reader, keyring: &Keyring) -> Result<Subheader>;
 
-    fn read_blob_at(&self, reader: &mut Reader, offset: u64, keyring: &Keyring) -> Result<Vec<u8>>;
+    fn read_blob(
+        &self,
+        reader: &mut Reader,
+        blob_ref: &BlobRef,
+        keyring: &Keyring,
+    ) -> Result<Vec<u8>>;
 
-    fn write_blob(&self, rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<u64>;
+    fn write_blob(&self, rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<BlobRef>;
 
     fn write_subheader(&self, rw: &mut Rw, subheader: &Subheader, keyring: &Keyring) -> Result;
 
@@ -28,7 +34,7 @@ pub trait VersionHandler {
     fn write_checkpoint(
         &self,
         rw: &mut Rw,
-        checkpoint: &Checkpoint,
+        checkpoint: &mut Checkpoint,
         keyring: &Keyring,
     ) -> Result<u64>;
 

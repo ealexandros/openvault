@@ -31,8 +31,8 @@ fn main() -> Result<()> {
 
     handler.init_layout(&mut file, &keyring)?;
 
-    let checkpoint = Checkpoint::default();
-    handler.write_checkpoint(&mut file, &checkpoint, &keyring)?;
+    let mut checkpoint = Checkpoint::default();
+    handler.write_checkpoint(&mut file, &mut checkpoint, &keyring)?;
 
     let record1 = RecordHeader::new(FeatureType::Filesystem, 1);
     handler.append_record(&mut file, &record1, b"aabbcc", &keyring)?;

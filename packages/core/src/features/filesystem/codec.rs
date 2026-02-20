@@ -1,7 +1,7 @@
 use crate::features::feature_trait::{EncodedFeatureRecord, FeatureCodec, RecordKind};
 
 use super::error::FilesystemError;
-use super::records::{FilesystemChange, FILESYSTEM_WIRE_VERSION_V1};
+use super::records::{FILESYSTEM_WIRE_VERSION_V1, FilesystemChange};
 
 pub const FILESYSTEM_FEATURE_ID: &str = "filesystem";
 
@@ -29,7 +29,7 @@ impl FeatureCodec for FilesystemCodec {
 
         Ok(EncodedFeatureRecord {
             feature_id: self.feature_id(),
-            wire_version: self.current_wire_version(),
+            version: self.current_wire_version(),
             kind,
             payload,
         })
@@ -103,7 +103,7 @@ mod tests {
         let change = FilesystemChange::Snapshot(FilesystemSnapshot::new(folders, files));
         let encoded = codec.encode_change(change.clone()).expect("encode");
         let decoded = codec
-            .decode_change(encoded.wire_version, encoded.kind, &encoded.payload)
+            .decode_change(encoded.version, encoded.kind, &encoded.payload)
             .expect("decode");
 
         assert_eq!(encoded.feature_id, FILESYSTEM_FEATURE_ID);
@@ -119,7 +119,7 @@ mod tests {
         let change = FilesystemChange::Deltas(vec![FilesystemDelta::FileDeleted { id: file_id }]);
         let encoded = codec.encode_change(change.clone()).expect("encode");
         let decoded = codec
-            .decode_change(encoded.wire_version, encoded.kind, &encoded.payload)
+            .decode_change(encoded.version, encoded.kind, &encoded.payload)
             .expect("decode");
 
         assert_eq!(encoded.kind, RecordKind::Delta);
@@ -150,7 +150,7 @@ mod tests {
         let encoded = codec.encode_change(change).expect("encode");
 
         let err = codec
-            .decode_change(encoded.wire_version, RecordKind::Delta, &encoded.payload)
+            .decode_change(encoded.version, RecordKind::Delta, &encoded.payload)
             .expect_err("kind mismatch");
 
         assert!(err.contains("Invalid feature record kind"));

@@ -1,5 +1,5 @@
 #[path = "trait.rs"]
 pub mod feature_trait;
 
+pub mod blob_ref;
 pub mod filesystem;
-pub mod registry;

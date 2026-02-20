@@ -3,6 +3,7 @@ pub mod mapper;
 pub mod replay;
 
 use crate::errors::{Error, Result};
+use crate::features::blob_ref::BlobRef;
 use crate::internal::io_ext::{Reader, Rw, Writer};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
@@ -27,11 +28,11 @@ impl VersionHandler for V1Handler {
         io::read_subheader(reader, keyring)
     }
 
-    fn read_blob_at(&self, reader: &mut Reader, offset: u64, keyring: &Keyring) -> Result<Vec<u8>> {
-        io::read_blob_at(reader, offset, keyring)
+    fn read_blob(&self, reader: &mut Reader, blob_ref: &BlobRef, keyring: &Keyring) -> Result<Vec<u8>> {
+        io::read_blob(reader, blob_ref, keyring)
     }
 
-    fn write_blob(&self, rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<u64> {
+    fn write_blob(&self, rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<BlobRef> {
         io::write_blob(rw, blob, keyring)
     }
 
@@ -51,7 +52,7 @@ impl VersionHandler for V1Handler {
     fn write_checkpoint(
         &self,
         rw: &mut Rw,
-        checkpoint: &Checkpoint,
+        checkpoint: &mut Checkpoint,
         keyring: &Keyring,
     ) -> Result<u64> {
         io::write_checkpoint(rw, checkpoint, keyring)
