@@ -56,19 +56,50 @@ fn test_xchacha20_streaming() {
     let key = [42u8; KEY_SIZE];
     let data = b"Large-ish data to test streaming encryption functionality.".repeat(1000);
 
-    let mut input = Cursor::new(&data);
-    let mut ciphertext_stream = Vec::new();
+    let mut input = Cursor::new(data.clone());
+    let mut ciphertext_stream = Cursor::new(Vec::new());
+
     cipher
         .encrypt_stream(&key, &mut input, &mut ciphertext_stream)
         .unwrap();
 
-    let mut output = Vec::new();
-    let mut encrypted_input = Cursor::new(&ciphertext_stream);
+    let mut encrypted_input = Cursor::new(ciphertext_stream.into_inner());
+    let mut output_stream = Cursor::new(Vec::new());
+
     cipher
-        .decrypt_stream(&key, &mut encrypted_input, &mut output)
+        .decrypt_stream(&key, &mut encrypted_input, &mut output_stream)
         .unwrap();
 
+    let output = output_stream.into_inner();
     assert_eq!(data, output);
+}
+
+#[test]
+fn test_xchacha20_streaming_bad_aad() {
+    let cipher = XChaCha20Poly1305Cipher;
+    let key = [42u8; KEY_SIZE];
+    let data = b"Large-ish data to test streaming encryption functionality.".repeat(10);
+
+    let mut input = Cursor::new(data);
+    let mut ciphertext_stream = Cursor::new(Vec::new());
+
+    cipher
+        .encrypt_stream(&key, &mut input, &mut ciphertext_stream)
+        .unwrap();
+
+    let ciphertext = ciphertext_stream.into_inner();
+
+    let mut corrupted = Vec::new();
+    corrupted.extend_from_slice(&ciphertext[..24]);
+    corrupted.push(0u8);
+    corrupted.extend_from_slice(&ciphertext[24..]);
+
+    let mut encrypted_input = Cursor::new(corrupted);
+    let mut output_stream = Cursor::new(Vec::new());
+
+    let result = cipher.decrypt_stream(&key, &mut encrypted_input, &mut output_stream);
+
+    assert!(result.is_err());
 }
 
 #[test]

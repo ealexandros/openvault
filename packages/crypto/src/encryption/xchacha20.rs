@@ -87,12 +87,12 @@ impl Cipher for XChaCha20Poly1305Cipher {
         let mut buffer = [0u8; DEFAULT_CHUNK_SIZE + DEFAULT_TAG_SIZE];
 
         loop {
+            let offset = input.stream_position()?;
+
             let n = input.read(&mut buffer).map_err(Error::Io)?;
             if n == 0 {
                 break;
             }
-
-            let offset = input.stream_position()?;
 
             let x_nonce = XNonce::from_slice(nonce.as_bytes());
             let payload = Payload {
