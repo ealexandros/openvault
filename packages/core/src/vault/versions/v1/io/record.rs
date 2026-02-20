@@ -39,7 +39,7 @@ pub fn read_record(reader: &mut Reader, offset: u64, keyring: &Keyring) -> Resul
     Ok(RecordWire::new(record, payload))
 }
 
-pub fn replay_records(
+pub fn read_replay_records(
     reader: &mut Reader,
     start_offset: u64,
     keyring: &Keyring,

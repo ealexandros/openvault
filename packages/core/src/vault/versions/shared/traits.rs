@@ -3,6 +3,7 @@ use crate::internal::io_ext::{Reader, Rw, Writer};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
+use crate::vault::versions::v1::checkpoint::Checkpoint;
 
 pub trait VersionHandler {
     fn version(&self) -> u16;
@@ -17,14 +18,19 @@ pub trait VersionHandler {
 
     fn write_subheader(&self, rw: &mut Rw, subheader: &Subheader, keyring: &Keyring) -> Result;
 
-    fn write_checkpoint(&self, rw: &mut Rw, payload: &[u8], keyring: &Keyring) -> Result<u64>;
-
     fn read_checkpoint(
         &self,
         reader: &mut Reader,
         offset: u64,
         keyring: &Keyring,
-    ) -> Result<Vec<u8>>;
+    ) -> Result<Checkpoint>;
+
+    fn write_checkpoint(
+        &self,
+        rw: &mut Rw,
+        checkpoint: &Checkpoint,
+        keyring: &Keyring,
+    ) -> Result<u64>;
 
     fn append_record(
         &self,
@@ -43,11 +49,5 @@ pub trait VersionHandler {
 
     fn replay(&self, reader: &mut Reader, keyring: &Keyring) -> Result;
 
-    /// Rewrites the vault into `writer` and returns the resulting subheader.
-    fn compact(
-        &self,
-        reader: &mut Reader,
-        writer: &mut Writer,
-        keyring: &Keyring,
-    ) -> Result<Subheader>;
+    fn compact(&self, reader: &mut Reader, writer: &mut Writer, keyring: &Keyring) -> Result;
 }

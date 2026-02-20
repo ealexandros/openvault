@@ -9,6 +9,8 @@ use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::VersionHandler;
+use crate::vault::versions::v1::checkpoint::Checkpoint;
+use crate::vault::versions::v1::replay::replay_records;
 
 #[derive(Debug, Default)]
 pub struct V1Handler;
@@ -43,12 +45,17 @@ impl VersionHandler for V1Handler {
         reader: &mut Reader,
         offset: u64,
         keyring: &Keyring,
-    ) -> Result<Vec<u8>> {
+    ) -> Result<Checkpoint> {
         io::read_checkpoint(reader, offset, keyring)
     }
 
-    fn write_checkpoint(&self, rw: &mut Rw, payload: &[u8], keyring: &Keyring) -> Result<u64> {
-        io::write_checkpoint(rw, payload, keyring)
+    fn write_checkpoint(
+        &self,
+        rw: &mut Rw,
+        checkpoint: &Checkpoint,
+        keyring: &Keyring,
+    ) -> Result<u64> {
+        io::write_checkpoint(rw, checkpoint, keyring)
     }
 
     fn append_record(
@@ -72,15 +79,10 @@ impl VersionHandler for V1Handler {
     }
 
     fn replay(&self, reader: &mut Reader, keyring: &Keyring) -> Result {
-        replay::replay_state(reader, keyring)
+        replay_records(reader, keyring)
     }
 
-    fn compact(
-        &self,
-        _reader: &mut Reader,
-        _writer: &mut Writer,
-        _keyring: &Keyring,
-    ) -> Result<Subheader> {
+    fn compact(&self, _reader: &mut Reader, _writer: &mut Writer, _keyring: &Keyring) -> Result {
         Err(Error::InvalidVaultFormat)
     }
 }

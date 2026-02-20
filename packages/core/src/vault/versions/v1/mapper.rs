@@ -1,5 +1,6 @@
 use crate::errors::{Error, Result};
 use crate::vault::versions::shared::record::{RecordHeader, RecordWire};
+use crate::vault::versions::v1::checkpoint::Checkpoint;
 
 pub fn encode_record(record: &RecordHeader, data: &[u8]) -> Result<Vec<u8>> {
     let wire = RecordWire {
@@ -13,4 +14,12 @@ pub fn decode_record(bytes: &[u8]) -> Result<(RecordHeader, Vec<u8>)> {
     let wire: RecordWire = postcard::from_bytes(bytes).map_err(|_| Error::InvalidVaultFormat)?;
 
     Ok((wire.header, wire.payload))
+}
+
+pub fn encode_checkpoint(checkpoint: &Checkpoint) -> Result<Vec<u8>> {
+    postcard::to_allocvec(checkpoint).map_err(|_| Error::InvalidVaultFormat)
+}
+
+pub fn decode_checkpoint(bytes: &[u8]) -> Result<Checkpoint> {
+    postcard::from_bytes(bytes).map_err(|_| Error::InvalidVaultFormat)
 }
