@@ -28,7 +28,7 @@ pub trait SeekExt: Seek {
     }
 }
 
-impl<S: Seek> SeekExt for S {}
+impl<T: Seek + ?Sized> SeekExt for T {}
 
 pub trait ReadSeek: Read + Seek {}
 

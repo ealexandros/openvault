@@ -1,11 +1,9 @@
-use std::io::SeekFrom;
-
 use crc32fast::Hasher;
 use serde::{Deserialize, Serialize};
 
 use crate::errors::{Error, Result};
 use crate::features::blob_ref::BlobRef;
-use crate::internal::io_ext::{Reader, Rw};
+use crate::internal::io_ext::{Reader, Rw, SeekExt};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
@@ -53,7 +51,7 @@ fn compute_blob_id(blob: &[u8]) -> [u8; 32] {
 }
 
 pub fn write_blob(rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<BlobRef> {
-    rw.seek(SeekFrom::End(0))?;
+    rw.seek_end()?;
 
     let mut chunks = Vec::new();
 
@@ -89,7 +87,7 @@ pub fn write_blob(rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<BlobRef
 }
 
 pub fn read_blob(reader: &mut Reader, blob_ref: &BlobRef, keyring: &Keyring) -> Result<Vec<u8>> {
-    reader.seek(SeekFrom::Start(blob_ref.manifest_offset))?;
+    reader.seek_from_start(blob_ref.manifest_offset)?;
 
     let manifest_bytes = open_frame(reader, AadDomain::BlobManifest, keyring)?;
     let manifest = decode_manifest(&manifest_bytes)?;
@@ -103,7 +101,7 @@ pub fn read_blob(reader: &mut Reader, blob_ref: &BlobRef, keyring: &Keyring) -> 
     let mut blob = Vec::with_capacity(blob_capacity);
 
     for chunk in &manifest.chunks {
-        reader.seek(SeekFrom::Start(chunk.offset))?;
+        reader.seek_from_start(chunk.offset)?;
         let chunk_bytes = open_frame(reader, AadDomain::BlobChunk, keyring)?;
 
         if chunk_bytes.len() != chunk.plain_size as usize {

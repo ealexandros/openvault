@@ -1,10 +1,8 @@
-use std::io::SeekFrom;
-
 use openvault_crypto::encryption::Nonce;
 use openvault_crypto::encryption::factory::EncryptionAlgorithm;
 
 use crate::errors::Result;
-use crate::internal::io_ext::{Reader, Rw};
+use crate::internal::io_ext::{Reader, Rw, SeekExt};
 use crate::vault::boot_header::VAULT_TOTAL_SIZE;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
@@ -22,13 +20,13 @@ pub fn write_subheader(rw: &mut Rw, data: &Subheader, keyring: &Keyring) -> Resu
 
     let ciphertext = cipher.encrypt(key, &nonce, &data.to_bytes()?, &aad)?;
 
-    rw.seek(SeekFrom::Start(SUBHEADER_OFFSET))?;
+    rw.seek_from_start(SUBHEADER_OFFSET)?;
 
     write_frame(rw, &nonce, &ciphertext)
 }
 
 pub fn read_subheader(reader: &mut Reader, keyring: &Keyring) -> Result<Subheader> {
-    reader.seek(SeekFrom::Start(SUBHEADER_OFFSET))?;
+    reader.seek_from_start(SUBHEADER_OFFSET)?;
 
     let (frame, ciphertext) = read_frame(reader)?;
 

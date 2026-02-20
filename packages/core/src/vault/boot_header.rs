@@ -1,9 +1,10 @@
 use openvault_crypto::keys::Salt;
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Seek, SeekFrom, Write};
+use std::io::{Read, Seek, Write};
 
 use crate::errors::{Error, Result};
 use crate::internal::hashing;
+use crate::internal::io_ext::SeekExt;
 use crate::vault::versions::factory::LATEST_VERSION;
 
 pub const VAULT_MAGIC: &[u8; 6] = b"OPENV0";
@@ -74,7 +75,7 @@ impl BootHeader {
     }
 
     pub fn read_from<R: Seek + Read>(reader: &mut R) -> Result<Self> {
-        reader.seek(SeekFrom::Start(0))?;
+        reader.seek_start()?;
 
         let mut buffer = [0u8; VAULT_TOTAL_SIZE];
         reader.read_exact(&mut buffer)?;
@@ -82,7 +83,7 @@ impl BootHeader {
     }
 
     pub fn write_to<W: Seek + Write>(&self, writer: &mut W) -> Result {
-        writer.seek(SeekFrom::Start(0))?;
+        writer.seek_start()?;
         writer.write_all(&self.to_bytes()?)?;
         Ok(())
     }

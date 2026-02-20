@@ -1,12 +1,11 @@
 use crate::errors::{Error, Result};
-use crate::internal::io_ext::{Reader, Rw};
+use crate::internal::io_ext::{Reader, Rw, SeekExt};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::record::{RecordHeader, RecordWire};
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
 use crate::vault::versions::v1::io::subheader::{read_subheader, write_subheader};
 use crate::vault::versions::v1::mapper::{decode_record, encode_record};
-use std::io::SeekFrom;
 
 pub fn append_record(
     rw: &mut Rw,
@@ -15,7 +14,7 @@ pub fn append_record(
     keyring: &Keyring,
 ) -> Result<u64> {
     let mut subheader = read_subheader(rw, keyring)?;
-    rw.seek(SeekFrom::End(0))?;
+    rw.seek_end()?;
 
     let mut record = record.clone();
 
@@ -33,7 +32,7 @@ pub fn append_record(
 }
 
 pub fn read_record(reader: &mut Reader, offset: u64, keyring: &Keyring) -> Result<RecordWire> {
-    reader.seek(SeekFrom::Start(offset))?;
+    reader.seek_from_start(offset)?;
     let record_wire = open_frame(reader, AadDomain::Record, keyring)?;
     let (record, payload) = decode_record(&record_wire)?;
     Ok(RecordWire::new(record, payload))
