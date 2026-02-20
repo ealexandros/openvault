@@ -30,21 +30,11 @@ fn main() -> Result<()> {
 
     handler.init_layout(&mut file, &keyring)?;
 
-    let record1 = RecordHeader {
-        feature_id: FeatureType::Notes,
-        version: 1,
-        sequence: 1,
-        prev_record_offset: 0,
-    };
+    let record1 = RecordHeader::new(FeatureType::Notes, 1);
 
     handler.append_record(&mut file, &record1, b"aabbcc", &keyring)?;
 
-    let record2 = RecordHeader {
-        feature_id: FeatureType::Filesystem,
-        version: 1,
-        sequence: 1,
-        prev_record_offset: 0,
-    };
+    let record2 = RecordHeader::new(FeatureType::Filesystem, 1);
 
     let _ = handler.append_record(&mut file, &record2, b"", &keyring)?;
 

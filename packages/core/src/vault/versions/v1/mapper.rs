@@ -6,7 +6,6 @@ pub fn encode_record(record: &RecordHeader, data: &[u8]) -> Result<Vec<u8>> {
         header: record.clone(),
         payload: data.to_vec(),
     };
-
     postcard::to_allocvec(&wire).map_err(|_| Error::InvalidVaultFormat)
 }
 

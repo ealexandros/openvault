@@ -66,6 +66,8 @@ impl<'a> RecordIterator<'a> {
         let offset = self.current_offset;
         let (record, payload) = read_record(self.reader, offset, self.keyring)?;
 
+        // @todo-soon rethink unwrap_or
+
         self.current_offset = record.prev_record_offset;
         Ok(Some((offset, record, payload)))
     }

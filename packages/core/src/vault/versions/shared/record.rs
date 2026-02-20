@@ -13,6 +13,17 @@ pub struct RecordHeader {
     pub prev_record_offset: u64,
 }
 
+impl RecordHeader {
+    pub fn new(feature_id: FeatureType, version: u16) -> Self {
+        Self {
+            feature_id,
+            version,
+            sequence: 0,
+            prev_record_offset: 0,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct RecordWire {
     pub header: RecordHeader,
