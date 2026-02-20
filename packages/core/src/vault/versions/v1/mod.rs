@@ -67,7 +67,8 @@ impl VersionHandler for V1Handler {
         offset: u64,
         keyring: &Keyring,
     ) -> Result<(RecordHeader, Vec<u8>)> {
-        io::read_record(reader, offset, keyring)
+        let record_wire = io::read_record(reader, offset, keyring)?;
+        Ok((record_wire.header, record_wire.payload))
     }
 
     fn replay(&self, reader: &mut Reader, keyring: &Keyring) -> Result {

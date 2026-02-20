@@ -1,7 +1,7 @@
-use crate::errors::Result;
+use crate::errors::{Error, Result};
 use crate::internal::io_ext::{Reader, Rw};
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::record::RecordHeader;
+use crate::vault::versions::shared::record::{RecordHeader, RecordWire};
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
 use crate::vault::versions::v1::io::subheader::{read_subheader, write_subheader};
@@ -32,51 +32,42 @@ pub fn append_record(
     Ok(record_offset)
 }
 
-pub fn read_record(
-    reader: &mut Reader,
-    offset: u64,
-    keyring: &Keyring,
-) -> Result<(RecordHeader, Vec<u8>)> {
+pub fn read_record(reader: &mut Reader, offset: u64, keyring: &Keyring) -> Result<RecordWire> {
     reader.seek(SeekFrom::Start(offset))?;
     let record_wire = open_frame(reader, AadDomain::Record, keyring)?;
     let (record, payload) = decode_record(&record_wire)?;
-    Ok((record, payload))
+    Ok(RecordWire::new(record, payload))
 }
 
-pub struct RecordIterator<'a> {
-    reader: &'a mut Reader,
-    current_offset: u64,
-    keyring: &'a Keyring,
-}
+pub fn replay_records(
+    reader: &mut Reader,
+    start_offset: u64,
+    keyring: &Keyring,
+) -> Result<Vec<(u64, RecordWire)>> {
+    let mut current_offset = start_offset;
+    let mut last_sequence: Option<u64> = None;
+    let mut records: Vec<(u64, RecordWire)> = Vec::new();
 
-impl<'a> RecordIterator<'a> {
-    pub fn new(reader: &'a mut Reader, start_offset: u64, keyring: &'a Keyring) -> Self {
-        Self {
-            reader,
-            current_offset: start_offset,
-            keyring,
+    while current_offset != 0 {
+        let offset = current_offset;
+
+        let record_wire = read_record(reader, offset, keyring)?;
+        let prev_record_offset = record_wire.header.prev_record_offset;
+
+        if last_sequence.is_some_and(|s| record_wire.header.sequence >= s) {
+            return Err(Error::InvalidVaultFormat);
         }
-    }
+        last_sequence = Some(record_wire.header.sequence);
 
-    fn next_internal(&mut self) -> Result<Option<(u64, RecordHeader, Vec<u8>)>> {
-        if self.current_offset == 0 {
-            return Ok(None);
+        if prev_record_offset != 0 && prev_record_offset >= offset {
+            return Err(Error::InvalidVaultFormat);
         }
 
-        let offset = self.current_offset;
-        let (record, payload) = read_record(self.reader, offset, self.keyring)?;
-
-        // @todo-soon rethink unwrap_or
-
-        self.current_offset = record.prev_record_offset;
-        Ok(Some((offset, record, payload)))
+        current_offset = prev_record_offset;
+        records.push((offset, record_wire));
     }
-}
 
-impl<'a> Iterator for RecordIterator<'a> {
-    type Item = Result<(u64, RecordHeader, Vec<u8>)>;
+    records.reverse();
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.next_internal().transpose()
-    }
+    Ok(records)
 }

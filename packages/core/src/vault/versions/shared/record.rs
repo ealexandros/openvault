@@ -29,3 +29,9 @@ pub struct RecordWire {
     pub header: RecordHeader,
     pub payload: Vec<u8>,
 }
+
+impl RecordWire {
+    pub fn new(header: RecordHeader, payload: Vec<u8>) -> Self {
+        Self { header, payload }
+    }
+}
