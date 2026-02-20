@@ -12,7 +12,12 @@ pub fn replay_records(reader: &mut Reader, keyring: &Keyring) -> Result {
         println!("{:#?}", checkpoint);
     }
 
-    let records = read_replay_records(reader, subheader.tail_record_offset, keyring)?;
+    let records = read_replay_records(
+        reader,
+        subheader.tail_record_offset,
+        subheader.checkpoint_offset,
+        keyring,
+    )?;
 
     for (_offset, record) in records {
         println!("{:#?}", record.header);

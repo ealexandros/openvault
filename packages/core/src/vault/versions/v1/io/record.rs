@@ -42,13 +42,14 @@ pub fn read_record(reader: &mut Reader, offset: u64, keyring: &Keyring) -> Resul
 pub fn read_replay_records(
     reader: &mut Reader,
     start_offset: u64,
+    stop_offset: u64,
     keyring: &Keyring,
 ) -> Result<Vec<(u64, RecordWire)>> {
     let mut current_offset = start_offset;
     let mut last_sequence: Option<u64> = None;
     let mut records: Vec<(u64, RecordWire)> = Vec::new();
 
-    while current_offset != 0 {
+    while current_offset != 0 && current_offset >= stop_offset {
         let offset = current_offset;
 
         let record_wire = read_record(reader, offset, keyring)?;
