@@ -334,14 +334,11 @@ impl FilesystemStore {
         file.name = target_name;
         file.updated_at = patch.updated_at;
 
-        if let Some(size_bytes) = patch.size_bytes {
-            file.size_bytes = size_bytes;
-        }
         if let Some(mime_type) = patch.mime_type {
             file.mime_type = mime_type;
         }
-        if let Some(content_hash) = patch.content_hash {
-            file.content_hash = content_hash;
+        if let Some(blob) = patch.blob {
+            file.blob = blob;
         }
 
         Ok(())

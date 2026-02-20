@@ -77,6 +77,7 @@ mod tests {
     use crate::features::feature_trait::FeatureCodec;
 
     use super::*;
+    use crate::features::blob_ref::BlobRef;
     use crate::features::filesystem::{
         FileMetadata, FilesystemDelta, FilesystemSnapshot, FolderMetadata, ROOT_FOLDER_ID,
     };
@@ -95,10 +96,14 @@ mod tests {
 
         let file_id = Uuid::new_v4();
         let mut files = HashMap::new();
-        files.insert(
-            file_id,
-            FileMetadata::new(file_id, docs_id, "report.txt", 256),
-        );
+        let mut file = FileMetadata::new(file_id, docs_id, "report.txt");
+
+        file.blob = Some(BlobRef {
+            id: [0u8; 32],
+            size_bytes: 256,
+            manifest_offset: 0,
+        });
+        files.insert(file_id, file);
 
         let change = FilesystemChange::Snapshot(FilesystemSnapshot::new(folders, files));
         let encoded = codec.encode_change(change.clone()).expect("encode");

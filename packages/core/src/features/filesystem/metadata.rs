@@ -1,3 +1,4 @@
+use crate::features::blob_ref::BlobRef;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -56,26 +57,28 @@ pub struct FileMetadata {
     pub id: Uuid,
     pub parent_id: Uuid,
     pub name: String,
-    pub size_bytes: u64,
     pub mime_type: Option<String>,
-    pub content_hash: Option<String>,
+    pub blob: Option<BlobRef>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 impl FileMetadata {
-    pub fn new(id: Uuid, parent_id: Uuid, name: impl Into<String>, size_bytes: u64) -> Self {
+    pub fn new(id: Uuid, parent_id: Uuid, name: impl Into<String>) -> Self {
         let now = Utc::now();
         Self {
             id,
             parent_id,
             name: name.into(),
-            size_bytes,
             mime_type: None,
-            content_hash: None,
+            blob: None,
             created_at: now,
             updated_at: now,
         }
+    }
+
+    pub fn size_bytes(&self) -> u64 {
+        self.blob.as_ref().map(|b| b.size_bytes).unwrap_or(0)
     }
 }
 
@@ -83,9 +86,8 @@ impl FileMetadata {
 pub struct FileMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
-    pub size_bytes: Option<u64>,
     pub mime_type: Option<Option<String>>,
-    pub content_hash: Option<Option<String>>,
+    pub blob: Option<Option<BlobRef>>,
     pub updated_at: DateTime<Utc>,
 }
 
@@ -94,9 +96,8 @@ impl FileMetadataPatch {
         Self {
             parent_id: None,
             name: None,
-            size_bytes: None,
             mime_type: None,
-            content_hash: None,
+            blob: None,
             updated_at,
         }
     }
