@@ -4,16 +4,16 @@ use openvault_crypto::encryption::Nonce;
 use openvault_crypto::encryption::factory::EncryptionAlgorithm;
 
 use crate::errors::Result;
+use crate::internal::io_ext::{ReadSeek, ReadWrite};
 use crate::vault::boot_header::VAULT_TOTAL_SIZE;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::shared::traits::{ReadSeek, WriteSeek};
 use crate::vault::versions::v1::io::aad::{AadDomain, encode_aad};
 
 pub const SUBHEADER_OFFSET: u64 = VAULT_TOTAL_SIZE as u64;
 
-pub fn write_subheader(writer: &mut dyn WriteSeek, data: &Subheader, keyring: &Keyring) -> Result {
+pub fn write_subheader(writer: &mut dyn ReadWrite, data: &Subheader, keyring: &Keyring) -> Result {
     let cipher = EncryptionAlgorithm::default().get()?;
 
     let nonce = Nonce::random();
@@ -40,7 +40,7 @@ pub fn read_subheader(reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result<Su
     Subheader::from_bytes(&plaintext)
 }
 
-pub fn read_subheader_from_rw(rw: &mut dyn WriteSeek, keyring: &Keyring) -> Result<Subheader> {
+pub fn read_subheader_from_rw(rw: &mut dyn ReadWrite, keyring: &Keyring) -> Result<Subheader> {
     rw.seek(SeekFrom::Start(SUBHEADER_OFFSET))?;
 
     let (frame, ciphertext) = read_frame(rw)?;

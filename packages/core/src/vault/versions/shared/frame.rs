@@ -3,6 +3,7 @@ use openvault_crypto::encryption::Nonce;
 use std::io::{Read, Write};
 
 use crate::errors::{Error, Result};
+use crate::internal::io_ext::ReadExt;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FrameHeader {
@@ -48,12 +49,11 @@ impl FrameHeader {
 
 pub fn read_frame<R: Read + ?Sized>(reader: &mut R) -> Result<(FrameHeader, Vec<u8>)> {
     let header = FrameHeader::read_from(reader)?;
-    let mut payload = vec![0u8; header.size as usize];
-    reader.read_exact(&mut payload)?;
+    let payload = reader.read_exact_vec(header.size as usize)?;
     Ok((header, payload))
 }
 
-pub fn write_frame<W: Write + ?Sized>(writer: &mut W, nonce: &Nonce, payload: &[u8]) -> Result<()> {
+pub fn write_frame<W: Write + ?Sized>(writer: &mut W, nonce: &Nonce, payload: &[u8]) -> Result {
     let header = FrameHeader::new(payload.len() as u32, *nonce);
     header.write_to(writer)?;
     writer.write_all(payload)?;

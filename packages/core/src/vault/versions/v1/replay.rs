@@ -1,6 +1,6 @@
 use crate::errors::Result;
+use crate::internal::io_ext::ReadSeek;
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::shared::traits::ReadSeek;
 use crate::vault::versions::v1::io;
 use crate::vault::versions::v1::io::record::RecordIterator;
 

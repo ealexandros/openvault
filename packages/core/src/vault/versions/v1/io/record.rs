@@ -1,7 +1,7 @@
 use crate::errors::Result;
+use crate::internal::io_ext::{ReadSeek, ReadWrite};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::record::RecordHeader;
-use crate::vault::versions::shared::traits::{ReadSeek, WriteSeek};
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
 use crate::vault::versions::v1::io::subheader::{read_subheader_from_rw, write_subheader};
@@ -9,7 +9,7 @@ use crate::vault::versions::v1::mapper::{decode_record, encode_record};
 use std::io::SeekFrom;
 
 pub fn append_record(
-    writer: &mut dyn WriteSeek,
+    writer: &mut dyn ReadWrite,
     record: &RecordHeader,
     payload: &[u8],
     keyring: &Keyring,

@@ -4,10 +4,11 @@ pub mod mapper;
 pub mod replay;
 
 use crate::errors::{Error, Result};
+use crate::internal::io_ext::{ReadSeek, ReadWrite};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::shared::traits::{ReadSeek, VersionHandler, WriteSeek};
+use crate::vault::versions::shared::traits::VersionHandler;
 
 #[derive(Debug, Default)]
 pub struct V1Handler;
@@ -17,7 +18,7 @@ impl VersionHandler for V1Handler {
         1
     }
 
-    fn init_layout(&self, writer: &mut dyn WriteSeek, keyring: &Keyring) -> Result<Subheader> {
+    fn init_layout(&self, writer: &mut dyn ReadWrite, keyring: &Keyring) -> Result<Subheader> {
         io::init_layout(writer, keyring)
     }
 
@@ -25,17 +26,27 @@ impl VersionHandler for V1Handler {
         io::read_subheader(reader, keyring)
     }
 
-    fn read_blob(&self, reader: &mut dyn ReadSeek, keyring: &Keyring) -> Result<Vec<u8>> {
-        io::read_blob(reader, keyring)
+    fn read_blob_at(
+        &self,
+        reader: &mut dyn ReadSeek,
+        offset: u64,
+        keyring: &Keyring,
+    ) -> Result<Vec<u8>> {
+        io::read_blob_at(reader, offset, keyring)
     }
 
-    fn write_blob(&self, writer: &mut dyn WriteSeek, blob: &[u8], keyring: &Keyring) -> Result {
+    fn write_blob(
+        &self,
+        writer: &mut dyn ReadWrite,
+        blob: &[u8],
+        keyring: &Keyring,
+    ) -> Result<u64> {
         io::write_blob(writer, blob, keyring)
     }
 
     fn write_subheader(
         &self,
-        writer: &mut dyn WriteSeek,
+        writer: &mut dyn ReadWrite,
         subheader: &Subheader,
         keyring: &Keyring,
     ) -> Result {
@@ -53,7 +64,7 @@ impl VersionHandler for V1Handler {
 
     fn write_checkpoint(
         &self,
-        writer: &mut dyn WriteSeek,
+        writer: &mut dyn ReadWrite,
         payload: &[u8],
         keyring: &Keyring,
     ) -> Result<u64> {
@@ -62,7 +73,7 @@ impl VersionHandler for V1Handler {
 
     fn append_record(
         &self,
-        writer: &mut dyn WriteSeek,
+        writer: &mut dyn ReadWrite,
         record: &RecordHeader,
         payload_plaintext: &[u8],
         keyring: &Keyring,
@@ -86,7 +97,7 @@ impl VersionHandler for V1Handler {
     fn compact(
         &self,
         _reader: &mut dyn ReadSeek,
-        _writer: &mut dyn WriteSeek,
+        _writer: &mut dyn ReadWrite,
         _keyring: &Keyring,
     ) -> Result<Subheader> {
         Err(Error::InvalidVaultFormat)
