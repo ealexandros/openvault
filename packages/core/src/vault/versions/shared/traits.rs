@@ -1,9 +1,9 @@
 use crate::errors::Result;
 use crate::internal::io_ext::{Reader, Rw, Writer};
 use crate::vault::crypto::keyring::Keyring;
+use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::v1::checkpoint::Checkpoint;
 
 pub trait VersionHandler {
     fn version(&self) -> u16;

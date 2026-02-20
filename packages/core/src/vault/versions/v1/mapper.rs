@@ -1,6 +1,6 @@
 use crate::errors::{Error, Result};
+use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::{RecordHeader, RecordWire};
-use crate::vault::versions::v1::checkpoint::Checkpoint;
 
 pub fn encode_record(record: &RecordHeader, data: &[u8]) -> Result<Vec<u8>> {
     let wire = RecordWire {

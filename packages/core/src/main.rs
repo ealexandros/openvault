@@ -7,8 +7,8 @@ use openvault_core::vault::crypto::keyring::Keyring;
 use openvault_core::vault::features::FeatureType;
 use openvault_core::vault::versions;
 use openvault_core::vault::versions::factory::LATEST_VERSION;
+use openvault_core::vault::versions::shared::checkpoint::Checkpoint;
 use openvault_core::vault::versions::shared::record::RecordHeader;
-use openvault_core::vault::versions::v1::checkpoint::Checkpoint;
 use openvault_crypto::keys::MasterKey;
 
 fn main() -> Result<()> {

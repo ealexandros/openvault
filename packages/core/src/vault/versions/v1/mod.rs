@@ -1,4 +1,3 @@
-pub mod checkpoint;
 pub mod io;
 pub mod mapper;
 pub mod replay;
@@ -6,10 +5,10 @@ pub mod replay;
 use crate::errors::{Error, Result};
 use crate::internal::io_ext::{Reader, Rw, Writer};
 use crate::vault::crypto::keyring::Keyring;
+use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::VersionHandler;
-use crate::vault::versions::v1::checkpoint::Checkpoint;
 use crate::vault::versions::v1::replay::replay_records;
 
 #[derive(Debug, Default)]
