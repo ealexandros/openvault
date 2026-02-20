@@ -11,12 +11,12 @@ pub use record::{append_record, read_record};
 pub use subheader::{read_subheader, write_subheader};
 
 use crate::errors::Result;
-use crate::internal::io_ext::ReadWrite;
+use crate::internal::io_ext::Rw;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::subheader::Subheader;
 
-pub fn init_layout(writer: &mut dyn ReadWrite, keyring: &Keyring) -> Result<Subheader> {
+pub fn init_layout(rw: &mut Rw, keyring: &Keyring) -> Result<Subheader> {
     let subheader = Subheader::default();
-    write_subheader(writer, &subheader, keyring)?;
+    write_subheader(rw, &subheader, keyring)?;
     Ok(subheader)
 }

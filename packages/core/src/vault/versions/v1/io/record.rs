@@ -1,21 +1,21 @@
 use crate::errors::Result;
-use crate::internal::io_ext::{ReadSeek, ReadWrite};
+use crate::internal::io_ext::{Reader, Rw};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
-use crate::vault::versions::v1::io::subheader::{read_subheader_from_rw, write_subheader};
+use crate::vault::versions::v1::io::subheader::{read_subheader, write_subheader};
 use crate::vault::versions::v1::mapper::{decode_record, encode_record};
 use std::io::SeekFrom;
 
 pub fn append_record(
-    writer: &mut dyn ReadWrite,
+    rw: &mut Rw,
     record: &RecordHeader,
     payload: &[u8],
     keyring: &Keyring,
 ) -> Result<u64> {
-    let mut subheader = read_subheader_from_rw(writer, keyring)?;
-    writer.seek(SeekFrom::End(0))?;
+    let mut subheader = read_subheader(rw, keyring)?;
+    rw.seek(SeekFrom::End(0))?;
 
     let mut record = record.clone();
 
@@ -23,17 +23,17 @@ pub fn append_record(
     record.prev_record_offset = subheader.tail_record_offset;
 
     let record_wire = encode_record(&record, payload)?;
-    let record_offset = seal_frame(writer, AadDomain::Record, &record_wire, keyring)?;
+    let record_offset = seal_frame(rw, AadDomain::Record, &record_wire, keyring)?;
 
     subheader.tail_record_offset = record_offset;
     subheader.last_sequence += 1;
-    write_subheader(writer, &subheader, keyring)?;
+    write_subheader(rw, &subheader, keyring)?;
 
     Ok(record_offset)
 }
 
 pub fn read_record(
-    reader: &mut dyn ReadSeek,
+    reader: &mut Reader,
     offset: u64,
     keyring: &Keyring,
 ) -> Result<(RecordHeader, Vec<u8>)> {
@@ -44,13 +44,13 @@ pub fn read_record(
 }
 
 pub struct RecordIterator<'a> {
-    reader: &'a mut dyn ReadSeek,
+    reader: &'a mut Reader,
     current_offset: u64,
     keyring: &'a Keyring,
 }
 
 impl<'a> RecordIterator<'a> {
-    pub fn new(reader: &'a mut dyn ReadSeek, start_offset: u64, keyring: &'a Keyring) -> Self {
+    pub fn new(reader: &'a mut Reader, start_offset: u64, keyring: &'a Keyring) -> Self {
         Self {
             reader,
             current_offset: start_offset,

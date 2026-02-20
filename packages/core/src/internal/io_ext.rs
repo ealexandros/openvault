@@ -21,3 +21,9 @@ impl<R: Read + Seek> ReadSeek for R {}
 impl<W: Write + Seek> WriteSeek for W {}
 
 impl<R: Read + Write + Seek> ReadWrite for R {}
+
+pub type Writer = dyn WriteSeek;
+
+pub type Reader = dyn ReadSeek;
+
+pub type Rw = dyn ReadWrite;
