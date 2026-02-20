@@ -1,9 +1,9 @@
 use chacha20poly1305::aead::{Aead, KeyInit, Payload};
 use chacha20poly1305::{XChaCha20Poly1305, XNonce};
-use std::io::{Read, Write};
 
 use crate::encryption::{Cipher, NONCE_SIZE, Nonce};
 use crate::errors::{Error, Result};
+use crate::internal::io_ext::{Reader, Writer};
 
 const DEFAULT_TAG_SIZE: usize = 16;
 const DEFAULT_CHUNK_SIZE: usize = 32 * 1024;
@@ -42,7 +42,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
         Ok(plaintext)
     }
 
-    fn encrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
+    fn encrypt_stream(&self, key: &[u8], input: &mut Reader, output: &mut Writer) -> Result {
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
         let mut nonce = Nonce::random();
@@ -56,9 +56,16 @@ impl Cipher for XChaCha20Poly1305Cipher {
                 break;
             }
 
+            let offset = output.stream_position()?;
+
             let x_nonce = XNonce::from_slice(nonce.as_bytes());
+            let payload = Payload {
+                msg: &buffer[..n],
+                aad: &offset.to_le_bytes(),
+            };
+
             let ciphertext = cipher
-                .encrypt(x_nonce, &buffer[..n])
+                .encrypt(x_nonce, payload)
                 .map_err(|_| Error::EncryptionFailed)?;
 
             output.write_all(&ciphertext).map_err(Error::Io)?;
@@ -69,7 +76,7 @@ impl Cipher for XChaCha20Poly1305Cipher {
         Ok(())
     }
 
-    fn decrypt_stream(&self, key: &[u8], input: &mut dyn Read, output: &mut dyn Write) -> Result {
+    fn decrypt_stream(&self, key: &[u8], input: &mut Reader, output: &mut Writer) -> Result {
         let cipher = XChaCha20Poly1305::new_from_slice(key).map_err(|_| Error::InvalidKeyLength)?;
 
         let mut nonce_bytes = [0u8; NONCE_SIZE];
@@ -85,9 +92,16 @@ impl Cipher for XChaCha20Poly1305Cipher {
                 break;
             }
 
+            let offset = input.stream_position()?;
+
             let x_nonce = XNonce::from_slice(nonce.as_bytes());
+            let payload = Payload {
+                msg: &buffer[..n],
+                aad: &offset.to_le_bytes(),
+            };
+
             let plaintext = cipher
-                .decrypt(x_nonce, &buffer[..n])
+                .decrypt(x_nonce, payload)
                 .map_err(|_| Error::DecryptionFailed)?;
 
             output.write_all(&plaintext).map_err(Error::Io)?;
