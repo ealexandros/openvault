@@ -20,7 +20,7 @@ pub trait VersionHandler {
         keyring: &Keyring,
     ) -> Result<Vec<u8>>;
 
-    fn write_blob(&self, rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<BlobRef>;
+    fn write_blob(&self, rw: &mut Rw, reader: &mut Reader, keyring: &Keyring) -> Result<BlobRef>;
 
     fn write_subheader(&self, rw: &mut Rw, subheader: &Subheader, keyring: &Keyring) -> Result;
 

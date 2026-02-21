@@ -1,3 +1,4 @@
+pub mod blob;
 pub mod io;
 pub mod mapper;
 pub mod replay;
@@ -28,12 +29,17 @@ impl VersionHandler for V1Handler {
         io::read_subheader(reader, keyring)
     }
 
-    fn read_blob(&self, reader: &mut Reader, blob_ref: &BlobRef, keyring: &Keyring) -> Result<Vec<u8>> {
+    fn read_blob(
+        &self,
+        reader: &mut Reader,
+        blob_ref: &BlobRef,
+        keyring: &Keyring,
+    ) -> Result<Vec<u8>> {
         io::read_blob(reader, blob_ref, keyring)
     }
 
-    fn write_blob(&self, rw: &mut Rw, blob: &[u8], keyring: &Keyring) -> Result<BlobRef> {
-        io::write_blob(rw, blob, keyring)
+    fn write_blob(&self, rw: &mut Rw, reader: &mut Reader, keyring: &Keyring) -> Result<BlobRef> {
+        io::write_blob(rw, reader, keyring)
     }
 
     fn write_subheader(&self, rw: &mut Rw, subheader: &Subheader, keyring: &Keyring) -> Result {

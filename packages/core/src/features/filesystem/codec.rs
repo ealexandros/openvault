@@ -99,7 +99,7 @@ mod tests {
         let mut file = FileMetadata::new(file_id, docs_id, "report.txt");
 
         file.blob = Some(BlobRef {
-            id: [0u8; 32],
+            id: Uuid::nil(),
             size_bytes: 256,
             manifest_offset: 0,
         });
