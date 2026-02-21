@@ -7,7 +7,7 @@ use crate::vault::boot_header::VAULT_TOTAL_SIZE;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::v1::io::aad::{AadDomain, encode_aad};
+use crate::vault::versions::v1::io::aad::AadDomain;
 
 pub const SUBHEADER_OFFSET: u64 = VAULT_TOTAL_SIZE as u64;
 
@@ -15,10 +15,10 @@ pub fn write_subheader(rw: &mut Rw, data: &Subheader, keyring: &Keyring) -> Resu
     let cipher = EncryptionAlgorithm::default().get()?;
 
     let nonce = Nonce::random();
-    let aad = encode_aad(AadDomain::Subheader, SUBHEADER_OFFSET);
-    let key = keyring.envelope_key_bytes();
+    let aad = AadDomain::Subheader.encode(SUBHEADER_OFFSET);
+    let key = keyring.derive_meta_key()?;
 
-    let ciphertext = cipher.encrypt(key, &nonce, &data.to_bytes()?, &aad)?;
+    let ciphertext = cipher.encrypt(&key, &nonce, &data.to_bytes()?, &aad)?;
 
     rw.seek_from_start(SUBHEADER_OFFSET)?;
 
@@ -31,10 +31,10 @@ pub fn read_subheader(reader: &mut Reader, keyring: &Keyring) -> Result<Subheade
     let (frame, ciphertext) = read_frame(reader)?;
 
     let cipher = EncryptionAlgorithm::default().get()?;
-    let aad = encode_aad(AadDomain::Subheader, SUBHEADER_OFFSET);
-    let key = keyring.envelope_key_bytes();
+    let aad = AadDomain::Subheader.encode(SUBHEADER_OFFSET);
+    let key = keyring.derive_meta_key()?;
 
-    let plaintext = cipher.decrypt(key, &frame.nonce, &ciphertext, &aad)?;
+    let plaintext = cipher.decrypt(&key, &frame.nonce, &ciphertext, &aad)?;
 
     Subheader::from_bytes(&plaintext)
 }

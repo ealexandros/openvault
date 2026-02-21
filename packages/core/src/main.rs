@@ -9,7 +9,7 @@ use openvault_core::vault::versions;
 use openvault_core::vault::versions::factory::LATEST_VERSION;
 use openvault_core::vault::versions::shared::checkpoint::Checkpoint;
 use openvault_core::vault::versions::shared::record::RecordHeader;
-use openvault_crypto::keys::MasterKey;
+use openvault_crypto::keys::master_key::MasterKey;
 
 fn main() -> Result<()> {
     let handler = versions::resolve_latest()?;

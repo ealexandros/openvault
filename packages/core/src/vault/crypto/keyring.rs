@@ -1,9 +1,14 @@
-use openvault_crypto::keys::{DerivedKey, MKEY_SIZE, MasterKey, Salt};
+use openvault_crypto::keys::derived_key::DerivedKey;
+use openvault_crypto::keys::master_key::MasterKey;
+use openvault_crypto::keys::salt::Salt;
 
 use crate::errors::Result;
 
 const CONTEXT_PREFIX: &str = "openvault";
-const CONTEXT_ENVELOPE: &str = "openvault/core/envelope";
+const CONTEXT_META: &str = "openvault/meta";
+const CONTEXT_DEFAULT: &str = "openvault/default";
+const CONTEXT_BLOB_MANIFEST: &str = "openvault/blob/manifest";
+const CONTEXT_BLOB_CHUNK: &str = "openvault/blob/chunk";
 
 #[derive(Debug, Clone)]
 pub struct Keyring {
@@ -24,12 +29,20 @@ impl Keyring {
         &self.master
     }
 
-    pub fn envelope_key_bytes(&self) -> &[u8; MKEY_SIZE] {
-        self.master.as_bytes()
+    pub fn derive_meta_key(&self) -> Result<DerivedKey<32>> {
+        self.expand_context(CONTEXT_META)
     }
 
-    pub fn derive_envelope_key<const N: usize>(&self) -> Result<DerivedKey<N>> {
-        self.expand_context::<N>(CONTEXT_ENVELOPE)
+    pub fn derive_default_key(&self) -> Result<DerivedKey<32>> {
+        self.expand_context(CONTEXT_DEFAULT)
+    }
+
+    pub fn derive_blob_manifest_key(&self) -> Result<DerivedKey<32>> {
+        self.expand_context(CONTEXT_BLOB_MANIFEST)
+    }
+
+    pub fn derive_blob_chunk_key(&self) -> Result<DerivedKey<32>> {
+        self.expand_context(CONTEXT_BLOB_CHUNK)
     }
 
     pub fn derive_feature_key<const N: usize>(&self, feature: &str) -> Result<DerivedKey<N>> {

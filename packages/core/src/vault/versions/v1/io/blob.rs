@@ -82,13 +82,15 @@ pub fn read_blob(reader: &mut Reader, blob_ref: &BlobRef, keyring: &Keyring) -> 
 mod tests {
     use std::io::Cursor;
 
+    use openvault_crypto::keys::salt::Salt;
+
     use crate::vault::crypto::keyring::Keyring;
     use crate::vault::versions::v1::io::init_layout;
 
     use super::{read_blob, write_blob};
 
     fn test_keyring() -> Keyring {
-        let salt = openvault_crypto::keys::random_salt();
+        let salt = Salt::random();
         Keyring::derive(b"test-password", &salt).expect("failed to derive test keyring")
     }
 

@@ -1,11 +1,9 @@
 use openvault_crypto::compression::factory::CompressionAlgorithm;
 use openvault_crypto::encryption::Nonce;
 use openvault_crypto::encryption::factory::EncryptionAlgorithm;
-use openvault_crypto::keys::MasterKey;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
-use super::keyring::Keyring;
 use crate::errors::{Error, Result};
 
 #[derive(Debug)]
@@ -86,38 +84,15 @@ impl Envelope {
     }
 }
 
-pub fn seal<T: Serialize>(
-    value: &T,
-    key: &MasterKey,
-    nonce: &Nonce,
-    aad: &[u8],
-) -> Result<Vec<u8>> {
-    Envelope::default().seal(value, key.as_bytes(), nonce, aad)
+pub fn seal<T: Serialize>(value: &T, key: &[u8], nonce: &Nonce, aad: &[u8]) -> Result<Vec<u8>> {
+    Envelope::default().seal(value, key, nonce, aad)
 }
 
 pub fn open<T: DeserializeOwned>(
     ciphertext: &[u8],
-    key: &MasterKey,
+    key: &[u8],
     nonce: &Nonce,
     aad: &[u8],
 ) -> Result<T> {
-    Envelope::default().open(ciphertext, key.as_bytes(), nonce, aad)
-}
-
-pub fn seal_with_keyring<T: Serialize>(
-    value: &T,
-    keyring: &Keyring,
-    nonce: &Nonce,
-    aad: &[u8],
-) -> Result<Vec<u8>> {
-    Envelope::default().seal(value, keyring.envelope_key_bytes(), nonce, aad)
-}
-
-pub fn open_with_keyring<T: DeserializeOwned>(
-    ciphertext: &[u8],
-    keyring: &Keyring,
-    nonce: &Nonce,
-    aad: &[u8],
-) -> Result<T> {
-    Envelope::default().open(ciphertext, keyring.envelope_key_bytes(), nonce, aad)
+    Envelope::default().open(ciphertext, key, nonce, aad)
 }

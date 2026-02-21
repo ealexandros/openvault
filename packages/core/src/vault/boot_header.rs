@@ -1,6 +1,7 @@
-use openvault_crypto::keys::Salt;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Seek, Write};
+
+use openvault_crypto::keys::salt::{SALT_SIZE, Salt};
 
 use crate::errors::{Error, Result};
 use crate::internal::hashing;
@@ -18,7 +19,7 @@ pub const VAULT_TOTAL_SIZE: usize = VAULT_PAYLOAD_SIZE + CRC_SIZE;
 pub struct BootHeader {
     pub magic: [u8; VAULT_MAGIC_SIZE],
     pub version: u16,
-    pub salt: Salt,
+    pub salt: [u8; SALT_SIZE],
 }
 
 impl BootHeader {
@@ -26,7 +27,7 @@ impl BootHeader {
         Self {
             magic: *VAULT_MAGIC,
             version: version.unwrap_or(LATEST_VERSION),
-            salt,
+            salt: salt.into_bytes(),
         }
     }
 
