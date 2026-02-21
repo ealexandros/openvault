@@ -11,7 +11,7 @@ pub const VAULT_MAGIC: &[u8; 6] = b"OPENV0";
 pub const VAULT_MAGIC_SIZE: usize = VAULT_MAGIC.len();
 pub const CRC_SIZE: usize = 4;
 
-pub const VAULT_PAYLOAD_SIZE: usize = size_of::<BootHeader>();
+pub const VAULT_PAYLOAD_SIZE: usize = 24;
 pub const VAULT_TOTAL_SIZE: usize = VAULT_PAYLOAD_SIZE + CRC_SIZE;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

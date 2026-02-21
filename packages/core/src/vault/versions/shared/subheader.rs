@@ -3,8 +3,6 @@ use std::io::{Read, Write};
 
 use crate::errors::Result;
 
-pub const SUBHEADER_SIZE: usize = size_of::<Subheader>();
-
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Subheader {
     pub checkpoint_offset: u64,
@@ -13,6 +11,8 @@ pub struct Subheader {
 }
 
 impl Subheader {
+    pub const SIZE: usize = 24;
+
     pub fn new(checkpoint_offset: u64, tail_record_offset: u64) -> Self {
         Self {
             checkpoint_offset,
@@ -42,8 +42,8 @@ impl Subheader {
         Subheader::read_from(&mut reader)
     }
 
-    pub fn to_bytes(self) -> Result<[u8; SUBHEADER_SIZE]> {
-        let mut buffer = [0u8; SUBHEADER_SIZE];
+    pub fn to_bytes(self) -> Result<[u8; Self::SIZE]> {
+        let mut buffer = [0u8; Self::SIZE];
         let mut writer = &mut buffer[..];
         self.write_to(&mut writer)?;
         Ok(buffer)

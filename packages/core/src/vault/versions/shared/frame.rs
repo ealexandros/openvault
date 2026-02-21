@@ -12,7 +12,7 @@ pub struct FrameHeader {
 }
 
 impl FrameHeader {
-    pub const SIZE: usize = size_of::<FrameHeader>();
+    pub const SIZE: usize = 28;
 
     pub fn new(size: u32, nonce: Nonce) -> Self {
         Self { size, nonce }
