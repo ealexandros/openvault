@@ -50,8 +50,12 @@ pub fn open_vault(path: &Path, password: &[u8]) -> Result<VaultSession> {
     ))
 }
 
-pub fn create_and_open_vault(path: &Path, password: &[u8]) -> Result<VaultSession> {
-    create_vault(path, password)?;
+pub fn create_and_open_vault(
+    path: &Path,
+    password: &[u8],
+    config: CreateConfig,
+) -> Result<VaultSession> {
+    create_vault_with(path, password, config)?;
     open_vault(path, password)
 }
 

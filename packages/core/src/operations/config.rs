@@ -12,14 +12,45 @@ pub struct CreateConfig {
     pub overwrite: bool,
 }
 
+impl CreateConfig {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_version(mut self, version: u16) -> Self {
+        self.version = version;
+        self
+    }
+
+    pub fn with_compression(mut self, compression: CompressionAlgorithm) -> Self {
+        self.compression = compression;
+        self
+    }
+
+    pub fn with_cipher(mut self, cipher: EncryptionAlgorithm) -> Self {
+        self.cipher = cipher;
+        self
+    }
+
+    pub fn with_filename(mut self, filename: String) -> Self {
+        self.filename = filename;
+        self
+    }
+
+    pub fn with_overwrite(mut self, overwrite: bool) -> Self {
+        self.overwrite = overwrite;
+        self
+    }
+}
+
 impl Default for CreateConfig {
     fn default() -> Self {
         Self {
             version: LATEST_FORMAT_VERSION,
-            compression: CompressionAlgorithm::Zstd,
-            cipher: EncryptionAlgorithm::XChaCha20Poly1305,
+            compression: CompressionAlgorithm::default(),
+            cipher: EncryptionAlgorithm::default(),
             filename: String::new(),
-            overwrite: true,
+            overwrite: false,
         }
     }
 }
