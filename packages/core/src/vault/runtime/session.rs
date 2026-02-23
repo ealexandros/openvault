@@ -7,21 +7,25 @@ pub struct VaultSession {
     file: File,
     version: u16,
     keyring: Keyring,
-    engine: FormatRef,
+    format: FormatRef,
 }
 
 impl VaultSession {
-    pub fn new(file: File, version: u16, keyring: Keyring, engine: FormatRef) -> Self {
+    pub fn new(file: File, version: u16, keyring: Keyring, format: FormatRef) -> Self {
         Self {
             file,
             version,
             keyring,
-            engine,
+            format,
         }
     }
 
     pub fn file(&self) -> &File {
         &self.file
+    }
+
+    pub fn file_mut(&mut self) -> &mut File {
+        &mut self.file
     }
 
     pub fn version(&self) -> u16 {
@@ -32,7 +36,7 @@ impl VaultSession {
         &self.keyring
     }
 
-    pub fn engine(&self) -> FormatRef {
-        self.engine
+    pub fn format(&self) -> FormatRef {
+        self.format
     }
 }

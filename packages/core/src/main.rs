@@ -13,7 +13,7 @@ fn main() -> Result {
     let session = create_and_open_vault(&path, password, create_config)?;
 
     println!("Vault created at: {}", path.display());
-    println!("Vault version: {}", session.engine().version());
+    println!("Vault version: {}", session.format().version());
 
     Ok(())
 }
