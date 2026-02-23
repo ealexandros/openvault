@@ -18,11 +18,3 @@ thiserror = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 walkdir = "2.5.0"
 zeroize = { workspace = true, features = ["zeroize_derive"] }
-
-# @todo-now check this..
-
-# regex = "1.11.1"
-# fs-err = "2.11.0" # Better fs errors
-# file-id = "0.2.2" # For file system identification
-# same-file = "1.0.6" # Check if two paths point to same file
-# memmap2 = "0.9.5" # Memory mapped I/O
