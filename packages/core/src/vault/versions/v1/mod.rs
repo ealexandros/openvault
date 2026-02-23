@@ -13,12 +13,14 @@ use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::VersionHandler;
 use crate::vault::versions::v1::replay::replay_records;
 
+pub const V1_FORMAT_VERSION: u16 = 1;
+
 #[derive(Debug, Default)]
 pub struct V1Handler;
 
 impl VersionHandler for V1Handler {
     fn version(&self) -> u16 {
-        1
+        V1_FORMAT_VERSION
     }
 
     fn init_layout(&self, rw: &mut Rw, keyring: &Keyring) -> Result<Subheader> {

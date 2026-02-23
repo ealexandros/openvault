@@ -2,6 +2,7 @@ use openvault_crypto::keys::derived_key::DerivedKey;
 
 use crate::errors::Result;
 use crate::vault::crypto::keyring::Keyring;
+use crate::vault::versions::v1::V1_FORMAT_VERSION;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
@@ -32,11 +33,11 @@ impl AadDomain {
     pub fn derive_key(&self, keyring: &Keyring) -> Result<DerivedKey> {
         match self {
             AadDomain::Subheader | AadDomain::Checkpoint | AadDomain::Record => {
-                keyring.derive_meta_key()
+                keyring.derive_meta_key(V1_FORMAT_VERSION)
             }
 
-            AadDomain::BlobManifest => keyring.derive_blob_manifest_key(),
-            AadDomain::BlobChunk => keyring.derive_blob_chunk_key(),
+            AadDomain::BlobManifest => keyring.derive_blob_manifest_key(V1_FORMAT_VERSION),
+            AadDomain::BlobChunk => keyring.derive_blob_chunk_key(V1_FORMAT_VERSION),
         }
     }
 }
