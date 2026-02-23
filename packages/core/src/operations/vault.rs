@@ -8,7 +8,7 @@ use crate::operations::config::CreateConfig;
 use crate::vault::boot_header::BootHeader;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::runtime::VaultSession;
-use crate::vault::versions::resolve_engine;
+use crate::vault::versions::resolve_format;
 
 pub fn create_vault_with(path: &Path, password: &[u8], config: CreateConfig) -> Result {
     let salt = Salt::random();
@@ -22,7 +22,7 @@ pub fn create_vault_with(path: &Path, password: &[u8], config: CreateConfig) -> 
 
     boot_header.write_to(&mut file)?;
 
-    let engine = resolve_engine(config.version)?;
+    let engine = resolve_format(config.version)?;
     engine.init_layout(&mut file, &keyring)?;
 
     Ok(())
@@ -38,7 +38,7 @@ pub fn open_vault(path: &Path, password: &[u8]) -> Result<VaultSession> {
     let boot_header = BootHeader::read_from(&mut file)?;
     let keyring = Keyring::derive(password, &Salt::from(boot_header.salt))?;
 
-    let engine = resolve_engine(boot_header.version)?;
+    let engine = resolve_format(boot_header.version)?;
 
     engine.read_subheader(&mut file, &keyring)?;
 

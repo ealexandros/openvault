@@ -10,15 +10,15 @@ use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::shared::traits::VersionHandler;
+use crate::vault::versions::shared::traits::FormatHandler;
 use crate::vault::versions::v1::replay::replay_records;
 
 pub const V1_FORMAT_VERSION: u16 = 1;
 
 #[derive(Debug, Default)]
-pub struct V1Handler;
+pub struct V1FormatHandler;
 
-impl VersionHandler for V1Handler {
+impl FormatHandler for V1FormatHandler {
     fn version(&self) -> u16 {
         V1_FORMAT_VERSION
     }

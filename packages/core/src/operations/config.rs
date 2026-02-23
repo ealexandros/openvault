@@ -1,7 +1,7 @@
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
 
-use crate::vault::versions::factory::LATEST_VERSION;
+use crate::vault::versions::factory::LATEST_FORMAT_VERSION;
 
 #[derive(Debug)]
 pub struct CreateConfig {
@@ -15,7 +15,7 @@ pub struct CreateConfig {
 impl Default for CreateConfig {
     fn default() -> Self {
         Self {
-            version: LATEST_VERSION,
+            version: LATEST_FORMAT_VERSION,
             compression: CompressionAlgorithm::Zstd,
             cipher: EncryptionAlgorithm::XChaCha20Poly1305,
             filename: String::new(),

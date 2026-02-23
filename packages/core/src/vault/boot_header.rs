@@ -6,7 +6,7 @@ use openvault_crypto::keys::salt::{SALT_SIZE, Salt};
 
 use crate::errors::{Error, Result};
 use crate::internal::io_ext::SeekExt;
-use crate::vault::versions::factory::LATEST_VERSION;
+use crate::vault::versions::factory::LATEST_FORMAT_VERSION;
 
 pub const VAULT_MAGIC: &[u8; 6] = b"OPENV0";
 pub const VAULT_MAGIC_SIZE: usize = VAULT_MAGIC.len();
@@ -26,7 +26,7 @@ impl BootHeader {
     pub fn new(salt: Salt, version: Option<u16>) -> Self {
         Self {
             magic: *VAULT_MAGIC,
-            version: version.unwrap_or(LATEST_VERSION),
+            version: version.unwrap_or(LATEST_FORMAT_VERSION),
             salt: salt.into_bytes(),
         }
     }

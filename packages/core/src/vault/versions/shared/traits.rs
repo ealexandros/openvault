@@ -6,7 +6,7 @@ use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
 
-pub trait VersionHandler {
+pub trait FormatHandler {
     fn version(&self) -> u16;
 
     fn init_layout(&self, rw: &mut Rw, keyring: &Keyring) -> Result<Subheader>;
