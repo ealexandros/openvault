@@ -33,4 +33,7 @@ impl Error {
     pub fn file_exists() -> Self {
         std::io::Error::new(std::io::ErrorKind::AlreadyExists, "File already exists").into()
     }
+    pub fn file_not_exists() -> Self {
+        std::io::Error::new(std::io::ErrorKind::NotFound, "File not found").into()
+    }
 }

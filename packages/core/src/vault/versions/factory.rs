@@ -1,17 +1,20 @@
 use crate::errors::{Error, Result};
 use crate::vault::versions::shared::traits::VersionHandler;
-use crate::vault::versions::v1::V1_FORMAT_VERSION;
-use crate::vault::versions::v1::V1Handler;
+use crate::vault::versions::v1::{V1_FORMAT_VERSION, V1Handler};
 
 pub const LATEST_VERSION: u16 = V1_FORMAT_VERSION;
 
-pub fn resolve(version: u16) -> Result<Box<dyn VersionHandler>> {
+pub type Engine = &'static dyn VersionHandler;
+
+// @todo-now rename the engine to something else
+
+pub fn resolve_engine(version: u16) -> Result<Engine> {
     match version {
-        V1_FORMAT_VERSION => Ok(Box::new(V1Handler)),
+        V1_FORMAT_VERSION => Ok(&V1Handler),
         _ => Err(Error::UnsupportedVaultVersion(version)),
     }
 }
 
-pub fn resolve_latest() -> Result<Box<dyn VersionHandler>> {
-    resolve(LATEST_VERSION)
+pub fn latest_engine() -> Engine {
+    &V1Handler
 }

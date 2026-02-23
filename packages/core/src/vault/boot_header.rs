@@ -1,10 +1,10 @@
+use crc32fast;
 use serde::{Deserialize, Serialize};
 use std::io::{Read, Seek, Write};
 
 use openvault_crypto::keys::salt::{SALT_SIZE, Salt};
 
 use crate::errors::{Error, Result};
-use crate::internal::hashing;
 use crate::internal::io_ext::SeekExt;
 use crate::vault::versions::factory::LATEST_VERSION;
 
@@ -40,7 +40,7 @@ impl BootHeader {
 
         payload.resize(VAULT_PAYLOAD_SIZE, 0);
 
-        let crc = hashing::compute_crc(&payload);
+        let crc = crc32fast::hash(&payload);
         let mut out = [0u8; VAULT_TOTAL_SIZE];
 
         out[..VAULT_PAYLOAD_SIZE].copy_from_slice(&payload);
@@ -60,7 +60,7 @@ impl BootHeader {
                 .try_into()
                 .map_err(|_| Error::InvalidVaultFormat)?,
         );
-        let computed_crc = hashing::compute_crc(payload);
+        let computed_crc = crc32fast::hash(payload);
 
         if stored_crc != computed_crc {
             return Err(Error::InvalidVaultChecksum);
