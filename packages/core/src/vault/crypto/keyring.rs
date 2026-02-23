@@ -21,10 +21,6 @@ impl Keyring {
         Ok(Self { master })
     }
 
-    pub fn master_key(&self) -> &MasterKey {
-        &self.master
-    }
-
     pub fn derive_meta_key(&self, version: u16) -> Result<DerivedKey> {
         let context = format!("{}/v{}/meta", CONTEXT_PREFIX, version);
         self.expand_context(&context)

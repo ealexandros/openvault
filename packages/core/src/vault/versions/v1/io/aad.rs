@@ -16,7 +16,9 @@ pub enum AadDomain {
 
 impl AadDomain {
     pub fn encode(&self, offset: u64) -> Vec<u8> {
-        let mut aad = b"openvault/v1/".to_vec();
+        let mut aad = format!("openvault/v{}/", V1_FORMAT_VERSION)
+            .as_bytes()
+            .to_vec();
 
         aad.push(match self {
             AadDomain::Subheader => 1,
