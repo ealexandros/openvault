@@ -25,8 +25,8 @@ pub fn create_vault_with(path: &Path, password: &[u8], config: CreateConfig) -> 
 
     boot_header.write_to(&mut file)?;
 
-    let engine = resolve_format(config.version)?;
-    engine.init_layout(&mut file, &keyring)?;
+    let format = resolve_format(config.version)?;
+    format.init_layout(&mut file, &keyring)?;
 
     Ok(())
 }
@@ -41,15 +41,15 @@ pub fn open_vault(path: &Path, password: &[u8]) -> Result<VaultSession> {
     let boot_header = BootHeader::read_from(&mut file)?;
     let keyring = Keyring::derive(password, &Salt::from(boot_header.salt))?;
 
-    let engine = resolve_format(boot_header.version)?;
+    let format = resolve_format(boot_header.version)?;
 
-    engine.read_subheader(&mut file, &keyring)?;
+    format.read_subheader(&mut file, &keyring)?;
 
     Ok(VaultSession::new(
         file,
         boot_header.version,
         keyring,
-        engine,
+        format,
     ))
 }
 
