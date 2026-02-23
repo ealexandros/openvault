@@ -1,17 +1,17 @@
 use std::fs::File;
 
 use crate::vault::crypto::keyring::Keyring;
-use crate::vault::versions::factory::Engine;
+use crate::vault::versions::factory::EngineRef;
 
 pub struct VaultSession {
     file: File,
     version: u16,
     keyring: Keyring,
-    engine: Engine,
+    engine: EngineRef,
 }
 
 impl VaultSession {
-    pub fn new(file: File, version: u16, keyring: Keyring, engine: Engine) -> Self {
+    pub fn new(file: File, version: u16, keyring: Keyring, engine: EngineRef) -> Self {
         Self {
             file,
             version,
@@ -32,7 +32,7 @@ impl VaultSession {
         &self.keyring
     }
 
-    pub fn engine(&self) -> Engine {
+    pub fn engine(&self) -> EngineRef {
         self.engine
     }
 }

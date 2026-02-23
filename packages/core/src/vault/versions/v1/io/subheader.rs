@@ -12,7 +12,7 @@ use crate::vault::versions::v1::io::aad::AadDomain;
 pub const SUBHEADER_OFFSET: u64 = VAULT_TOTAL_SIZE as u64;
 
 pub fn write_subheader(rw: &mut Rw, data: &Subheader, keyring: &Keyring) -> Result {
-    let cipher = EncryptionAlgorithm::default().get()?;
+    let cipher = EncryptionAlgorithm::default().resolve()?;
 
     let aad_domain = AadDomain::Subheader;
 
@@ -34,7 +34,7 @@ pub fn read_subheader(reader: &mut Reader, keyring: &Keyring) -> Result<Subheade
 
     let aad_domain = AadDomain::Subheader;
 
-    let cipher = EncryptionAlgorithm::default().get()?;
+    let cipher = EncryptionAlgorithm::default().resolve()?;
     let aad = aad_domain.encode(SUBHEADER_OFFSET);
     let key = aad_domain.derive_key(keyring)?;
 

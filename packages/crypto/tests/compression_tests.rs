@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 #[test]
 fn test_zstd_roundtrip() {
-    let compressor = CompressionAlgorithm::Zstd.get().unwrap();
+    let compressor = CompressionAlgorithm::Zstd.resolve().unwrap();
     let data = b"Hello world! This is a test string for Zstd compression.";
 
     let compressed = compressor.compress(data).unwrap();
@@ -19,7 +19,7 @@ fn test_compression_factory_from_str() {
     let algo = CompressionAlgorithm::from_str("zstd").unwrap();
     assert_eq!(algo, CompressionAlgorithm::Zstd);
 
-    let compressor = algo.get().unwrap();
+    let compressor = algo.resolve().unwrap();
     assert!(compressor.compress(b"test").is_ok());
 }
 
@@ -47,7 +47,7 @@ fn test_zstd_streaming() {
 
 #[test]
 fn test_zstd_empty_input() {
-    let compressor = CompressionAlgorithm::Zstd.get().unwrap();
+    let compressor = CompressionAlgorithm::Zstd.resolve().unwrap();
     let data = b"";
 
     let compressed = compressor.compress(data).unwrap();
@@ -58,7 +58,7 @@ fn test_zstd_empty_input() {
 
 #[test]
 fn test_zstd_invalid_data() {
-    let compressor = CompressionAlgorithm::Zstd.get().unwrap();
+    let compressor = CompressionAlgorithm::Zstd.resolve().unwrap();
     let invalid_data = b"not compressed at all";
 
     let result = compressor.decompress(invalid_data);
@@ -67,7 +67,7 @@ fn test_zstd_invalid_data() {
 
 #[test]
 fn test_zstd_large_data_roundtrip() {
-    let compressor = CompressionAlgorithm::Zstd.get().unwrap();
+    let compressor = CompressionAlgorithm::Zstd.resolve().unwrap();
     let data = vec![0u8; 1024 * 1024];
 
     let compressed = compressor.compress(&data).unwrap();

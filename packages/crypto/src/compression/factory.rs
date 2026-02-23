@@ -5,6 +5,8 @@ use crate::errors::Result;
 
 // @todo-soon rethink about name and Box<...>, consider rust-delegate
 
+pub type CompressorRef = &'static dyn Compressor;
+
 #[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum CompressionAlgorithm {
@@ -13,9 +15,9 @@ pub enum CompressionAlgorithm {
 }
 
 impl CompressionAlgorithm {
-    pub fn get(&self) -> Result<Box<dyn Compressor>> {
+    pub fn resolve(&self) -> Result<CompressorRef> {
         match self {
-            CompressionAlgorithm::Zstd => Ok(Box::new(zstd::Zstd)),
+            CompressionAlgorithm::Zstd => Ok(&zstd::Zstd),
         }
     }
 }

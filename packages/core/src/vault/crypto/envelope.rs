@@ -36,10 +36,10 @@ impl Envelope {
         nonce: &Nonce,
         aad: &[u8],
     ) -> Result<Vec<u8>> {
-        let compressor = self.compression.get()?;
+        let compressor = self.compression.resolve()?;
         let compressed = compressor.compress(plaintext)?;
 
-        let cipher = self.encryption.get()?;
+        let cipher = self.encryption.resolve()?;
         let encrypted = cipher.encrypt(key, nonce, &compressed, aad)?;
 
         Ok(encrypted)
@@ -52,10 +52,10 @@ impl Envelope {
         nonce: &Nonce,
         aad: &[u8],
     ) -> Result<Vec<u8>> {
-        let cipher = self.encryption.get()?;
+        let cipher = self.encryption.resolve()?;
         let compressed = cipher.decrypt(key, nonce, ciphertext, aad)?;
 
-        let compressor = self.compression.get()?;
+        let compressor = self.compression.resolve()?;
         let plaintext = compressor.decompress(&compressed)?;
 
         Ok(plaintext)

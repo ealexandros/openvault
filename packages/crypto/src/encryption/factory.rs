@@ -3,6 +3,8 @@ use strum_macros::{AsRefStr, Display, EnumString};
 use crate::encryption::{Cipher, xchacha20};
 use crate::errors::Result;
 
+pub type CipherRef = &'static dyn Cipher;
+
 #[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum EncryptionAlgorithm {
@@ -12,11 +14,9 @@ pub enum EncryptionAlgorithm {
 }
 
 impl EncryptionAlgorithm {
-    pub fn get(&self) -> Result<Box<dyn Cipher>> {
+    pub fn resolve(&self) -> Result<CipherRef> {
         match self {
-            EncryptionAlgorithm::XChaCha20Poly1305 => {
-                Ok(Box::new(xchacha20::XChaCha20Poly1305Cipher))
-            }
+            EncryptionAlgorithm::XChaCha20Poly1305 => Ok(&xchacha20::XChaCha20Poly1305Cipher),
         }
     }
 }
