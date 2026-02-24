@@ -4,6 +4,8 @@ mod error;
 mod session;
 mod stores;
 
+use std::path::Path;
+
 pub use client::VaultClient;
 pub use config::CreateVaultOptions;
 pub use error::{Error, Result};
@@ -28,28 +30,25 @@ pub fn client() -> VaultClient {
     VaultClient::new()
 }
 
-pub fn create_vault<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(path: P, password: S) -> Result {
+pub fn create_vault(path: impl AsRef<Path>, password: impl AsRef<[u8]>) -> Result {
     client().create(path, password)
 }
 
-pub fn create_vault_with<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(
-    path: P,
-    password: S,
+pub fn create_vault_with(
+    path: impl AsRef<Path>,
+    password: impl AsRef<[u8]>,
     options: CreateVaultOptions,
 ) -> Result {
     client().create_with(path, password, options)
 }
 
-pub fn open_vault<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(
-    path: P,
-    password: S,
-) -> Result<VaultHandle> {
+pub fn open_vault(path: impl AsRef<Path>, password: impl AsRef<[u8]>) -> Result<VaultHandle> {
     client().open(path, password)
 }
 
-pub fn create_and_open_vault<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(
-    path: P,
-    password: S,
+pub fn create_and_open_vault(
+    path: impl AsRef<Path>,
+    password: impl AsRef<[u8]>,
     options: CreateVaultOptions,
 ) -> Result<VaultHandle> {
     client().create_and_open(path, password, options)
