@@ -7,7 +7,7 @@ use std::io::Read;
 
 use crate::errors::{Error, Result};
 use crate::features::blob_ref::BlobRef;
-use crate::internal::io_ext::{ReadWrite, Reader, Writer};
+use crate::internal::io_ext::{ReadWriter, Reader, Writer};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::replay::ReplayState;
@@ -25,7 +25,7 @@ impl FormatHandler for V1FormatHandler {
         V1_FORMAT_VERSION
     }
 
-    fn init_layout(&self, rw: &mut ReadWrite, context: &FormatContext) -> Result<Subheader> {
+    fn init_layout(&self, rw: &mut ReadWriter, context: &FormatContext) -> Result<Subheader> {
         io::init_layout(rw, context)
     }
 
@@ -44,7 +44,7 @@ impl FormatHandler for V1FormatHandler {
 
     fn write_blob(
         &self,
-        rw: &mut ReadWrite,
+        rw: &mut ReadWriter,
         reader: &mut dyn Read,
         context: &FormatContext,
     ) -> Result<BlobRef> {
@@ -53,7 +53,7 @@ impl FormatHandler for V1FormatHandler {
 
     fn write_subheader(
         &self,
-        rw: &mut ReadWrite,
+        rw: &mut ReadWriter,
         subheader: &Subheader,
         context: &FormatContext,
     ) -> Result {
@@ -71,7 +71,7 @@ impl FormatHandler for V1FormatHandler {
 
     fn write_checkpoint(
         &self,
-        rw: &mut ReadWrite,
+        rw: &mut ReadWriter,
         checkpoint: &mut Checkpoint,
         context: &FormatContext,
     ) -> Result<u64> {
@@ -80,7 +80,7 @@ impl FormatHandler for V1FormatHandler {
 
     fn append_record(
         &self,
-        rw: &mut ReadWrite,
+        rw: &mut ReadWriter,
         record: &RecordHeader,
         payload: &[u8],
         context: &FormatContext,

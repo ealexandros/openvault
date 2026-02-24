@@ -1,5 +1,5 @@
 use crate::errors::{Error, Result};
-use crate::internal::io_ext::{ReadWrite, Reader, SeekExt};
+use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
 use crate::vault::versions::shared::record::{RecordHeader, RecordWire};
 use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
@@ -8,7 +8,7 @@ use crate::vault::versions::v1::io::subheader::{read_subheader, write_subheader}
 use crate::vault::versions::v1::mapper::{decode_record, encode_record};
 
 pub fn append_record(
-    rw: &mut ReadWrite,
+    rw: &mut ReadWriter,
     record: &RecordHeader,
     payload: &[u8],
     context: &FormatContext,

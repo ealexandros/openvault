@@ -1,5 +1,5 @@
 use crate::errors::Result;
-use crate::internal::io_ext::{ReadWrite, Reader};
+use crate::internal::io_ext::{ReadWriter, Reader};
 use crate::vault::crypto::envelope::Envelope;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::traits::FormatContext;
@@ -7,7 +7,7 @@ use crate::vault::versions::v1::io::aad::AadDomain;
 use openvault_crypto::encryption::Nonce;
 
 pub fn seal_frame(
-    rw: &mut ReadWrite,
+    rw: &mut ReadWriter,
     domain: AadDomain,
     data: &[u8],
     context: &FormatContext,

@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::errors::{Error, Result};
 use crate::features::blob_ref::BlobRef;
-use crate::internal::io_ext::{ReadWrite, Reader, SeekExt};
+use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
 use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::blob::{BlobChunkMeta, BlobManifest};
 use crate::vault::versions::v1::io::aad::AadDomain;
@@ -14,7 +14,7 @@ const BLOB_CHUNK_SIZE: usize = 256 * 1024;
 const BLOB_MANIFEST_VERSION: u16 = 1;
 
 pub fn write_blob(
-    rw: &mut ReadWrite,
+    rw: &mut ReadWriter,
     mut reader: impl Read,
     context: &FormatContext,
 ) -> Result<BlobRef> {

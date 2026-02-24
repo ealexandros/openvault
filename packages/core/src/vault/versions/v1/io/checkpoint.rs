@@ -1,5 +1,5 @@
 use crate::errors::Result;
-use crate::internal::io_ext::{ReadWrite, Reader, SeekExt};
+use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
@@ -18,7 +18,7 @@ pub fn read_checkpoint(
 }
 
 pub fn write_checkpoint(
-    rw: &mut ReadWrite,
+    rw: &mut ReadWriter,
     checkpoint: &mut Checkpoint,
     context: &FormatContext,
 ) -> Result<u64> {

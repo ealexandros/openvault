@@ -45,4 +45,4 @@ impl<T: ReadSeek + WriteSeek> ReadWriteSeek for T {}
 
 pub type Reader = dyn ReadSeek;
 pub type Writer = dyn WriteSeek;
-pub type ReadWrite = dyn ReadWriteSeek;
+pub type ReadWriter = dyn ReadWriteSeek;
