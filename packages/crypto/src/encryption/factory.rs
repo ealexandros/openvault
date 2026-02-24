@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum_macros::{AsRefStr, Display, EnumString};
+use strum_macros::EnumString;
 
 use crate::encryption::{Cipher, xchacha20};
 use crate::errors::{Error, Result};
@@ -7,9 +7,7 @@ use crate::errors::{Error, Result};
 pub type CipherRef = &'static dyn Cipher;
 
 #[repr(u8)]
-#[derive(
-    Debug, PartialEq, EnumString, Display, AsRefStr, Copy, Clone, Serialize, Deserialize, Default,
-)]
+#[derive(Debug, PartialEq, EnumString, Copy, Clone, Serialize, Deserialize, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum EncryptionAlgorithm {
     #[default]
@@ -30,9 +28,7 @@ impl TryFrom<u8> for EncryptionAlgorithm {
 
     fn try_from(value: u8) -> Result<Self> {
         match value {
-            x if x == EncryptionAlgorithm::XChaCha20Poly1305 as u8 => {
-                Ok(EncryptionAlgorithm::XChaCha20Poly1305)
-            }
+            1 => Ok(Self::XChaCha20Poly1305),
             _ => Err(Error::UnsupportedCipher(value)),
         }
     }
