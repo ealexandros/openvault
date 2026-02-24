@@ -15,9 +15,9 @@ pub enum CompressionAlgorithm {
 }
 
 impl CompressionAlgorithm {
-    pub fn resolve(&self) -> Result<CompressorRef> {
+    pub fn resolve(self) -> CompressorRef {
         match self {
-            CompressionAlgorithm::Zstd => Ok(&zstd::Zstd),
+            Self::Zstd => &zstd::Zstd,
         }
     }
 }

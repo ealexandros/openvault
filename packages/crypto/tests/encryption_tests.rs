@@ -6,7 +6,7 @@ const KEY_SIZE: usize = 32;
 
 #[test]
 fn test_xchacha20_roundtrip() {
-    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve().unwrap();
+    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve();
     let key = [42u8; KEY_SIZE];
     let plaintext = b"Secret message for XChaCha20";
 
@@ -20,7 +20,7 @@ fn test_xchacha20_roundtrip() {
 
 #[test]
 fn test_xchacha20_explicit_nonce_aad() {
-    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve().unwrap();
+    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve();
     let key = [42u8; KEY_SIZE];
     let nonce = Nonce::random();
     let plaintext = b"Secret message";
@@ -40,7 +40,7 @@ fn test_encryption_factory_from_str() {
     let algo2 = EncryptionAlgorithm::from_str("xchacha20poly1305").unwrap();
     assert_eq!(algo2, EncryptionAlgorithm::XChaCha20Poly1305);
 
-    let cipher = algo.resolve().unwrap();
+    let cipher = algo.resolve();
     assert!(
         cipher
             .encrypt_prefixed_nonce(&[0u8; 32], b"test", b"")
@@ -50,7 +50,7 @@ fn test_encryption_factory_from_str() {
 
 #[test]
 fn test_xchacha20_incorrect_key() {
-    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve().unwrap();
+    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve();
     let key1 = [42u8; KEY_SIZE];
     let key2 = [43u8; KEY_SIZE];
     let plaintext = b"Secret message";
@@ -65,7 +65,7 @@ fn test_xchacha20_incorrect_key() {
 
 #[test]
 fn test_xchacha20_corrupted_ciphertext() {
-    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve().unwrap();
+    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve();
     let key = [42u8; KEY_SIZE];
     let plaintext = b"Secret message";
 
@@ -81,7 +81,7 @@ fn test_xchacha20_corrupted_ciphertext() {
 
 #[test]
 fn test_xchacha20_empty_plaintext() {
-    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve().unwrap();
+    let cipher = EncryptionAlgorithm::XChaCha20Poly1305.resolve();
     let key = [42u8; KEY_SIZE];
     let plaintext = b"";
 

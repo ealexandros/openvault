@@ -16,9 +16,9 @@ pub enum EncryptionAlgorithm {
 }
 
 impl EncryptionAlgorithm {
-    pub fn resolve(&self) -> Result<CipherRef> {
+    pub fn resolve(self) -> CipherRef {
         match self {
-            EncryptionAlgorithm::XChaCha20Poly1305 => Ok(&xchacha20::XChaCha20Poly1305Cipher),
+            Self::XChaCha20Poly1305 => &xchacha20::XChaCha20Poly1305Cipher,
         }
     }
 }

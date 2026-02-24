@@ -5,10 +5,10 @@ use crate::VAULT_EXTENSION;
 use crate::errors::{Error, Result};
 use crate::internal::fs::{create_new_file, open_with_read_write, remove_if_exists, resolve_path};
 use crate::operations::config::CreateConfig;
-use crate::vault::boot_header::BootHeader;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::runtime::VaultSession;
 use crate::vault::versions::resolve_format;
+use crate::vault::versions::shared::boot_header::BootHeader;
 use crate::vault::versions::shared::traits::FormatContext;
 
 pub fn create_vault_with(path: &Path, password: &[u8], config: CreateConfig) -> Result {

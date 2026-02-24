@@ -1,6 +1,6 @@
 use std::io::{Cursor, Write};
 
-use byteorder::{LittleEndian, ReadBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crc32fast;
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
@@ -52,8 +52,8 @@ impl BootHeader {
             cursor.write_all(&self.magic)?;
             cursor.write_all(&self.version.to_le_bytes())?;
             cursor.write_all(&self.salt)?;
-            cursor.write_all(&[self.cipher as u8])?;
-            cursor.write_all(&[self.compressor as u8])?;
+            cursor.write_u8(self.cipher as u8)?;
+            cursor.write_u8(self.compressor as u8)?;
         }
 
         let crc = crc32fast::hash(&bytes[..VAULT_PAYLOAD_SIZE]);
@@ -69,7 +69,11 @@ impl BootHeader {
 
         let (payload, crc_bytes) = bytes.split_at(VAULT_PAYLOAD_SIZE);
 
-        let stored_crc = u32::from_le_bytes(crc_bytes.try_into().unwrap());
+        let stored_crc = u32::from_le_bytes(
+            crc_bytes
+                .try_into()
+                .map_err(|_| Error::InvalidVaultFormat)?,
+        );
         let computed_crc = crc32fast::hash(payload);
 
         if stored_crc != computed_crc {
@@ -78,14 +82,14 @@ impl BootHeader {
 
         let mut cursor = Cursor::new(payload);
 
-        let magic = cursor.read_exact_array::<VAULT_MAGIC_SIZE>()?;
+        let magic = cursor.read_exact_arr::<VAULT_MAGIC_SIZE>()?;
 
         if magic != *VAULT_MAGIC {
             return Err(Error::InvalidVaultFormat);
         }
 
         let version = cursor.read_u16::<LittleEndian>()?;
-        let salt = cursor.read_exact_array::<SALT_SIZE>()?;
+        let salt = cursor.read_exact_arr::<SALT_SIZE>()?;
         let cipher = cursor.read_u8()?;
         let compressor = cursor.read_u8()?;
 
@@ -100,11 +104,11 @@ impl BootHeader {
 
     pub fn read_from(reader: &mut Reader) -> Result<Self> {
         reader.seek_to_start()?;
-        let buffer = reader.read_exact_vec(Self::SIZE)?;
+        let buffer = reader.read_exact_arr::<{ Self::SIZE }>()?;
         Self::from_bytes(&buffer)
     }
 
-    pub fn write_to(&self, writer: &mut Writer) -> Result<()> {
+    pub fn write_to(&self, writer: &mut Writer) -> Result {
         writer.seek_to_start()?;
         writer.write_all(&self.to_bytes()?)?;
         Ok(())

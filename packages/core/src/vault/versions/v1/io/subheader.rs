@@ -2,7 +2,7 @@ use openvault_crypto::encryption::Nonce;
 
 use crate::errors::Result;
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
-use crate::vault::boot_header::BootHeader;
+use crate::vault::versions::shared::boot_header::BootHeader;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::FormatContext;
@@ -17,7 +17,7 @@ pub fn write_subheader(rw: &mut ReadWriter, data: &Subheader, context: &FormatCo
     let aad = aad_domain.encode(SUBHEADER_OFFSET);
     let key = aad_domain.derive_key(context.keyring)?;
 
-    let cipher = context.cipher.resolve()?;
+    let cipher = context.cipher.resolve();
     let ciphertext = cipher.encrypt(&key, &nonce, &data.to_bytes()?, &aad)?;
 
     rw.seek_from_start(SUBHEADER_OFFSET)?;
@@ -35,7 +35,7 @@ pub fn read_subheader(reader: &mut Reader, context: &FormatContext) -> Result<Su
     let aad = aad_domain.encode(SUBHEADER_OFFSET);
     let key = aad_domain.derive_key(context.keyring)?;
 
-    let cipher = context.cipher.resolve()?;
+    let cipher = context.cipher.resolve();
     let plaintext = cipher.decrypt(&key, &frame.nonce, &ciphertext, &aad)?;
 
     Subheader::from_bytes(&plaintext)
