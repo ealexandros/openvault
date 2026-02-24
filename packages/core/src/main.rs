@@ -5,6 +5,7 @@ use openvault_core::errors::Result;
 use openvault_core::features::filesystem::scan_directory;
 use openvault_core::operations::blob::{get_blob, put_blob};
 use openvault_core::operations::config::CreateConfig;
+use openvault_core::operations::filesystem::load_filesystem_store;
 use openvault_core::operations::replay::replay_since_checkpoint;
 use openvault_core::operations::vault::create_and_open_vault;
 use openvault_crypto::compression::CompressionAlgorithm;
@@ -35,6 +36,10 @@ fn main() -> Result {
     println!("Replay state: {:#?}", replay_state);
 
     let (_files, _folders) = scan_directory(Path::new("./temp"))?;
+
+    let filesystem_store = load_filesystem_store(&mut session)?;
+
+    println!("Filesystem store: {:#?}", filesystem_store);
 
     // println!("Files: {:#?}", files);
     // println!("Folders: {:#?}", folders);

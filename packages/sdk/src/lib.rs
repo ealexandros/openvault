@@ -2,13 +2,24 @@ mod client;
 mod config;
 mod error;
 mod session;
+mod stores;
 
 pub use client::VaultClient;
 pub use config::CreateVaultOptions;
 pub use error::{Error, Result};
 pub use session::VaultHandle;
+pub use stores::{StoresCommitResult, VaultStores};
 
 pub use openvault_core::features::blob_ref::BlobRef;
+pub use openvault_core::features::filesystem::{
+    FileMetadata, FileMetadataPatch, FilesystemChange, FilesystemDelta, FilesystemError,
+    FilesystemSnapshot, FilesystemStore, FolderMetadata, FolderMetadataPatch, ROOT_FOLDER_ID,
+    scan_directory, scan_file,
+};
+pub use openvault_core::features::secrets::{
+    EncryptedField, LoginEntry, LoginEntryPatch, SecretDelta, SecretError, SecretSnapshot,
+    SecretStore, SecretsChange, TOTP,
+};
 pub use openvault_core::vault::versions::shared::replay::{ReplayRecord, ReplayState};
 pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;

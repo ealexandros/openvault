@@ -6,6 +6,12 @@ pub enum Error {
     Crypto(#[from] openvault_crypto::errors::Error),
 
     #[error(transparent)]
+    Filesystem(#[from] crate::features::filesystem::FilesystemError),
+
+    #[error(transparent)]
+    Secrets(#[from] crate::features::secrets::SecretError),
+
+    #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
@@ -25,6 +31,9 @@ pub enum Error {
 
     #[error("Invalid entry header")]
     InvalidEntryHeader,
+
+    #[error("Feature codec error: {0}")]
+    FeatureCodec(String),
 
     #[error("Unable to unlock vault. Verify password and selected algorithms")]
     UnlockFailed,
