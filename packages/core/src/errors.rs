@@ -25,15 +25,25 @@ pub enum Error {
 
     #[error("Invalid entry header")]
     InvalidEntryHeader,
+
+    #[error("Unable to unlock vault. Verify password and selected algorithms")]
+    UnlockFailed,
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
 impl Error {
-    pub fn file_exists() -> Self {
-        std::io::Error::new(std::io::ErrorKind::AlreadyExists, "File already exists").into()
-    }
     pub fn file_not_exists() -> Self {
         std::io::Error::new(std::io::ErrorKind::NotFound, "File not found").into()
+    }
+    pub fn map_unlock_error(error: Error) -> Error {
+        use openvault_crypto::errors::Error as CryptoError;
+
+        match error {
+            Error::Crypto(CryptoError::DecryptionFailed)
+            | Error::Crypto(CryptoError::InvalidKeyLength)
+            | Error::Crypto(CryptoError::DecompressionFailed(_)) => Error::UnlockFailed,
+            _ => error,
+        }
     }
 }

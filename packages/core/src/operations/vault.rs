@@ -2,7 +2,7 @@ use openvault_crypto::keys::salt::Salt;
 use std::path::Path;
 
 use crate::VAULT_EXTENSION;
-use crate::errors::Result;
+use crate::errors::{Error, Result};
 use crate::internal::fs::{create_new_file, open_with_read_write, remove_if_exists, resolve_path};
 use crate::operations::config::{CreateConfig, OpenConfig};
 use crate::vault::boot_header::BootHeader;
@@ -46,7 +46,10 @@ pub fn open_vault(path: &Path, password: &[u8], config: OpenConfig) -> Result<Va
     let format = resolve_format(boot_header.version)?;
 
     let context = FormatContext::new(&keyring, config.compression, config.cipher);
-    format.read_subheader(&mut file, &context)?;
+
+    format
+        .read_subheader(&mut file, &context)
+        .map_err(Error::map_unlock_error)?;
 
     Ok(VaultSession::new(
         file,

@@ -1,16 +1,16 @@
 use crate::errors::Result;
 use crate::internal::io_ext::Reader;
+use crate::vault::versions::shared::replay::{ReplayRecord, ReplayState};
 use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::record::read_replay_records;
 use crate::vault::versions::v1::io::{read_checkpoint, read_subheader};
 
-pub fn replay_records(reader: &mut Reader, context: &FormatContext) -> Result {
+pub fn replay_records(reader: &mut Reader, context: &FormatContext) -> Result<ReplayState> {
     let subheader = read_subheader(reader, context)?;
 
-    if subheader.checkpoint_offset != 0 {
-        let checkpoint = read_checkpoint(reader, subheader.checkpoint_offset, context)?;
-        println!("{:#?}", checkpoint);
-    }
+    let checkpoint = (subheader.checkpoint_offset != 0)
+        .then(|| read_checkpoint(reader, subheader.checkpoint_offset, context))
+        .transpose()?;
 
     let records = read_replay_records(
         reader,
@@ -19,10 +19,10 @@ pub fn replay_records(reader: &mut Reader, context: &FormatContext) -> Result {
         context,
     )?;
 
-    for (_offset, record) in records {
-        println!("{:#?}", record.header);
-        println!("{:#?}", record.payload);
-    }
+    let records = records
+        .into_iter()
+        .map(|(offset, record)| ReplayRecord::new(offset, record.header, record.payload))
+        .collect();
 
-    Ok(())
+    Ok(ReplayState::new(subheader, checkpoint, records))
 }

@@ -5,6 +5,7 @@ use openvault_core::errors::Result;
 use openvault_core::features::filesystem::scan_directory;
 use openvault_core::operations::blob::{get_blob, put_blob};
 use openvault_core::operations::config::CreateConfig;
+use openvault_core::operations::replay::replay_since_checkpoint;
 use openvault_core::operations::vault::create_and_open_vault;
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
@@ -29,10 +30,14 @@ fn main() -> Result {
     println!("Vault version: {}", session.version());
     println!("Blob: {}", String::from_utf8_lossy(&blob));
 
-    let (files, folders) = scan_directory(Path::new("./temp"))?;
+    let replay_state = replay_since_checkpoint(&mut session)?;
 
-    println!("Files: {:#?}", files);
-    println!("Folders: {:#?}", folders);
+    println!("Replay state: {:#?}", replay_state);
+
+    let (_files, _folders) = scan_directory(Path::new("./temp"))?;
+
+    // println!("Files: {:#?}", files);
+    // println!("Folders: {:#?}", folders);
 
     Ok(())
 }

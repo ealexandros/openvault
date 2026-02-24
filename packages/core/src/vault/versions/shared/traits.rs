@@ -9,6 +9,7 @@ use crate::internal::io_ext::{ReadWrite, Reader, Writer};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
+use crate::vault::versions::shared::replay::ReplayState;
 use crate::vault::versions::shared::subheader::Subheader;
 
 pub struct FormatContext<'a> {
@@ -88,7 +89,7 @@ pub trait FormatHandler {
         context: &FormatContext,
     ) -> Result<(RecordHeader, Vec<u8>)>;
 
-    fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result;
+    fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result<ReplayState>;
 
     fn compact(&self, reader: &mut Reader, writer: &mut Writer, context: &FormatContext) -> Result;
 }

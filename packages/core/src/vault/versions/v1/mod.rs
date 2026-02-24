@@ -10,6 +10,7 @@ use crate::features::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWrite, Reader, Writer};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
+use crate::vault::versions::shared::replay::ReplayState;
 use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::{FormatContext, FormatHandler};
 use crate::vault::versions::v1::replay::replay_records;
@@ -97,7 +98,7 @@ impl FormatHandler for V1FormatHandler {
         Ok((record_wire.header, record_wire.payload))
     }
 
-    fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result {
+    fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result<ReplayState> {
         replay_records(reader, context)
     }
 
