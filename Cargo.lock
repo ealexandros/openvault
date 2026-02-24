@@ -2591,6 +2591,11 @@ dependencies = [
 [[package]]
 name = "openvault-sdk"
 version = "0.0.0"
+dependencies = [
+ "openvault-core",
+ "openvault-crypto",
+ "thiserror 2.0.18",
+]
 
 [[package]]
 name = "option-ext"
