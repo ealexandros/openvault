@@ -8,11 +8,11 @@ use crate::errors::{Error, Result};
 
 use super::metadata::{FileMetadata, FolderMetadata};
 
-fn to_vault_path(path: &Path) -> String {
+fn to_path(path: &Path) -> String {
     format!("/{}", path.to_string_lossy())
 }
 
-pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileMetadata>, Vec<FolderMetadata>)> {
+pub fn scan_directory(root: &Path) -> Result<(Vec<FileMetadata>, Vec<FolderMetadata>)> {
     let mut files = Vec::new();
     let mut folders = Vec::new();
 
@@ -33,11 +33,11 @@ pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileMetadata>, Vec<FolderMeta
 
         let relative = path.strip_prefix(root).map_err(|_| Error::InvalidPath)?;
 
-        let vault_path = to_vault_path(relative);
+        let path = to_path(relative);
 
         let parent_path = relative
             .parent()
-            .map(to_vault_path)
+            .map(to_path)
             .unwrap_or_else(|| "/".to_string());
 
         let parent_id = id_map
@@ -48,8 +48,8 @@ pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileMetadata>, Vec<FolderMeta
         let id = Uuid::new_v4();
 
         if entry.file_type().is_dir() {
-            folders.push(FolderMetadata::new(id, Some(parent_id), vault_path.clone()));
-            id_map.insert(vault_path, id);
+            folders.push(FolderMetadata::new(id, Some(parent_id), path.clone()));
+            id_map.insert(path, id);
             continue;
         }
 
@@ -58,10 +58,21 @@ pub fn scan_filesystem(root: &Path) -> Result<(Vec<FileMetadata>, Vec<FolderMeta
             .map(|s| s.to_string_lossy().into_owned())
             .ok_or(Error::InvalidPath)?;
 
-        let metadata = entry.metadata()?;
-
-        files.push(FileMetadata::new(id, parent_id, name, metadata.len()));
+        files.push(FileMetadata::new(id, parent_id, name));
     }
 
     Ok((files, folders))
+}
+
+pub fn scan_file(path: &Path) -> Result<FileMetadata> {
+    let id = Uuid::new_v4();
+
+    let name = path
+        .file_name()
+        .map(|s| s.to_string_lossy().into_owned())
+        .ok_or(Error::InvalidPath)?;
+
+    // @todo-soon fix parent_id
+
+    Ok(FileMetadata::new(id, id, name))
 }

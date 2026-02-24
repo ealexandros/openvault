@@ -96,7 +96,7 @@ mod tests {
 
         let file_id = Uuid::new_v4();
         let mut files = HashMap::new();
-        let mut file = FileMetadata::new(file_id, docs_id, "report.txt", 256);
+        let mut file = FileMetadata::new(file_id, docs_id, "report.txt");
 
         file.blob = Some(BlobRef {
             id: Uuid::nil(),

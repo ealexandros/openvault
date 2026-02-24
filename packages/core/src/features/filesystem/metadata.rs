@@ -57,7 +57,6 @@ pub struct FileMetadata {
     pub id: Uuid,
     pub parent_id: Uuid,
     pub name: String,
-    pub size: u64,
     pub mime_type: Option<String>,
     pub blob: Option<BlobRef>,
     pub created_at: DateTime<Utc>,
@@ -65,13 +64,12 @@ pub struct FileMetadata {
 }
 
 impl FileMetadata {
-    pub fn new(id: Uuid, parent_id: Uuid, name: impl Into<String>, size: u64) -> Self {
+    pub fn new(id: Uuid, parent_id: Uuid, name: impl Into<String>) -> Self {
         let now = Utc::now();
         Self {
             id,
             parent_id,
             name: name.into(),
-            size,
             mime_type: None,
             blob: None,
             created_at: now,

@@ -2,7 +2,7 @@ use std::io::Cursor;
 use std::path::Path;
 
 use openvault_core::errors::Result;
-use openvault_core::features::filesystem::scan_filesystem;
+use openvault_core::features::filesystem::scan_directory;
 use openvault_core::operations::blob::{get_blob, put_blob};
 use openvault_core::operations::config::CreateConfig;
 use openvault_core::operations::vault::create_and_open_vault;
@@ -24,7 +24,7 @@ fn main() -> Result {
     println!("Vault version: {}", session.format().version());
     println!("Blob: {}", String::from_utf8_lossy(&blob));
 
-    let (files, folders) = scan_filesystem(Path::new("./temp"))?;
+    let (files, folders) = scan_directory(Path::new("./temp"))?;
 
     println!("Files: {:#?}", files);
     println!("Folders: {:#?}", folders);

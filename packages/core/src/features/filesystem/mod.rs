@@ -15,4 +15,4 @@ pub use records::{
 };
 pub use store::FilesystemStore;
 
-pub use scanner::scan_filesystem;
+pub use scanner::{scan_directory, scan_file};
