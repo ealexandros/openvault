@@ -41,8 +41,8 @@ impl EncryptedField {
     }
 }
 
-const DEFAULT_PERIOD: u64 = 30;
-const DEFAULT_DIGITS: u8 = 6;
+const DEFAULT_PERIOD: NonZeroU64 = NonZeroU64::new(30).unwrap();
+const DEFAULT_DIGITS: NonZeroU8 = NonZeroU8::new(6).unwrap();
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate, Zeroize, ZeroizeOnDrop)]
 pub struct TOTP {
@@ -54,10 +54,23 @@ pub struct TOTP {
 
 impl TOTP {
     pub fn new(secret: String, period: Option<u64>, digits: Option<u8>) -> Result<Self> {
+        let period = match period {
+            Some(p) => NonZeroU64::new(p).ok_or_else(|| {
+                SecretError::InvalidInput("TOTP period must be non-zero".to_string())
+            })?,
+            None => DEFAULT_PERIOD,
+        };
+        let digits = match digits {
+            Some(d) => NonZeroU8::new(d).ok_or_else(|| {
+                SecretError::InvalidInput("TOTP digits must be non-zero".to_string())
+            })?,
+            None => DEFAULT_DIGITS,
+        };
+
         let totp = Self {
             secret,
-            period: NonZeroU64::new(period.unwrap_or(DEFAULT_PERIOD)).unwrap(),
-            digits: NonZeroU8::new(digits.unwrap_or(DEFAULT_DIGITS)).unwrap(),
+            period,
+            digits,
         };
 
         totp.validate()
@@ -71,8 +84,8 @@ impl Default for TOTP {
     fn default() -> Self {
         Self {
             secret: String::new(),
-            period: NonZeroU64::new(DEFAULT_PERIOD).unwrap(),
-            digits: NonZeroU8::new(DEFAULT_DIGITS).unwrap(),
+            period: DEFAULT_PERIOD,
+            digits: DEFAULT_DIGITS,
         }
     }
 }

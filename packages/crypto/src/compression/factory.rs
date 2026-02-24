@@ -5,6 +5,7 @@ use crate::errors::Result;
 
 pub type CompressorRef = &'static dyn Compressor;
 
+#[repr(u8)]
 #[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Copy, Clone, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum CompressionAlgorithm {

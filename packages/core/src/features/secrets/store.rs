@@ -148,6 +148,9 @@ impl SecretStore {
     fn apply_delta(&mut self, delta: &SecretDelta, track_delta: bool) -> Result {
         match delta {
             SecretDelta::Added(entry) => {
+                if self.entries.contains_key(&entry.id) {
+                    return Err(SecretError::DuplicateId(entry.id));
+                }
                 let mut entry = entry.clone();
                 entry.folder = normalize_folder_path(&entry.folder);
 
@@ -172,7 +175,10 @@ impl SecretStore {
                     .ensure_name_available(&target_folder, target_name, Some(id))?;
 
                 let old_entry = current.clone();
-                let entry = self.entries.get_mut(id).unwrap();
+                let entry = self
+                    .entries
+                    .get_mut(id)
+                    .ok_or_else(|| SecretError::NotFound(id.to_string()))?;
 
                 entry.patch(patch.clone())?;
                 entry.folder = normalize_folder_path(&entry.folder);

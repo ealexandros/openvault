@@ -1,7 +1,5 @@
+use openvault_crypto::encryption::EncryptionAlgorithm;
 use openvault_crypto::encryption::nonce::Nonce;
-use openvault_crypto::encryption::xchacha20::XChaCha20Poly1305Cipher;
-use openvault_crypto::encryption::{Cipher, EncryptionAlgorithm};
-use std::io::Cursor;
 use std::str::FromStr;
 
 const KEY_SIZE: usize = 32;
@@ -48,58 +46,6 @@ fn test_encryption_factory_from_str() {
             .encrypt_prefixed_nonce(&[0u8; 32], b"test", b"")
             .is_ok()
     );
-}
-
-#[test]
-fn test_xchacha20_streaming() {
-    let cipher = XChaCha20Poly1305Cipher;
-    let key = [42u8; KEY_SIZE];
-    let data = b"Large-ish data to test streaming encryption functionality.".repeat(1000);
-
-    let mut input = Cursor::new(data.clone());
-    let mut ciphertext_stream = Cursor::new(Vec::new());
-
-    cipher
-        .encrypt_stream(&key, &mut input, &mut ciphertext_stream)
-        .unwrap();
-
-    let mut encrypted_input = Cursor::new(ciphertext_stream.into_inner());
-    let mut output_stream = Cursor::new(Vec::new());
-
-    cipher
-        .decrypt_stream(&key, &mut encrypted_input, &mut output_stream)
-        .unwrap();
-
-    let output = output_stream.into_inner();
-    assert_eq!(data, output);
-}
-
-#[test]
-fn test_xchacha20_streaming_bad_aad() {
-    let cipher = XChaCha20Poly1305Cipher;
-    let key = [42u8; KEY_SIZE];
-    let data = b"Large-ish data to test streaming encryption functionality.".repeat(10);
-
-    let mut input = Cursor::new(data);
-    let mut ciphertext_stream = Cursor::new(Vec::new());
-
-    cipher
-        .encrypt_stream(&key, &mut input, &mut ciphertext_stream)
-        .unwrap();
-
-    let ciphertext = ciphertext_stream.into_inner();
-
-    let mut corrupted = Vec::new();
-    corrupted.extend_from_slice(&ciphertext[..24]);
-    corrupted.push(0u8);
-    corrupted.extend_from_slice(&ciphertext[24..]);
-
-    let mut encrypted_input = Cursor::new(corrupted);
-    let mut output_stream = Cursor::new(Vec::new());
-
-    let result = cipher.decrypt_stream(&key, &mut encrypted_input, &mut output_stream);
-
-    assert!(result.is_err());
 }
 
 #[test]

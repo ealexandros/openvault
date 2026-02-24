@@ -75,3 +75,11 @@ pub fn create_and_open_vault(
 pub fn change_password() {
     todo!()
 }
+
+pub fn compact() {
+    todo!()
+}
+
+pub fn close_vault() {
+    todo!()
+}

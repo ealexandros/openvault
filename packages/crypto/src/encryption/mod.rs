@@ -8,14 +8,10 @@ pub use nonce::{NONCE_SIZE, Nonce};
 use std::fmt::Debug;
 
 use crate::errors::Result;
-use crate::internal::io_ext::{Reader, Writer};
 
 pub trait Cipher: Debug + Send + Sync {
     fn encrypt(&self, key: &[u8], nonce: &Nonce, plaintext: &[u8], aad: &[u8]) -> Result<Vec<u8>>;
     fn decrypt(&self, key: &[u8], nonce: &Nonce, ciphertext: &[u8], aad: &[u8]) -> Result<Vec<u8>>;
-
-    fn encrypt_stream(&self, key: &[u8], input: &mut Reader, output: &mut Writer) -> Result;
-    fn decrypt_stream(&self, key: &[u8], input: &mut Reader, output: &mut Writer) -> Result;
 
     fn encrypt_no_aad(&self, key: &[u8], nonce: &Nonce, plaintext: &[u8]) -> Result<Vec<u8>> {
         self.encrypt(key, nonce, plaintext, b"")

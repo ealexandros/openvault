@@ -6,6 +6,7 @@ use crate::errors::{Error, Result};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
     Filesystem = 1,
+    Secrets = 2,
 }
 
 impl TryFrom<u16> for FeatureType {
@@ -14,6 +15,7 @@ impl TryFrom<u16> for FeatureType {
     fn try_from(v: u16) -> Result<Self> {
         match v {
             1 => Ok(Self::Filesystem),
+            2 => Ok(Self::Secrets),
             _ => Err(Error::InvalidVaultFormat),
         }
     }

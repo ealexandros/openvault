@@ -17,6 +17,9 @@ pub enum SecretError {
     #[error("Secret already exists: {0}")]
     AlreadyExists(String),
 
+    #[error("Duplicate secret ID: {0}")]
+    DuplicateId(uuid::Uuid),
+
     #[error("Secret not found: {0}")]
     NotFound(String),
 
