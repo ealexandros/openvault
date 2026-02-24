@@ -43,9 +43,10 @@ impl FilesystemStore {
             deltas: Vec::new(),
         };
 
-        if !store.folders.contains_key(&ROOT_FOLDER_ID) {
-            store.folders.insert(ROOT_FOLDER_ID, FolderMetadata::root());
-        }
+        store
+            .folders
+            .entry(ROOT_FOLDER_ID)
+            .or_insert_with(FolderMetadata::root);
 
         store.validate_snapshot()?;
 
@@ -158,9 +159,9 @@ impl FilesystemStore {
         self.folders = snapshot.folders;
         self.files = snapshot.files;
 
-        if !self.folders.contains_key(&ROOT_FOLDER_ID) {
-            self.folders.insert(ROOT_FOLDER_ID, FolderMetadata::root());
-        }
+        self.folders
+            .entry(ROOT_FOLDER_ID)
+            .or_insert_with(FolderMetadata::root);
 
         self.validate_snapshot()
     }

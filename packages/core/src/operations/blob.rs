@@ -1,20 +1,17 @@
+use std::io::Read;
+
 use crate::errors::Result;
 use crate::features::blob_ref::BlobRef;
-use crate::internal::io_ext::Reader;
 use crate::vault::runtime::VaultSession;
 
-pub fn put_blob(session: &mut VaultSession, source: &mut Reader) -> Result<BlobRef> {
+pub fn put_blob(session: &mut VaultSession, source: &mut dyn Read) -> Result<BlobRef> {
     let format = session.format();
-    let keyring = session.keyring().clone();
-    let file = session.file_mut();
 
-    format.write_blob(file, source, &keyring)
+    session.with_format_context(|file, context| format.write_blob(file, source, context))
 }
 
 pub fn get_blob(session: &mut VaultSession, blob_ref: &BlobRef) -> Result<Vec<u8>> {
     let format = session.format();
-    let keyring = session.keyring().clone();
-    let file = session.file_mut();
 
-    format.read_blob(file, blob_ref, &keyring)
+    session.with_format_context(|file, context| format.read_blob(file, blob_ref, context))
 }

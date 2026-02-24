@@ -5,7 +5,7 @@ use crate::errors::Result;
 
 pub type CipherRef = &'static dyn Cipher;
 
-#[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Default)]
+#[derive(Debug, PartialEq, EnumString, Display, AsRefStr, Copy, Clone, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum EncryptionAlgorithm {
     #[default]

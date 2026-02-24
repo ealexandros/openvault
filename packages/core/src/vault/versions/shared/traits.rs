@@ -1,59 +1,94 @@
+use std::io::Read;
+
+use openvault_crypto::compression::CompressionAlgorithm;
+use openvault_crypto::encryption::EncryptionAlgorithm;
+
 use crate::errors::Result;
 use crate::features::blob_ref::BlobRef;
-use crate::internal::io_ext::{Reader, Rw, Writer};
+use crate::internal::io_ext::{ReadWrite, Reader, Writer};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;
 use crate::vault::versions::shared::subheader::Subheader;
 
+pub struct FormatContext<'a> {
+    pub keyring: &'a Keyring,
+    pub compressor: CompressionAlgorithm,
+    pub cipher: EncryptionAlgorithm,
+}
+
+impl<'a> FormatContext<'a> {
+    pub fn new(
+        keyring: &'a Keyring,
+        compressor: CompressionAlgorithm,
+        cipher: EncryptionAlgorithm,
+    ) -> Self {
+        Self {
+            keyring,
+            compressor,
+            cipher,
+        }
+    }
+}
+
 pub trait FormatHandler {
     fn version(&self) -> u16;
 
-    fn init_layout(&self, rw: &mut Rw, keyring: &Keyring) -> Result<Subheader>;
+    fn init_layout(&self, rw: &mut ReadWrite, context: &FormatContext) -> Result<Subheader>;
 
-    fn read_subheader(&self, reader: &mut Reader, keyring: &Keyring) -> Result<Subheader>;
+    fn read_subheader(&self, reader: &mut Reader, context: &FormatContext) -> Result<Subheader>;
 
     fn read_blob(
         &self,
         reader: &mut Reader,
         blob_ref: &BlobRef,
-        keyring: &Keyring,
+        context: &FormatContext,
     ) -> Result<Vec<u8>>;
 
-    fn write_blob(&self, rw: &mut Rw, reader: &mut Reader, keyring: &Keyring) -> Result<BlobRef>;
+    fn write_blob(
+        &self,
+        rw: &mut ReadWrite,
+        reader: &mut dyn Read,
+        context: &FormatContext,
+    ) -> Result<BlobRef>;
 
-    fn write_subheader(&self, rw: &mut Rw, subheader: &Subheader, keyring: &Keyring) -> Result;
+    fn write_subheader(
+        &self,
+        rw: &mut ReadWrite,
+        subheader: &Subheader,
+        context: &FormatContext,
+    ) -> Result;
 
     fn read_checkpoint(
         &self,
         reader: &mut Reader,
         offset: u64,
-        keyring: &Keyring,
+        context: &FormatContext,
     ) -> Result<Checkpoint>;
 
     fn write_checkpoint(
         &self,
-        rw: &mut Rw,
+        rw: &mut ReadWrite,
         checkpoint: &mut Checkpoint,
-        keyring: &Keyring,
+        context: &FormatContext,
     ) -> Result<u64>;
 
     fn append_record(
         &self,
-        rw: &mut Rw,
+        rw: &mut ReadWrite,
         record: &RecordHeader,
         payload: &[u8],
-        keyring: &Keyring,
+        context: &FormatContext,
     ) -> Result<u64>;
 
     fn read_record(
         &self,
         reader: &mut Reader,
         offset: u64,
-        keyring: &Keyring,
+        context: &FormatContext,
     ) -> Result<(RecordHeader, Vec<u8>)>;
 
-    fn replay(&self, reader: &mut Reader, keyring: &Keyring) -> Result;
+    fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result;
 
-    fn compact(&self, reader: &mut Reader, writer: &mut Writer, keyring: &Keyring) -> Result;
+    fn compact(&self, reader: &mut Reader, writer: &mut Writer, context: &FormatContext) -> Result;
 }

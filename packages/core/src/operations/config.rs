@@ -3,7 +3,7 @@ use openvault_crypto::encryption::EncryptionAlgorithm;
 
 use crate::vault::versions::factory::LATEST_FORMAT_VERSION;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CreateConfig {
     pub version: u16,
     pub compression: CompressionAlgorithm,
@@ -27,7 +27,7 @@ impl CreateConfig {
         self
     }
 
-    pub fn with_cipher(mut self, cipher: EncryptionAlgorithm) -> Self {
+    pub fn with_encryption(mut self, cipher: EncryptionAlgorithm) -> Self {
         self.cipher = cipher;
         self
     }
@@ -51,6 +51,35 @@ impl Default for CreateConfig {
             cipher: EncryptionAlgorithm::default(),
             filename: String::new(),
             overwrite: false,
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct OpenConfig {
+    pub compression: CompressionAlgorithm,
+    pub cipher: EncryptionAlgorithm,
+}
+
+impl OpenConfig {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_compression(mut self, compression: CompressionAlgorithm) -> Self {
+        self.compression = compression;
+        self
+    }
+
+    pub fn with_encryption(mut self, cipher: EncryptionAlgorithm) -> Self {
+        self.cipher = cipher;
+        self
+    }
+
+    pub fn from_create(config: &CreateConfig) -> Self {
+        Self {
+            compression: config.compression,
+            cipher: config.cipher,
         }
     }
 }

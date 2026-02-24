@@ -1,11 +1,10 @@
 use crc32fast;
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Seek, Write};
 
 use openvault_crypto::keys::salt::{SALT_SIZE, Salt};
 
 use crate::errors::{Error, Result};
-use crate::internal::io_ext::SeekExt;
+use crate::internal::io_ext::{ReadExt, Reader, SeekExt, Writer};
 use crate::vault::versions::factory::LATEST_FORMAT_VERSION;
 
 pub const VAULT_MAGIC: &[u8; 6] = b"OPENV0";
@@ -75,16 +74,14 @@ impl BootHeader {
         Ok(header)
     }
 
-    pub fn read_from<R: Seek + Read>(reader: &mut R) -> Result<Self> {
-        reader.seek_start()?;
-
-        let mut buffer = [0u8; VAULT_TOTAL_SIZE];
-        reader.read_exact(&mut buffer)?;
+    pub fn read_from(reader: &mut Reader) -> Result<Self> {
+        reader.seek_to_start()?;
+        let buffer = reader.read_exact_vec(VAULT_TOTAL_SIZE)?;
         Self::from_bytes(&buffer)
     }
 
-    pub fn write_to<W: Seek + Write>(&self, writer: &mut W) -> Result {
-        writer.seek_start()?;
+    pub fn write_to(&self, writer: &mut Writer) -> Result {
+        writer.seek_to_start()?;
         writer.write_all(&self.to_bytes()?)?;
         Ok(())
     }

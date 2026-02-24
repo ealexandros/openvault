@@ -42,7 +42,7 @@ pub fn resolve_path(path: &Path, filename: &str, extension: &str) -> std::path::
         }
     }
 
-    if resolved.extension().map_or(true, |ext| ext != extension) {
+    if resolved.extension().is_none_or(|ext| ext != extension) {
         resolved.set_extension(extension);
     }
 

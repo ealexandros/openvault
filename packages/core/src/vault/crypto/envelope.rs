@@ -6,19 +6,10 @@ use serde::de::DeserializeOwned;
 
 use crate::errors::{Error, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Envelope {
     compression: CompressionAlgorithm,
     encryption: EncryptionAlgorithm,
-}
-
-impl Default for Envelope {
-    fn default() -> Self {
-        Self {
-            compression: CompressionAlgorithm::default(),
-            encryption: EncryptionAlgorithm::default(),
-        }
-    }
 }
 
 impl Envelope {
