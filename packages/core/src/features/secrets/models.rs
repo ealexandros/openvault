@@ -1,14 +1,83 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::num::{NonZeroU8, NonZeroU64};
 use uuid::Uuid;
-use zeroize::Zeroize;
+use validator::Validate;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
-use crate::domain::folders::path::normalize_folder_path;
-use crate::domain::secrets::crypto::EncryptedField;
-use crate::domain::secrets::totp::TOTP;
-use crate::errors::Result;
+use super::error::{Result, SecretError};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+pub const ROOT_FOLDER: &str = "/";
+
+pub fn normalize_folder_path(path: &str) -> String {
+    let trimmed = path.trim();
+
+    if trimmed.is_empty() || trimmed == ROOT_FOLDER {
+        return ROOT_FOLDER.to_string();
+    }
+
+    let parts: Vec<&str> = trimmed
+        .split('/')
+        .filter(|segment| !segment.trim().is_empty())
+        .collect();
+
+    if parts.is_empty() {
+        return ROOT_FOLDER.to_string();
+    }
+
+    format!("/{}", parts.join("/"))
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, PartialEq, Eq)]
+pub struct EncryptedField(Vec<u8>);
+
+impl EncryptedField {
+    pub const fn new(ciphertext: Vec<u8>) -> Self {
+        Self(ciphertext)
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+const DEFAULT_PERIOD: u64 = 30;
+const DEFAULT_DIGITS: u8 = 6;
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate, Zeroize, ZeroizeOnDrop)]
+pub struct TOTP {
+    #[validate(length(min = 16, message = "Secret must be at least 16 characters"))]
+    pub secret: String,
+    pub period: NonZeroU64,
+    pub digits: NonZeroU8,
+}
+
+impl TOTP {
+    pub fn new(secret: String, period: Option<u64>, digits: Option<u8>) -> Result<Self> {
+        let totp = Self {
+            secret,
+            period: NonZeroU64::new(period.unwrap_or(DEFAULT_PERIOD)).unwrap(),
+            digits: NonZeroU8::new(digits.unwrap_or(DEFAULT_DIGITS)).unwrap(),
+        };
+
+        totp.validate()
+            .map_err(|e| SecretError::InvalidInput(e.to_string()))?;
+
+        Ok(totp)
+    }
+}
+
+impl Default for TOTP {
+    fn default() -> Self {
+        Self {
+            secret: String::new(),
+            period: NonZeroU64::new(DEFAULT_PERIOD).unwrap(),
+            digits: NonZeroU8::new(DEFAULT_DIGITS).unwrap(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoginEntry {
     pub id: Uuid,
     pub folder: String,
@@ -22,7 +91,7 @@ pub struct LoginEntry {
     pub totp: Option<TOTP>,
 }
 
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LoginEntryPatch {
     pub folder: Option<String>,
     pub name: Option<String>,

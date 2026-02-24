@@ -2,11 +2,10 @@ use std::collections::hash_map::Keys;
 use std::collections::{BTreeSet, HashMap};
 use uuid::Uuid;
 
-use crate::domain::folders::normalize_folder_path;
-use crate::domain::secrets::login::LoginEntry;
-use crate::errors::{Result, SecretError};
+use super::error::{Result, SecretError};
+use super::models::{LoginEntry, normalize_folder_path};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct StoreIndexes {
     folder_entries: HashMap<String, BTreeSet<Uuid>>,
     entry_names: HashMap<(String, String), Uuid>,

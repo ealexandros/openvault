@@ -1,17 +1,17 @@
-use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashMap};
+
 use uuid::Uuid;
 
-use crate::domain::folders::{immediate_child_folder, normalize_folder_path};
-use crate::domain::indexes::StoreIndexes;
-use crate::domain::records::{SecretDelta, SecretsChange, Snapshot};
-use crate::domain::secrets::crypto::EncryptedField;
-use crate::domain::secrets::login::{LoginEntry, LoginEntryPatch};
-use crate::errors::{Result, SecretError};
+use super::error::{Result, SecretError};
+use super::indexes::StoreIndexes;
+use super::models::{
+    EncryptedField, LoginEntry, LoginEntryPatch, ROOT_FOLDER, normalize_folder_path,
+};
+use super::records::{SecretDelta, SecretSnapshot, SecretsChange};
 
 const SNAPSHOT_THRESHOLD: usize = 30;
 
-#[derive(Clone, Serialize, Deserialize, Debug, Default)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq, Eq)]
 pub struct SecretStore {
     entries: HashMap<Uuid, LoginEntry>,
     deltas: Vec<SecretDelta>,
@@ -24,16 +24,17 @@ impl SecretStore {
         Self::default()
     }
 
-    pub fn restore(snapshot: Snapshot, deltas: Vec<SecretDelta>) -> Result<Self> {
+    pub fn restore(snapshot: SecretSnapshot, deltas: Vec<SecretDelta>) -> Result<Self> {
         let mut store = Self {
             entries: snapshot.entries,
+            deltas: Vec::new(),
             ..Self::default()
         };
 
         store.indexes.rebuild(&store.entries)?;
 
         for delta in &deltas {
-            store.apply_delta(delta)?;
+            store.apply_delta(delta, false)?;
         }
 
         store.reset_sync_state();
@@ -50,16 +51,16 @@ impl SecretStore {
 
     pub fn insert(&mut self, entry: LoginEntry) -> Result<Uuid> {
         let id = entry.id;
-        self.commit_delta(SecretDelta::Added(entry))?;
+        self.apply_delta(&SecretDelta::Added(entry), true)?;
         Ok(id)
     }
 
     pub fn update(&mut self, id: Uuid, patch: LoginEntryPatch) -> Result {
-        self.commit_delta(SecretDelta::Updated { id, patch })
+        self.apply_delta(&SecretDelta::Updated { id, patch }, true)
     }
 
     pub fn delete(&mut self, id: Uuid) -> Result {
-        self.commit_delta(SecretDelta::Deleted { id })
+        self.apply_delta(&SecretDelta::Deleted { id }, true)
     }
 
     pub fn list_all(&self) -> Vec<LoginEntry> {
@@ -101,8 +102,12 @@ impl SecretStore {
             .collect::<BTreeSet<_>>()
     }
 
+    pub fn snapshot(&self) -> SecretSnapshot {
+        SecretSnapshot::new(self.entries.clone())
+    }
+
     pub fn create_snapshot(&self) -> SecretsChange {
-        SecretsChange::Snapshot(Snapshot::new(self.entries.clone()))
+        SecretsChange::Snapshot(self.snapshot())
     }
 
     pub fn pending_changes(&self) -> Option<SecretsChange> {
@@ -121,20 +126,31 @@ impl SecretStore {
         self.deltas.clear();
     }
 
-    fn commit_delta(&mut self, delta: SecretDelta) -> Result {
-        self.apply_delta(&delta)?;
-        self.deltas.push(delta);
+    pub fn apply_change(&mut self, change: SecretsChange) -> Result {
+        match change {
+            SecretsChange::Snapshot(snapshot) => self.replace_snapshot(snapshot)?,
+            SecretsChange::Deltas(deltas) => {
+                for delta in &deltas {
+                    self.apply_delta(delta, false)?;
+                }
+            }
+        }
+
+        self.reset_sync_state();
         Ok(())
     }
 
-    fn apply_delta(&mut self, delta: &SecretDelta) -> Result {
+    fn replace_snapshot(&mut self, snapshot: SecretSnapshot) -> Result {
+        self.entries = snapshot.entries;
+        self.indexes.rebuild(&self.entries)
+    }
+
+    fn apply_delta(&mut self, delta: &SecretDelta, track_delta: bool) -> Result {
         match delta {
             SecretDelta::Added(entry) => {
                 let mut entry = entry.clone();
                 entry.folder = normalize_folder_path(&entry.folder);
 
-                self.indexes
-                    .ensure_name_available(&entry.folder, &entry.name, None)?;
                 self.indexes.track_entry(&entry)?;
                 self.entries.insert(entry.id, entry);
             }
@@ -173,6 +189,47 @@ impl SecretStore {
             }
         }
 
+        if track_delta {
+            self.deltas.push(delta.clone());
+        }
+
         Ok(())
     }
 }
+
+pub fn immediate_child_folder(parent: &str, candidate: &str) -> Option<String> {
+    let parent = normalize_folder_path(parent);
+    let candidate = normalize_folder_path(candidate);
+
+    if parent == candidate {
+        return None;
+    }
+
+    let prefix = if parent == ROOT_FOLDER {
+        ROOT_FOLDER.to_string()
+    } else {
+        format!("{}/", parent)
+    };
+
+    if !candidate.starts_with(&prefix) {
+        return None;
+    }
+
+    let remainder = candidate.strip_prefix(&prefix)?;
+    if remainder.is_empty() {
+        return None;
+    }
+
+    let next_segment = remainder.split('/').next()?;
+    if next_segment.is_empty() {
+        return None;
+    }
+
+    if parent == ROOT_FOLDER {
+        Some(format!("/{}", next_segment))
+    } else {
+        Some(format!("{}/{}", parent, next_segment))
+    }
+}
+
+use serde::{Deserialize, Serialize};

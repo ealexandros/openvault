@@ -22,6 +22,15 @@ pub enum SecretError {
 
     #[error("Invalid key")]
     InvalidKey,
+
+    #[error("Unsupported secrets wire version: {0}")]
+    UnsupportedWireVersion(u16),
+
+    #[error("Invalid feature record kind: expected {expected:?}, actual {actual:?}")]
+    InvalidRecordKind {
+        expected: crate::features::feature_trait::RecordKind,
+        actual: crate::features::feature_trait::RecordKind,
+    },
 }
 
 pub type Result<T = ()> = std::result::Result<T, SecretError>;

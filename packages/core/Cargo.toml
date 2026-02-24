@@ -16,5 +16,6 @@ strum = { workspace = true }
 strum_macros = { workspace = true }
 thiserror = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
+validator = { version = "0.20", features = ["derive"] }
 walkdir = "2.5.0"
 zeroize = { workspace = true, features = ["zeroize_derive"] }
