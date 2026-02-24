@@ -25,6 +25,12 @@ pub enum Error {
 
     #[error("Decompression failed: {0}")]
     DecompressionFailed(String),
+
+    #[error("Unsupported cipher: {0}")]
+    UnsupportedCipher(u8),
+
+    #[error("Unsupported compressor: {0}")]
+    UnsupportedCompressor(u8),
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;

@@ -4,7 +4,7 @@ use openvault_core::operations::vault::{
     create_and_open_vault, create_vault, create_vault_with, open_vault,
 };
 
-use crate::config::{CreateVaultOptions, OpenVaultOptions};
+use crate::config::CreateVaultOptions;
 use crate::error::Error;
 use crate::error::Result;
 use crate::session::VaultHandle;
@@ -35,17 +35,7 @@ impl VaultClient {
         path: P,
         password: S,
     ) -> Result<VaultHandle> {
-        self.open_with(path, password, OpenVaultOptions::default())
-    }
-
-    pub fn open_with<P: AsRef<Path>, S: AsRef<[u8]>>(
-        &self,
-        path: P,
-        password: S,
-        options: OpenVaultOptions,
-    ) -> Result<VaultHandle> {
-        let session = open_vault(path.as_ref(), password.as_ref(), options.into_core())
-            .map_err(Error::from)?;
+        let session = open_vault(path.as_ref(), password.as_ref()).map_err(Error::from)?;
         Ok(VaultHandle::new(session))
     }
 

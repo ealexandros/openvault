@@ -4,7 +4,7 @@ mod error;
 mod session;
 
 pub use client::VaultClient;
-pub use config::{CreateVaultOptions, OpenVaultOptions};
+pub use config::CreateVaultOptions;
 pub use error::{Error, Result};
 pub use session::VaultHandle;
 
@@ -34,14 +34,6 @@ pub fn open_vault<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(
     password: S,
 ) -> Result<VaultHandle> {
     client().open(path, password)
-}
-
-pub fn open_vault_with<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(
-    path: P,
-    password: S,
-    options: OpenVaultOptions,
-) -> Result<VaultHandle> {
-    client().open_with(path, password, options)
 }
 
 pub fn create_and_open_vault<P: AsRef<std::path::Path>, S: AsRef<[u8]>>(

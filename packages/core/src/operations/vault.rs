@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::VAULT_EXTENSION;
 use crate::errors::{Error, Result};
 use crate::internal::fs::{create_new_file, open_with_read_write, remove_if_exists, resolve_path};
-use crate::operations::config::{CreateConfig, OpenConfig};
+use crate::operations::config::CreateConfig;
 use crate::vault::boot_header::BootHeader;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::runtime::VaultSession;
@@ -16,7 +16,12 @@ pub fn create_vault_with(path: &Path, password: &[u8], config: CreateConfig) -> 
 
     let salt = Salt::random();
     let keyring = Keyring::derive(password, &salt)?;
-    let boot_header = BootHeader::new(salt, Some(config.version));
+    let boot_header = BootHeader::new(
+        salt,
+        Some(config.version),
+        Some(config.cipher),
+        Some(config.compression),
+    );
 
     if config.overwrite {
         remove_if_exists(&path)?;
@@ -37,7 +42,7 @@ pub fn create_vault(path: &Path, password: &[u8]) -> Result {
     create_vault_with(path, password, CreateConfig::default())
 }
 
-pub fn open_vault(path: &Path, password: &[u8], config: OpenConfig) -> Result<VaultSession> {
+pub fn open_vault(path: &Path, password: &[u8]) -> Result<VaultSession> {
     let mut file = open_with_read_write(path)?;
 
     let boot_header = BootHeader::read_from(&mut file)?;
@@ -45,7 +50,7 @@ pub fn open_vault(path: &Path, password: &[u8], config: OpenConfig) -> Result<Va
 
     let format = resolve_format(boot_header.version)?;
 
-    let context = FormatContext::new(&keyring, config.compression, config.cipher);
+    let context = FormatContext::new(&keyring, boot_header.compressor, boot_header.cipher);
 
     format
         .read_subheader(&mut file, &context)
@@ -54,8 +59,8 @@ pub fn open_vault(path: &Path, password: &[u8], config: OpenConfig) -> Result<Va
     Ok(VaultSession::new(
         file,
         keyring,
-        config.compression,
-        config.cipher,
+        boot_header.compressor,
+        boot_header.cipher,
         format,
     ))
 }
@@ -66,10 +71,8 @@ pub fn create_and_open_vault(
     config: CreateConfig,
 ) -> Result<VaultSession> {
     let resolved_path = resolve_path(path, &config.filename, VAULT_EXTENSION);
-    let open_config = OpenConfig::from_create(&config);
-
     create_vault_with(path, password, config)?;
-    open_vault(&resolved_path, password, open_config)
+    open_vault(&resolved_path, password)
 }
 
 pub fn change_password() {

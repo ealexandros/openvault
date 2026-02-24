@@ -1,4 +1,4 @@
-use openvault_core::operations::config::{CreateConfig, OpenConfig};
+use openvault_core::operations::config::CreateConfig;
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
 
@@ -38,31 +38,6 @@ impl CreateVaultOptions {
     }
 
     pub(crate) fn into_core(self) -> CreateConfig {
-        self.inner
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct OpenVaultOptions {
-    inner: OpenConfig,
-}
-
-impl OpenVaultOptions {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_compression(mut self, compression: CompressionAlgorithm) -> Self {
-        self.inner.compression = compression;
-        self
-    }
-
-    pub fn with_encryption(mut self, cipher: EncryptionAlgorithm) -> Self {
-        self.inner.cipher = cipher;
-        self
-    }
-
-    pub(crate) fn into_core(self) -> OpenConfig {
         self.inner
     }
 }

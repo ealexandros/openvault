@@ -7,6 +7,12 @@ pub trait ReadExt: Read {
         self.read_exact(&mut buffer)?;
         Ok(buffer)
     }
+
+    fn read_exact_array<const N: usize>(&mut self) -> Result<[u8; N]> {
+        let mut buffer = [0u8; N];
+        self.read_exact(&mut buffer)?;
+        Ok(buffer)
+    }
 }
 
 impl<R: Read + ?Sized> ReadExt for R {}

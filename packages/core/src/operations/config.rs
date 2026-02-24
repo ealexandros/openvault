@@ -54,32 +54,3 @@ impl Default for CreateConfig {
         }
     }
 }
-
-#[derive(Debug, Default)]
-pub struct OpenConfig {
-    pub compression: CompressionAlgorithm,
-    pub cipher: EncryptionAlgorithm,
-}
-
-impl OpenConfig {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_compression(mut self, compression: CompressionAlgorithm) -> Self {
-        self.compression = compression;
-        self
-    }
-
-    pub fn with_encryption(mut self, cipher: EncryptionAlgorithm) -> Self {
-        self.cipher = cipher;
-        self
-    }
-
-    pub fn from_create(config: &CreateConfig) -> Self {
-        Self {
-            compression: config.compression,
-            cipher: config.cipher,
-        }
-    }
-}
