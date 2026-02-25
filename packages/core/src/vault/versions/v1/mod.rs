@@ -6,7 +6,7 @@ pub mod replay;
 use std::io::Read;
 
 use crate::errors::{Error, Result};
-use crate::features::blob_ref::BlobRef;
+use crate::features::shared::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, Writer};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::RecordHeader;

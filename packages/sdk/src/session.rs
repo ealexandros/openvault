@@ -1,8 +1,8 @@
 use std::io::{Cursor, Read};
 
-use openvault_core::features::blob_ref::BlobRef;
 use openvault_core::features::filesystem::{FilesystemChange, FilesystemStore};
 use openvault_core::features::secrets::{SecretStore, SecretsChange};
+use openvault_core::features::shared::blob_ref::BlobRef;
 use openvault_core::operations::blob::{get_blob, put_blob};
 use openvault_core::operations::filesystem::{
     apply_filesystem_change, commit_filesystem_store, load_filesystem_store,
@@ -15,6 +15,7 @@ use openvault_core::vault::runtime::VaultSession;
 use openvault_core::vault::versions::shared::replay::ReplayState;
 
 use crate::error::Result;
+use crate::features::{FilesystemFeature, SecretsFeature};
 use crate::stores::{StoresCommitResult, VaultStores};
 
 pub struct VaultHandle {
@@ -49,6 +50,14 @@ impl VaultHandle {
 
     pub fn replay_since_checkpoint(&mut self) -> Result<ReplayState> {
         replay_since_checkpoint(&mut self.inner).map_err(Into::into)
+    }
+
+    pub fn filesystem(&mut self) -> FilesystemFeature<'_> {
+        FilesystemFeature::new(self)
+    }
+
+    pub fn secrets(&mut self) -> SecretsFeature<'_> {
+        SecretsFeature::new(self)
     }
 
     pub fn stores(&self) -> Option<&VaultStores> {
@@ -100,6 +109,10 @@ impl VaultHandle {
         })
     }
 
+    pub fn commit_all(&mut self) -> Result<StoresCommitResult> {
+        self.commit_stores()
+    }
+
     pub fn load_filesystem_store(&mut self) -> Result<FilesystemStore> {
         load_filesystem_store(&mut self.inner).map_err(Into::into)
     }
@@ -140,5 +153,21 @@ impl VaultHandle {
         let filesystem = load_filesystem_store(&mut self.inner)?;
         let secrets = load_secret_store(&mut self.inner)?;
         Ok(VaultStores::new(filesystem, secrets))
+    }
+
+    pub(crate) fn commit_filesystem_cached(&mut self) -> Result<bool> {
+        let Some(stores) = self.stores.as_mut() else {
+            return Ok(false);
+        };
+
+        commit_filesystem_store(&mut self.inner, &mut stores.filesystem).map_err(Into::into)
+    }
+
+    pub(crate) fn commit_secret_cached(&mut self) -> Result<bool> {
+        let Some(stores) = self.stores.as_mut() else {
+            return Ok(false);
+        };
+
+        commit_secret_store(&mut self.inner, &mut stores.secrets).map_err(Into::into)
     }
 }

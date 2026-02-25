@@ -1,4 +1,4 @@
-use crate::features::blob_ref::BlobRef;
+use crate::features::shared::blob_ref::BlobRef;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

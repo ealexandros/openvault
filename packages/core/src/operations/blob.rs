@@ -1,7 +1,7 @@
 use std::io::Read;
 
 use crate::errors::Result;
-use crate::features::blob_ref::BlobRef;
+use crate::features::shared::blob_ref::BlobRef;
 use crate::vault::runtime::VaultSession;
 
 pub fn put_blob(session: &mut VaultSession, source: &mut dyn Read) -> Result<BlobRef> {

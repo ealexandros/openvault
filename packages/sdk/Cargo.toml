@@ -7,3 +7,4 @@ edition = "2024"
 openvault-core = { workspace = true }
 openvault-crypto = { workspace = true }
 thiserror = { workspace = true }
+uuid = { workspace = true }

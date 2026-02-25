@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use openvault_sdk::{
-    CreateVaultOptions, EncryptedField, Error, LoginEntry, VaultClient, scan_file,
+    CreateVaultOptions, EncryptedField, Error, FeatureFacade, LoginEntry, VaultClient, scan_file,
 };
 
 fn temp_vault_path(name: &str) -> PathBuf {
@@ -70,26 +70,21 @@ fn sdk_filesystem_store_persists_changes() {
 
     {
         let mut handle = client.open(&path, b"password").expect("open vault");
-        let mut store = handle
-            .load_filesystem_store()
-            .expect("load filesystem store");
-
+        let mut filesystem = handle.filesystem();
+        filesystem.load().expect("load filesystem store");
         let file = scan_file(Path::new("readme.md")).expect("scan file");
-        store.add_file(file).expect("add file");
+        filesystem.add_file(file).expect("add file");
 
-        let wrote = handle
-            .commit_filesystem_store(&mut store)
-            .expect("commit filesystem store");
+        let wrote = filesystem.commit().expect("commit filesystem store");
         assert!(wrote);
     }
 
     {
         let mut reopened = client.open(&path, b"password").expect("reopen vault");
-        let restored = reopened
-            .load_filesystem_store()
-            .expect("load filesystem store");
-        assert_eq!(restored.files().len(), 1);
-        assert_eq!(restored.files()[0].name, "readme.md");
+        let mut filesystem = reopened.filesystem();
+        let files = filesystem.files().expect("list files");
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0].name, "readme.md");
     }
 
     fs::remove_dir_all(root).expect("cleanup");
@@ -107,7 +102,8 @@ fn sdk_secret_store_persists_changes() {
 
     {
         let mut handle = client.open(&path, b"password").expect("open vault");
-        let mut store = handle.load_secret_store().expect("load secret store");
+        let mut secrets = handle.secrets();
+        secrets.load().expect("load secret store");
 
         let entry = LoginEntry::new(
             Some("/accounts".to_string()),
@@ -120,19 +116,18 @@ fn sdk_secret_store_persists_changes() {
         )
         .expect("build secret");
 
-        store.insert(entry).expect("insert secret");
+        secrets.insert(entry).expect("insert secret");
 
-        let wrote = handle
-            .commit_secret_store(&mut store)
-            .expect("commit secret store");
+        let wrote = secrets.commit().expect("commit secret store");
         assert!(wrote);
     }
 
     {
         let mut reopened = client.open(&path, b"password").expect("reopen vault");
-        let restored = reopened.load_secret_store().expect("load secret store");
-        assert_eq!(restored.list_all().len(), 1);
-        assert_eq!(restored.list_all()[0].name, "mail");
+        let mut secrets = reopened.secrets();
+        let entries = secrets.list_all().expect("list secrets");
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].name, "mail");
     }
 
     fs::remove_dir_all(root).expect("cleanup");
@@ -170,7 +165,7 @@ fn sdk_centralized_stores_commit_roundtrip() {
             stores.secrets.insert(entry).expect("insert secret");
         }
 
-        let commit = handle.commit_stores().expect("commit stores");
+        let commit = handle.commit_all().expect("commit stores");
         assert!(commit.filesystem);
         assert!(commit.secrets);
     }

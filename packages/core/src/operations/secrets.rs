@@ -1,6 +1,6 @@
 use crate::errors::{Error, Result};
-use crate::features::feature_trait::{FeatureCodec, RecordKind};
 use crate::features::secrets::{SECRETS_FEATURE_ID, SecretCodec, SecretStore, SecretsChange};
+use crate::features::shared::feature_trait::{FeatureCodec, RecordKind};
 use crate::operations::replay::replay_since_checkpoint;
 use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;

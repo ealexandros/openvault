@@ -4,14 +4,6 @@
 
 ## 🏗️ How it Works
 
-OpenVault uses an append-only, log-structured design. All data—files, notes, logs, and secrets—are stored as encrypted **Blobs**. A single encrypted **Metadata Block** is stored at the end of the file (EOF), ensuring that metadata can grow freely without shifting existing data.
-
-- **Everything is a Blob**: Unified handling for all data types.
-- **Metadata at EOF**: Fast opens and flexible growth.
-- **Soft Deletes**: Instant deletions by marking metadata, cleaned up via periodic compaction.
-
-Detailed documentation can be found in [Architecture Docs](./docs/architecture.md).
-
 ## 🛠️ Getting Started
 
 ### Prerequisites
@@ -41,6 +33,6 @@ To build all packages for production:
 bun build
 ```
 
-### ✨ Conclustion
+## 📝 License
 
 Made with ❤️ – Shared with the Community 🤲

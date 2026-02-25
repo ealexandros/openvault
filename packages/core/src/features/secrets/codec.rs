@@ -1,4 +1,4 @@
-use crate::features::feature_trait::{EncodedFeatureRecord, FeatureCodec, RecordKind};
+use crate::features::shared::feature_trait::{EncodedFeatureRecord, FeatureCodec, RecordKind};
 
 use super::error::SecretError;
 use super::records::{SECRETS_WIRE_VERSION_V1, SecretsChange};

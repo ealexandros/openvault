@@ -1,6 +1,4 @@
-#[path = "trait.rs"]
-pub mod feature_trait;
+pub mod shared;
 
-pub mod blob_ref;
 pub mod filesystem;
 pub mod secrets;

@@ -1,7 +1,7 @@
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::features::feature_trait::RecordKind;
+use crate::features::shared::feature_trait::RecordKind;
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum FilesystemError {

@@ -1,4 +1,4 @@
-use crate::features::feature_trait::{EncodedFeatureRecord, FeatureCodec, RecordKind};
+use crate::features::shared::feature_trait::{EncodedFeatureRecord, FeatureCodec, RecordKind};
 
 use super::error::FilesystemError;
 use super::records::{FILESYSTEM_WIRE_VERSION_V1, FilesystemChange};
@@ -74,13 +74,13 @@ mod tests {
 
     use uuid::Uuid;
 
-    use crate::features::feature_trait::FeatureCodec;
+    use crate::features::shared::feature_trait::FeatureCodec;
 
     use super::*;
-    use crate::features::blob_ref::BlobRef;
     use crate::features::filesystem::{
         FileMetadata, FilesystemDelta, FilesystemSnapshot, FolderMetadata, ROOT_FOLDER_ID,
     };
+    use crate::features::shared::blob_ref::BlobRef;
 
     #[test]
     fn codec_roundtrip_snapshot_payload() {

@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::features::shared::feature_trait::RecordKind;
+
 #[derive(Debug, Error)]
 pub enum SecretError {
     #[error("Serialization error: {0}")]
@@ -31,8 +33,8 @@ pub enum SecretError {
 
     #[error("Invalid feature record kind: expected {expected:?}, actual {actual:?}")]
     InvalidRecordKind {
-        expected: crate::features::feature_trait::RecordKind,
-        actual: crate::features::feature_trait::RecordKind,
+        expected: RecordKind,
+        actual: RecordKind,
     },
 }
 
