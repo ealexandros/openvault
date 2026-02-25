@@ -86,24 +86,21 @@ mod tests {
     fn codec_roundtrip_snapshot_payload() {
         let codec = FilesystemCodec;
 
-        let docs_id = Uuid::new_v4();
         let mut folders = HashMap::new();
-        folders.insert(ROOT_FOLDER_ID, FolderMetadata::root());
-        folders.insert(
-            docs_id,
-            FolderMetadata::new(docs_id, Some(ROOT_FOLDER_ID), "docs"),
-        );
 
-        let file_id = Uuid::new_v4();
+        let docs = FolderMetadata::new(Some(ROOT_FOLDER_ID), "docs");
+        let docs_id = docs.id;
+        folders.insert(docs_id, docs);
+
         let mut files = HashMap::new();
-        let mut file = FileMetadata::new(file_id, docs_id, "report.txt");
+        let mut file = FileMetadata::new(docs_id, "report.txt");
 
         file.blob = Some(BlobRef {
             id: Uuid::nil(),
             size_bytes: 256,
             manifest_offset: 0,
         });
-        files.insert(file_id, file);
+        files.insert(file.id, file);
 
         let change = FilesystemChange::Snapshot(FilesystemSnapshot::new(folders, files));
         let encoded = codec.encode_change(change.clone()).expect("encode");

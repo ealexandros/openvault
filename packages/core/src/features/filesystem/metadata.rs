@@ -15,10 +15,10 @@ pub struct FolderMetadata {
 }
 
 impl FolderMetadata {
-    pub fn new(id: Uuid, parent_id: Option<Uuid>, name: impl Into<String>) -> Self {
+    pub fn new(parent_id: Option<Uuid>, name: impl Into<String>) -> Self {
         let now = Utc::now();
         Self {
-            id,
+            id: Uuid::new_v4(),
             parent_id,
             name: name.into(),
             created_at: now,
@@ -27,11 +27,14 @@ impl FolderMetadata {
     }
 
     pub fn root() -> Self {
-        Self::new(ROOT_FOLDER_ID, None, "/")
-    }
-
-    pub fn is_root(&self) -> bool {
-        self.id == ROOT_FOLDER_ID
+        let now = Utc::now();
+        Self {
+            id: ROOT_FOLDER_ID,
+            parent_id: None,
+            name: "/".to_string(),
+            created_at: now,
+            updated_at: now,
+        }
     }
 }
 
@@ -64,10 +67,10 @@ pub struct FileMetadata {
 }
 
 impl FileMetadata {
-    pub fn new(id: Uuid, parent_id: Uuid, name: impl Into<String>) -> Self {
+    pub fn new(parent_id: Uuid, name: impl Into<String>) -> Self {
         let now = Utc::now();
         Self {
-            id,
+            id: Uuid::new_v4(),
             parent_id,
             name: name.into(),
             mime_type: None,

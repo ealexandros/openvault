@@ -1,7 +1,8 @@
+use openvault_core::features::filesystem::ROOT_FOLDER_ID;
 use openvault_sdk::{
-    CompressionAlgorithm, CreateConfig, EncryptionAlgorithm, create_and_open_vault,
+    CompressionAlgorithm, CreateConfig, EncryptionAlgorithm, FileMetadata, FolderMetadata,
+    create_and_open_vault,
 };
-use uuid::Uuid;
 
 fn main() {
     let path = "./temp/vault.ov";
@@ -16,14 +17,23 @@ fn main() {
 
     let mut fs = vault.filesystem();
 
-    fs.add_directory(openvault_sdk::FolderMetadata::new(
-        Uuid::new_v4(),
-        Some(Uuid::nil()),
-        "my_directory",
-    ))
-    .unwrap();
+    let folder = FolderMetadata::new(Some(ROOT_FOLDER_ID), "my_directory");
+    let folder_id = fs.add_directory(folder).unwrap();
+
+    let blob_ref = fs.put_blob_bytes(b"hey").unwrap();
+    let mut file = FileMetadata::new(folder_id, "myfile.txt");
+    file.mime_type = Some("text/plain".to_string());
+    file.blob = Some(blob_ref);
+
+    let file_id = fs.add_file(file).unwrap();
 
     fs.commit().unwrap();
 
     println!("{:#?}", fs.directories());
+    println!("{:#?}", fs.files());
+
+    println!(
+        "{:#?}",
+        String::from_utf8(fs.get_file(&file_id).unwrap().unwrap()).unwrap()
+    );
 }

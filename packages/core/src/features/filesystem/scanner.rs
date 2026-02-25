@@ -27,25 +27,25 @@ pub fn scan_directory(root: &Path) -> Result<(Vec<FileMetadata>, Vec<FolderMetad
 
         let parent_id = id_map.get(parent_path).copied().ok_or(Error::InvalidPath)?;
 
-        let id = Uuid::new_v4();
         let name = file_name(relative)?;
 
         if entry.file_type().is_dir() {
-            folders.push(FolderMetadata::new(id, Some(parent_id), name));
+            let folder = FolderMetadata::new(Some(parent_id), name);
+            let id = folder.id;
+            folders.push(folder);
             id_map.insert(relative.to_path_buf(), id);
             continue;
         }
 
-        files.push(FileMetadata::new(id, parent_id, name));
+        files.push(FileMetadata::new(parent_id, name));
     }
 
     Ok((files, folders))
 }
 
 pub fn scan_file(path: &Path) -> Result<FileMetadata> {
-    let id = Uuid::new_v4();
     let name = file_name(path)?;
-    Ok(FileMetadata::new(id, ROOT_FOLDER_ID, name))
+    Ok(FileMetadata::new(ROOT_FOLDER_ID, name))
 }
 
 fn file_name(path: &Path) -> Result<String> {

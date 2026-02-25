@@ -12,20 +12,11 @@ pub use errors::Error;
 pub use features::{CommitResult, FilesystemFeature, SecretsFeature};
 pub use vault::Vault;
 
-pub use openvault_core::features::filesystem::{
-    FileMetadata, FileMetadataPatch, FilesystemDelta, FilesystemStore as CoreFilesystemStore,
-    FolderMetadata, FolderMetadataPatch, ROOT_FOLDER_ID, scan_directory, scan_file,
-};
-
-pub use openvault_core::features::secrets::{
-    EncryptedField, LoginEntry, LoginEntryPatch, SecretDelta, SecretStore as CoreSecretStore,
-    SecretsChange, TOTP,
-};
-
-pub use openvault_core::features::shared::blob_ref::BlobRef;
 pub use openvault_core::operations::config::CreateConfig;
 pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;
+
+pub use openvault_core::features::filesystem::{FileMetadata, FolderMetadata};
 
 pub fn client() -> VaultClient {
     VaultClient::new()
