@@ -1,19 +1,19 @@
 use uuid::Uuid;
 
 use openvault_core::features::secrets::{
-    EncryptedField, LoginEntry, LoginEntryPatch, SecretDelta, SecretStore as CoreSecretStore,
+    EncryptedField, LoginEntry, LoginEntryPatch, SecretDelta, SecretStore,
 };
 use openvault_core::operations::secrets::{commit_secret_store, load_secret_store};
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::{Error, Result};
 
-pub struct SecretsStore<'a> {
+pub struct SecretsFeature<'a> {
     session: &'a mut VaultSession,
-    state: Option<CoreSecretStore>,
+    state: Option<SecretStore>,
 }
 
-impl<'a> SecretsStore<'a> {
+impl<'a> SecretsFeature<'a> {
     pub(crate) fn new(session: &'a mut VaultSession) -> Self {
         Self {
             session,
@@ -21,7 +21,7 @@ impl<'a> SecretsStore<'a> {
         }
     }
 
-    pub fn load(&mut self) -> Result<&mut CoreSecretStore> {
+    pub fn load(&mut self) -> Result<&mut SecretStore> {
         if self.state.is_none() {
             self.state = Some(load_secret_store(self.session)?);
         }
@@ -29,7 +29,7 @@ impl<'a> SecretsStore<'a> {
         Ok(self.state.as_mut().expect("state loaded"))
     }
 
-    pub fn refresh(&mut self) -> Result<&mut CoreSecretStore> {
+    pub fn refresh(&mut self) -> Result<&mut SecretStore> {
         self.state = Some(load_secret_store(self.session)?);
         Ok(self.state.as_mut().expect("state refreshed"))
     }

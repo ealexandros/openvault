@@ -1,8 +1,8 @@
 mod filesystem;
 mod secrets;
 
-pub use filesystem::FilesystemStore;
-pub use secrets::SecretsStore;
+pub use filesystem::FilesystemFeature;
+pub use secrets::SecretsFeature;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct CommitResult {

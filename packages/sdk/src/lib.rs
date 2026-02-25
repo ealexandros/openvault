@@ -1,6 +1,6 @@
 mod client;
 mod errors;
-mod stores;
+mod features;
 mod vault;
 
 use std::path::Path;
@@ -9,7 +9,7 @@ use crate::client::VaultClient;
 use crate::errors::Result;
 
 pub use errors::Error;
-pub use stores::{CommitResult, FilesystemStore, SecretsStore};
+pub use features::{CommitResult, FilesystemFeature, SecretsFeature};
 pub use vault::Vault;
 
 pub use openvault_core::features::filesystem::{

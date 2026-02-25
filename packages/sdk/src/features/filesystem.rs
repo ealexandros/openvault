@@ -5,8 +5,8 @@ use std::path::Path;
 use uuid::Uuid;
 
 use openvault_core::features::filesystem::{
-    FileMetadata, FileMetadataPatch, FilesystemDelta, FilesystemStore as CoreFilesystemStore,
-    FolderMetadata, FolderMetadataPatch, scan_file,
+    FileMetadata, FileMetadataPatch, FilesystemDelta, FilesystemStore, FolderMetadata,
+    FolderMetadataPatch, scan_file,
 };
 use openvault_core::features::shared::blob_ref::BlobRef;
 use openvault_core::operations::blob::{get_blob, put_blob};
@@ -15,12 +15,12 @@ use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::{Error, Result};
 
-pub struct FilesystemStore<'a> {
+pub struct FilesystemFeature<'a> {
     session: &'a mut VaultSession,
-    state: Option<CoreFilesystemStore>,
+    state: Option<FilesystemStore>,
 }
 
-impl<'a> FilesystemStore<'a> {
+impl<'a> FilesystemFeature<'a> {
     pub(crate) fn new(session: &'a mut VaultSession) -> Self {
         Self {
             session,
@@ -28,7 +28,7 @@ impl<'a> FilesystemStore<'a> {
         }
     }
 
-    pub fn load(&mut self) -> Result<&mut CoreFilesystemStore> {
+    pub fn load(&mut self) -> Result<&mut FilesystemStore> {
         if self.state.is_none() {
             self.state = Some(load_filesystem_store(self.session)?);
         }
@@ -36,7 +36,7 @@ impl<'a> FilesystemStore<'a> {
         Ok(self.state.as_mut().expect("state loaded"))
     }
 
-    pub fn refresh(&mut self) -> Result<&mut CoreFilesystemStore> {
+    pub fn refresh(&mut self) -> Result<&mut FilesystemStore> {
         self.state = Some(load_filesystem_store(self.session)?);
         Ok(self.state.as_mut().expect("state refreshed"))
     }

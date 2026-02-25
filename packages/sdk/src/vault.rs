@@ -3,7 +3,7 @@ use openvault_core::operations::secrets::{commit_secret_store, load_secret_store
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::Result;
-use crate::stores::{CommitResult, FilesystemStore, SecretsStore};
+use crate::features::{CommitResult, FilesystemFeature, SecretsFeature};
 
 pub struct Vault {
     session: VaultSession,
@@ -18,12 +18,12 @@ impl Vault {
         self.session.version()
     }
 
-    pub fn filesystem(&mut self) -> FilesystemStore<'_> {
-        FilesystemStore::new(&mut self.session)
+    pub fn filesystem(&mut self) -> FilesystemFeature<'_> {
+        FilesystemFeature::new(&mut self.session)
     }
 
-    pub fn secrets(&mut self) -> SecretsStore<'_> {
-        SecretsStore::new(&mut self.session)
+    pub fn secrets(&mut self) -> SecretsFeature<'_> {
+        SecretsFeature::new(&mut self.session)
     }
 
     pub fn commit_all(&mut self) -> Result<CommitResult> {

@@ -32,7 +32,7 @@ impl<'a> FormatContext<'a> {
     }
 }
 
-pub trait FormatHandler {
+pub trait FormatHandler: Sync + Send {
     fn version(&self) -> u16;
 
     fn init_layout(&self, rw: &mut ReadWriter, context: &FormatContext) -> Result<Subheader>;
