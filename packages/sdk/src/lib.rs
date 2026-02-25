@@ -9,7 +9,7 @@ use crate::client::VaultClient;
 use crate::errors::Result;
 
 pub use errors::Error;
-pub use features::{CommitResult, FilesystemFeature, SecretsFeature};
+pub use features::{CommitResult, FilesystemFeature};
 pub use vault::Vault;
 
 pub use openvault_core::operations::config::CreateConfig;

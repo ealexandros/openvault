@@ -1,6 +1,6 @@
 use crate::errors::{Error, Result};
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
-use crate::vault::versions::shared::record::{RecordHeader, RecordWire};
+use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
@@ -9,37 +9,31 @@ use crate::vault::versions::v1::mapper::{decode_record, encode_record};
 
 pub fn append_record(
     rw: &mut ReadWriter,
-    record: &RecordHeader,
-    payload: &[u8],
+    record: &mut Record,
     context: &FormatContext,
 ) -> Result<u64> {
     let mut subheader = read_subheader(rw, context)?;
+
     rw.seek_to_end()?;
 
-    let mut record = record.clone();
+    record.header.sequence = subheader.last_sequence + 1;
+    record.header.prev_record_offset = subheader.tail_record_offset;
 
-    record.sequence = subheader.last_sequence + 1;
-    record.prev_record_offset = subheader.tail_record_offset;
-
-    let record_wire = encode_record(&record, payload)?;
-    let record_offset = seal_frame(rw, AadDomain::Record, &record_wire, context)?;
+    let record_bytes = encode_record(&record)?;
+    let record_offset = seal_frame(rw, AadDomain::Record, &record_bytes, context)?;
 
     subheader.tail_record_offset = record_offset;
     subheader.last_sequence += 1;
+
     write_subheader(rw, &subheader, context)?;
 
     Ok(record_offset)
 }
 
-pub fn read_record(
-    reader: &mut Reader,
-    offset: u64,
-    context: &FormatContext,
-) -> Result<RecordWire> {
+pub fn read_record(reader: &mut Reader, offset: u64, context: &FormatContext) -> Result<Record> {
     reader.seek_from_start(offset)?;
-    let record_wire = open_frame(reader, AadDomain::Record, context)?;
-    let (record, payload) = decode_record(&record_wire)?;
-    Ok(RecordWire::new(record, payload))
+    let record_bytes = open_frame(reader, AadDomain::Record, context)?;
+    decode_record(&record_bytes)
 }
 
 pub fn read_replay_records(
@@ -47,10 +41,10 @@ pub fn read_replay_records(
     start_offset: u64,
     stop_offset: u64,
     context: &FormatContext,
-) -> Result<Vec<(u64, RecordWire)>> {
+) -> Result<Vec<(u64, Record)>> {
     let mut current_offset = start_offset;
-    let mut last_sequence: Option<u64> = None;
-    let mut records: Vec<(u64, RecordWire)> = Vec::new();
+    let mut last_sequence = None;
+    let mut records = Vec::new();
 
     while current_offset != 0 && current_offset >= stop_offset {
         let offset = current_offset;

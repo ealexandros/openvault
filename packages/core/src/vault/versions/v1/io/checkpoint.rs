@@ -7,16 +7,6 @@ use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
 use crate::vault::versions::v1::io::subheader::{read_subheader, write_subheader};
 use crate::vault::versions::v1::mapper::{decode_checkpoint, encode_checkpoint};
 
-pub fn read_checkpoint(
-    reader: &mut Reader,
-    offset: u64,
-    context: &FormatContext,
-) -> Result<Checkpoint> {
-    reader.seek_from_start(offset)?;
-    let checkpoint_bytes = open_frame(reader, AadDomain::Checkpoint, context)?;
-    decode_checkpoint(&checkpoint_bytes)
-}
-
 pub fn write_checkpoint(
     rw: &mut ReadWriter,
     checkpoint: &mut Checkpoint,
@@ -35,4 +25,14 @@ pub fn write_checkpoint(
     write_subheader(rw, &subheader, context)?;
 
     Ok(offset)
+}
+
+pub fn read_checkpoint(
+    reader: &mut Reader,
+    offset: u64,
+    context: &FormatContext,
+) -> Result<Checkpoint> {
+    reader.seek_from_start(offset)?;
+    let checkpoint_bytes = open_frame(reader, AadDomain::Checkpoint, context)?;
+    decode_checkpoint(&checkpoint_bytes)
 }

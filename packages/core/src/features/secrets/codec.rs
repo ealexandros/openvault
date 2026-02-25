@@ -1,4 +1,4 @@
-use crate::features::shared::feature_trait::{EncodedFeatureRecord, FeatureCodec, RecordKind};
+use crate::features::shared::feature_trait::{EncodedFeatureRecord, FeatureCodec, WireChange};
 
 use super::error::SecretError;
 use super::records::{SECRETS_WIRE_VERSION_V1, SecretsChange};
@@ -9,62 +9,32 @@ pub const SECRETS_FEATURE_ID: &str = "secrets";
 pub struct SecretCodec;
 
 impl FeatureCodec for SecretCodec {
+    type Error = SecretError;
     type DomainChange = SecretsChange;
 
     fn feature_id(&self) -> &'static str {
         SECRETS_FEATURE_ID
     }
 
-    fn current_wire_version(&self) -> u16 {
+    fn wire_version(&self) -> u16 {
         SECRETS_WIRE_VERSION_V1
     }
 
-    fn encode_change(
-        &self,
-        change: Self::DomainChange,
-    ) -> std::result::Result<EncodedFeatureRecord, String> {
-        let kind = match &change {
-            SecretsChange::Snapshot(_) => RecordKind::Snapshot,
-            SecretsChange::Deltas(_) => RecordKind::Delta,
-        };
-
+    fn encode_change(&self, change: Self::DomainChange) -> Result<Vec<u8>> {
         let payload = postcard::to_allocvec(&change)
-            .map_err(|e| SecretError::SerializationError(e.to_string()).to_string())?;
+            .map_err(|e| SecretError::SerializationError(e.to_string()))?;
 
-        Ok(EncodedFeatureRecord {
-            feature_id: self.feature_id(),
-            version: self.current_wire_version(),
-            kind,
-            payload,
-        })
+        Ok(payload)
     }
 
-    fn decode_change(
-        &self,
-        wire_version: u16,
-        kind: RecordKind,
-        payload: &[u8],
-    ) -> std::result::Result<Self::DomainChange, String> {
+    fn decode_change(&self, wire_version: u16, payload: &[u8]) -> Result<Self::DomainChange> {
         if wire_version != SECRETS_WIRE_VERSION_V1 {
-            return Err(SecretError::UnsupportedWireVersion(wire_version).to_string());
+            return Err(SecretError::UnsupportedWireVersion(wire_version));
         }
 
-        let change: SecretsChange = postcard::from_bytes(payload)
-            .map_err(|e| SecretError::DeserializationError(e.to_string()).to_string())?;
+        let decoded: Self::DomainChange = postcard::from_bytes(payload)
+            .map_err(|e| SecretError::InvalidPayload(e.to_string()))?;
 
-        let expected = match &change {
-            SecretsChange::Snapshot(_) => RecordKind::Snapshot,
-            SecretsChange::Deltas(_) => RecordKind::Delta,
-        };
-
-        if kind != expected {
-            return Err(SecretError::InvalidRecordKind {
-                expected,
-                actual: kind,
-            }
-            .to_string());
-        }
-
-        Ok(change)
+        Ok(decoded)
     }
 }

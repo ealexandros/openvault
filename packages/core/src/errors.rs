@@ -8,9 +8,8 @@ pub enum Error {
     #[error(transparent)]
     Filesystem(#[from] crate::features::filesystem::FilesystemError),
 
-    #[error(transparent)]
-    Secrets(#[from] crate::features::secrets::SecretError),
-
+    // #[error(transparent)]
+    // Secrets(#[from] crate::features::secrets::SecretError),
     #[error(transparent)]
     Io(#[from] std::io::Error),
 

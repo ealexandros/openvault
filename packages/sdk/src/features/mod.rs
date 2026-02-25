@@ -1,17 +1,18 @@
 mod filesystem;
-mod secrets;
+// mod secrets;
 
 pub use filesystem::FilesystemFeature;
-pub use secrets::SecretsFeature;
+// pub use secrets::SecretsFeature;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct CommitResult {
     pub filesystem: bool,
-    pub secrets: bool,
+    // pub secrets: bool,
 }
 
 impl CommitResult {
     pub fn any(self) -> bool {
-        self.filesystem || self.secrets
+        self.filesystem
+        // self.filesystem || self.secrets
     }
 }

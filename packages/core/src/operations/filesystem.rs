@@ -1,30 +1,23 @@
-use crate::errors::{Error, Result};
-use crate::features::filesystem::{
-    FILESYSTEM_FEATURE_ID, FilesystemChange, FilesystemCodec, FilesystemStore,
-};
-use crate::features::shared::feature_trait::{FeatureCodec, RecordKind};
+use crate::errors::Result;
+use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
+use crate::features::shared::feature_trait::FeatureCodec;
 use crate::operations::replay::replay_since_checkpoint;
 use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;
-use crate::vault::versions::shared::record::RecordHeader;
+use crate::vault::versions::shared::record::Record;
 
 pub fn apply_filesystem_change(
     session: &mut VaultSession,
     change: FilesystemChange,
 ) -> Result<u64> {
     let codec = FilesystemCodec;
-    let encoded = codec.encode_change(change).map_err(Error::FeatureCodec)?;
 
-    if encoded.feature_id != FILESYSTEM_FEATURE_ID {
-        return Err(Error::InvalidVaultFormat);
-    }
+    let encoded = codec.encode_change(change)?;
+    let mut record = Record::new(FeatureType::Filesystem, codec.wire_version(), encoded);
 
-    let payload = pack_feature_payload(encoded.kind, &encoded.payload);
-    let header = RecordHeader::new(FeatureType::Filesystem, encoded.version);
     let format = session.format();
 
-    session
-        .with_format_context(|file, context| format.append_record(file, &header, &payload, context))
+    session.with_format_context(|file, context| format.append_record(file, &mut record, context))
 }
 
 pub fn load_filesystem_store(session: &mut VaultSession) -> Result<FilesystemStore> {
@@ -35,14 +28,11 @@ pub fn load_filesystem_store(session: &mut VaultSession) -> Result<FilesystemSto
     let mut deltas = Vec::new();
 
     for record in replay.records {
-        if record.header.feature_id != FeatureType::Filesystem {
+        if record.header.feature_type != FeatureType::Filesystem {
             continue;
         }
 
-        let (kind, payload) = unpack_feature_payload(&record.payload)?;
-        let change = codec
-            .decode_change(record.header.version, kind, payload)
-            .map_err(Error::FeatureCodec)?;
+        let change = codec.decode_change(record.header.version, &record.payload)?;
 
         match change {
             FilesystemChange::Snapshot(snapshot) => {
@@ -69,34 +59,4 @@ pub fn commit_filesystem_store(
     store.reset_sync_state();
 
     Ok(true)
-}
-
-fn pack_feature_payload(kind: RecordKind, payload: &[u8]) -> Vec<u8> {
-    let mut framed = Vec::with_capacity(payload.len() + 1);
-    framed.push(encode_record_kind(kind));
-    framed.extend_from_slice(payload);
-    framed
-}
-
-fn unpack_feature_payload(payload: &[u8]) -> Result<(RecordKind, &[u8])> {
-    let Some((&kind, body)) = payload.split_first() else {
-        return Err(Error::InvalidVaultFormat);
-    };
-
-    Ok((decode_record_kind(kind)?, body))
-}
-
-fn encode_record_kind(kind: RecordKind) -> u8 {
-    match kind {
-        RecordKind::Snapshot => 1,
-        RecordKind::Delta => 2,
-    }
-}
-
-fn decode_record_kind(value: u8) -> Result<RecordKind> {
-    match value {
-        1 => Ok(RecordKind::Snapshot),
-        2 => Ok(RecordKind::Delta),
-        _ => Err(Error::InvalidVaultFormat),
-    }
 }

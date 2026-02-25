@@ -1,8 +1,6 @@
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::features::shared::feature_trait::RecordKind;
-
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum FilesystemError {
     #[error("Invalid filesystem entry name: {0}")]
@@ -37,12 +35,6 @@ pub enum FilesystemError {
 
     #[error("Unsupported filesystem wire version: {0}")]
     UnsupportedWireVersion(u16),
-
-    #[error("Invalid feature record kind. Expected {expected:?}, got {actual:?}")]
-    InvalidRecordKind {
-        expected: RecordKind,
-        actual: RecordKind,
-    },
 
     #[error("Invalid filesystem payload: {0}")]
     InvalidPayload(String),

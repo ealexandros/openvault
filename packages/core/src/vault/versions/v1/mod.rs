@@ -9,7 +9,7 @@ use crate::errors::{Error, Result};
 use crate::features::shared::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, Writer};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
-use crate::vault::versions::shared::record::RecordHeader;
+use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::shared::replay::ReplayState;
 use crate::vault::versions::shared::subheader::Subheader;
 use crate::vault::versions::shared::traits::{FormatContext, FormatHandler};
@@ -81,11 +81,10 @@ impl FormatHandler for V1FormatHandler {
     fn append_record(
         &self,
         rw: &mut ReadWriter,
-        record: &RecordHeader,
-        payload: &[u8],
+        record: &mut Record,
         context: &FormatContext,
     ) -> Result<u64> {
-        io::append_record(rw, record, payload, context)
+        io::append_record(rw, record, context)
     }
 
     fn read_record(
@@ -93,9 +92,8 @@ impl FormatHandler for V1FormatHandler {
         reader: &mut Reader,
         offset: u64,
         context: &FormatContext,
-    ) -> Result<(RecordHeader, Vec<u8>)> {
-        let record_wire = io::read_record(reader, offset, context)?;
-        Ok((record_wire.header, record_wire.payload))
+    ) -> Result<Record> {
+        io::read_record(reader, offset, context)
     }
 
     fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result<ReplayState> {

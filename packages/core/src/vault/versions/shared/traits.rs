@@ -8,7 +8,7 @@ use crate::features::shared::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, Writer};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
-use crate::vault::versions::shared::record::RecordHeader;
+use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::shared::replay::ReplayState;
 use crate::vault::versions::shared::subheader::Subheader;
 
@@ -79,13 +79,12 @@ pub trait FormatHandler: Sync + Send {
         reader: &mut Reader,
         offset: u64,
         context: &FormatContext,
-    ) -> Result<(RecordHeader, Vec<u8>)>;
+    ) -> Result<Record>;
 
     fn append_record(
         &self,
         rw: &mut ReadWriter,
-        record: &RecordHeader,
-        payload: &[u8],
+        record: &mut Record,
         context: &FormatContext,
     ) -> Result<u64>;
 
