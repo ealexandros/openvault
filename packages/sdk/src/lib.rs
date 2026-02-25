@@ -1,30 +1,29 @@
 mod client;
-mod config;
-mod error;
-mod features;
-mod session;
+mod errors;
 mod stores;
+mod vault;
 
 use std::path::Path;
 
-pub use client::VaultClient;
-pub use config::CreateVaultOptions;
-pub use error::{Error, Result};
-pub use features::{FeatureFacade, FilesystemFeature, SecretsFeature};
-pub use session::VaultHandle;
-pub use stores::{StoresCommitResult, VaultStores};
+use crate::client::VaultClient;
+use crate::errors::Result;
+
+pub use errors::Error;
+pub use stores::{CommitResult, FilesystemStore, SecretsStore};
+pub use vault::Vault;
 
 pub use openvault_core::features::filesystem::{
-    FileMetadata, FileMetadataPatch, FilesystemChange, FilesystemDelta, FilesystemError,
-    FilesystemSnapshot, FilesystemStore, FolderMetadata, FolderMetadataPatch, ROOT_FOLDER_ID,
-    scan_directory, scan_file,
+    FileMetadata, FileMetadataPatch, FilesystemDelta, FilesystemStore as CoreFilesystemStore,
+    FolderMetadata, FolderMetadataPatch, ROOT_FOLDER_ID, scan_directory, scan_file,
 };
+
 pub use openvault_core::features::secrets::{
-    EncryptedField, LoginEntry, LoginEntryPatch, SecretDelta, SecretError, SecretSnapshot,
-    SecretStore, SecretsChange, TOTP,
+    EncryptedField, LoginEntry, LoginEntryPatch, SecretDelta, SecretStore as CoreSecretStore,
+    SecretsChange, TOTP,
 };
+
 pub use openvault_core::features::shared::blob_ref::BlobRef;
-pub use openvault_core::vault::versions::shared::replay::{ReplayRecord, ReplayState};
+pub use openvault_core::operations::config::CreateConfig;
 pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;
 
@@ -39,19 +38,19 @@ pub fn create_vault(path: impl AsRef<Path>, password: impl AsRef<[u8]>) -> Resul
 pub fn create_vault_with(
     path: impl AsRef<Path>,
     password: impl AsRef<[u8]>,
-    options: CreateVaultOptions,
+    options: CreateConfig,
 ) -> Result {
     client().create_with(path, password, options)
 }
 
-pub fn open_vault(path: impl AsRef<Path>, password: impl AsRef<[u8]>) -> Result<VaultHandle> {
+pub fn open_vault(path: impl AsRef<Path>, password: impl AsRef<[u8]>) -> Result<Vault> {
     client().open(path, password)
 }
 
 pub fn create_and_open_vault(
     path: impl AsRef<Path>,
     password: impl AsRef<[u8]>,
-    options: CreateVaultOptions,
-) -> Result<VaultHandle> {
+    options: CreateConfig,
+) -> Result<Vault> {
     client().create_and_open(path, password, options)
 }
