@@ -32,7 +32,8 @@ impl VaultClient {
 
     pub fn open(&self, path: impl AsRef<Path>, password: impl AsRef<[u8]>) -> Result<Vault> {
         let session = open_vault(path.as_ref(), password.as_ref()).map_err(Error::from)?;
-        Ok(Vault::new(session))
+
+        Vault::new(session)
     }
 
     pub fn create_and_open(
@@ -44,6 +45,6 @@ impl VaultClient {
         let session = create_and_open_vault(path.as_ref(), password.as_ref(), options)
             .map_err(Error::from)?;
 
-        Ok(Vault::new(session))
+        Vault::new(session)
     }
 }

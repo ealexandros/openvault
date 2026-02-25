@@ -1,6 +1,11 @@
-use crate::errors::Result;
+use std::fs::File;
+use std::path::Path;
+use uuid::Uuid;
+
+use crate::errors::{Error, Result};
 use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
 use crate::features::shared::feature_trait::FeatureCodec;
+use crate::operations::blob;
 use crate::operations::replay::replay_since_checkpoint;
 use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;
@@ -47,6 +52,34 @@ pub fn load_filesystem_store(session: &mut VaultSession) -> Result<FilesystemSto
     FilesystemStore::restore(snapshot, deltas).map_err(Into::into)
 }
 
+// @todo-now remove this from here..
+
+pub fn add_file(
+    session: &mut VaultSession,
+    store: &mut FilesystemStore,
+    parent_id: Uuid,
+    source_path: &Path,
+) -> Result<Uuid> {
+    let name = source_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or(Error::InvalidPath)?
+        .to_string();
+
+    let extension = source_path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("")
+        .to_string();
+
+    let mut file = File::open(source_path)?;
+    let blob_ref = blob::put_blob(session, &mut file)?;
+
+    let file_id = store.add_file(parent_id, name, extension, blob_ref)?;
+
+    Ok(file_id)
+}
+
 pub fn commit_filesystem_store(
     session: &mut VaultSession,
     store: &mut FilesystemStore,
@@ -56,7 +89,7 @@ pub fn commit_filesystem_store(
     };
 
     apply_filesystem_change(session, change)?;
-    store.reset_sync_state();
+    store.clear_deltas();
 
     Ok(true)
 }

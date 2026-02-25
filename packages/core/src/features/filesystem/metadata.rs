@@ -60,28 +60,33 @@ pub struct FileMetadata {
     pub id: Uuid,
     pub parent_id: Uuid,
     pub name: String,
-    pub mime_type: Option<String>,
-    pub blob: Option<BlobRef>,
+    pub mime_type: String,
+    pub blob: BlobRef,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 impl FileMetadata {
-    pub fn new(parent_id: Uuid, name: impl Into<String>) -> Self {
+    pub fn new(
+        parent_id: Uuid,
+        name: impl Into<String>,
+        mime_type: impl Into<String>,
+        blob: BlobRef,
+    ) -> Self {
         let now = Utc::now();
         Self {
             id: Uuid::new_v4(),
             parent_id,
             name: name.into(),
-            mime_type: None,
-            blob: None,
+            mime_type: mime_type.into(),
+            blob,
             created_at: now,
             updated_at: now,
         }
     }
 
     pub fn size_bytes(&self) -> u64 {
-        self.blob.as_ref().map(|b| b.size_bytes).unwrap_or(0)
+        self.blob.size_bytes
     }
 }
 
@@ -89,8 +94,8 @@ impl FileMetadata {
 pub struct FileMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
-    pub mime_type: Option<Option<String>>,
-    pub blob: Option<Option<BlobRef>>,
+    pub mime_type: Option<String>,
+    pub blob: Option<BlobRef>,
     pub updated_at: DateTime<Utc>,
 }
 
