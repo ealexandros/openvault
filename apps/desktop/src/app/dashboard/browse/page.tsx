@@ -23,7 +23,6 @@ const BrowsePage = () => {
     isDragging,
     handleFolderClick,
     handleBreadcrumbClick,
-    handleResetPath,
     handleCreateFolder,
     handleDeleteItem,
     handleRenameItem,
@@ -94,11 +93,7 @@ const BrowsePage = () => {
         <div className="sticky top-0 z-10 flex flex-col gap-4 bg-background/95 py-2 backdrop-blur md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-semibold tracking-tight">Files</h3>
-            <Breadcrumbs
-              currentPath={currentPath}
-              onReset={handleResetPath}
-              onClick={handleBreadcrumbClick}
-            />
+            <Breadcrumbs currentPath={currentPath} onClick={handleBreadcrumbClick} />
           </div>
           <div className="flex gap-2">
             <NewFolderDialog onCreate={handleCreateFolder} />

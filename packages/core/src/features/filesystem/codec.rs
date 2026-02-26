@@ -1,4 +1,4 @@
-use crate::features::shared::feature_trait::FeatureCodec;
+use crate::features::shared::traits::FeatureCodec;
 
 use super::error::{FilesystemError, Result};
 use super::records::{FILESYSTEM_WIRE_VERSION_V1, FilesystemChange};

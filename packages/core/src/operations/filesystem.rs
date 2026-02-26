@@ -1,6 +1,6 @@
 use crate::errors::Result;
 use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
-use crate::features::shared::feature_trait::FeatureCodec;
+use crate::features::shared::traits::FeatureCodec;
 use crate::operations::replay::replay_since_checkpoint;
 use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;

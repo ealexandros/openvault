@@ -1,6 +1,6 @@
+import { useFileDragDrop } from "@/hooks/useFileDragDrop";
 import { tauriApi } from "@/libraries/tauri-api";
 import { type FileItem, type FolderItem } from "@/types/filesystem";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useState } from "react";
 
@@ -10,23 +10,18 @@ type PathSegment = {
 };
 
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
+const ROOT_FOLDER: PathSegment = { id: ROOT_FOLDER_ID, name: "Home" };
 
 // @todo-now refactor everything from here..
 // @todo-now performUpload executes twice
 
 export const useBrowse = () => {
-  const [currentPath, setCurrentPath] = useState<PathSegment[]>([
-    { id: ROOT_FOLDER_ID, name: "/" },
-  ]);
+  const [currentPath, setCurrentPath] = useState<PathSegment[]>([ROOT_FOLDER]);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
 
-  const currentFolder = currentPath[currentPath.length - 1] ?? {
-    id: ROOT_FOLDER_ID,
-    name: "/",
-  };
+  const currentFolder = currentPath[currentPath.length - 1] ?? ROOT_FOLDER;
 
   const fetchFiles = useCallback(async (folderId: string) => {
     setIsLoading(true);
@@ -40,48 +35,32 @@ export const useBrowse = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchFiles(currentFolder.id);
   }, [currentFolder.id, fetchFiles]);
 
-  const performUpload = async (path: string) => {
-    const result = await tauriApi.uploadFile({ parentId: currentFolder.id, sourcePath: path });
-
-    if (result.success) {
-      await fetchFiles(currentFolder.id);
-    }
-  };
-
-  useEffect(() => {
-    const unlisten: (() => void)[] = [];
-
-    const setupListeners = async () => {
-      const u1 = await getCurrentWindow().listen("tauri://drag-enter", () => {
-        setIsDragging(true);
+  const performUpload = useCallback(
+    async (path: string) => {
+      const result = await tauriApi.uploadFile({
+        parentId: currentFolder.id,
+        sourcePath: path,
       });
-      const u2 = await getCurrentWindow().listen("tauri://drag-leave", () => {
-        setIsDragging(false);
-      });
-      const u3 = await getCurrentWindow().listen<{ paths: string[] }>(
-        "tauri://drag-drop",
-        event => {
-          setIsDragging(false);
-          void (async () => {
-            for (const path of event.payload.paths) {
-              await performUpload(path);
-            }
-          })();
-        },
-      );
-      unlisten.push(u1, u2, u3);
-    };
 
-    void setupListeners();
+      if (result.success) {
+        await fetchFiles(currentFolder.id);
+      }
+    },
+    [currentFolder.id, fetchFiles],
+  );
 
-    return () => {
-      unlisten.forEach(u => u());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { isDragging } = useFileDragDrop({
+    onDrop: async event => {
+      const paths = (event as { payload: { paths: string[] } }).payload.paths;
+      for (const path of paths) {
+        await performUpload(path);
+      }
+    },
+  });
 
   const handleFolderClick = (item: FolderItem) => {
     setCurrentPath(prev => [...prev, { id: item.id, name: item.name }]);
@@ -89,10 +68,6 @@ export const useBrowse = () => {
 
   const handleBreadcrumbClick = (index: number) => {
     setCurrentPath(prev => prev.slice(0, index + 1));
-  };
-
-  const handleResetPath = () => {
-    setCurrentPath([{ id: ROOT_FOLDER_ID, name: "/" }]);
   };
 
   const handleCreateFolder = async (name: string) => {
@@ -150,7 +125,6 @@ export const useBrowse = () => {
     isDragging,
     handleFolderClick,
     handleBreadcrumbClick,
-    handleResetPath,
     handleCreateFolder,
     handleDeleteItem,
     handleRenameItem,
