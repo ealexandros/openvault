@@ -144,6 +144,20 @@ impl FilesystemStore {
         self.apply_delta_with_tracking(&FilesystemDelta::FolderUpdated { id, patch })
     }
 
+    pub fn rename_folder(&mut self, id: Uuid, new_name: String) -> Result {
+        self.apply_delta_with_tracking(&FilesystemDelta::FolderUpdated {
+            id,
+            patch: FolderMetadataPatch::default().set_name(new_name),
+        })
+    }
+
+    pub fn rename_file(&mut self, id: Uuid, new_name: String) -> Result {
+        self.apply_delta_with_tracking(&FilesystemDelta::FileUpdated {
+            id,
+            patch: FileMetadataPatch::default().set_name(new_name),
+        })
+    }
+
     pub fn snapshot(&self) -> FilesystemSnapshot {
         FilesystemSnapshot::new(self.folders.clone(), self.files.clone())
     }

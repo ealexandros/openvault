@@ -141,6 +141,32 @@ async fn delete_item(state: TauriState<'_>, id: String, item_type: String) -> Re
     Ok(())
 }
 
+#[tauri::command]
+async fn rename_item(
+    state: TauriState<'_>,
+    id: String,
+    item_type: String,
+    new_name: String,
+) -> Result {
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state
+        .as_mut()
+        .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
+
+    let uuid = uuid::Uuid::parse_str(&id)
+        .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
+
+    match item_type.as_str() {
+        "file" => vault.filesystem().rename_file(uuid, new_name)?,
+        "folder" => vault.filesystem().rename_folder(uuid, new_name)?,
+        _ => return Err(crate::errors::Error::Internal("Invalid item type".into())),
+    }
+
+    vault.commit_all()?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -150,7 +176,8 @@ pub fn run() {
             open_vault,
             browse_vault,
             create_folder,
-            delete_item
+            delete_item,
+            rename_item
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

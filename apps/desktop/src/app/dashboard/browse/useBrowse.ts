@@ -68,6 +68,22 @@ export const useBrowse = () => {
     }
   };
 
+  const handleRenameItem = async (
+    id: string,
+    itemType: "file" | "folder",
+    newName: string,
+  ) => {
+    const { error } = await tauriApi.safeInvoke("rename_item", {
+      id,
+      itemType,
+      newName,
+    });
+
+    if (error == null) {
+      await fetchFiles(currentFolder.id);
+    }
+  };
+
   return {
     currentPath: currentPath.map(p => p.name),
     currentFiles,
@@ -77,6 +93,7 @@ export const useBrowse = () => {
     handleResetPath,
     handleCreateFolder,
     handleDeleteItem,
+    handleRenameItem,
     refresh: () => fetchFiles(currentFolder.id),
   };
 };

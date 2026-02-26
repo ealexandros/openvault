@@ -46,12 +46,22 @@ pub struct FolderMetadataPatch {
 }
 
 impl FolderMetadataPatch {
-    pub fn new(updated_at: DateTime<Utc>) -> Self {
+    pub fn default() -> Self {
         Self {
             parent_id: None,
             name: None,
-            updated_at,
+            updated_at: Utc::now(),
         }
+    }
+
+    pub fn set_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
+
+    pub fn set_parent_id(mut self, parent_id: Uuid) -> Self {
+        self.parent_id = Some(parent_id);
+        self
     }
 }
 
@@ -100,13 +110,18 @@ pub struct FileMetadataPatch {
 }
 
 impl FileMetadataPatch {
-    pub fn new(updated_at: DateTime<Utc>) -> Self {
+    pub fn default() -> Self {
         Self {
             parent_id: None,
             name: None,
             mime_type: None,
             blob: None,
-            updated_at,
+            updated_at: Utc::now(),
         }
+    }
+
+    pub fn set_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
     }
 }

@@ -60,6 +60,14 @@ impl<'a> FilesystemFeature<'a> {
         self.store.patch_file(id, patch).map_err(map_fs_error)
     }
 
+    pub fn rename_folder(&mut self, id: Uuid, new_name: String) -> Result {
+        self.store.rename_folder(id, new_name).map_err(map_fs_error)
+    }
+
+    pub fn rename_file(&mut self, id: Uuid, new_name: String) -> Result {
+        self.store.rename_file(id, new_name).map_err(map_fs_error)
+    }
+
     pub fn delete_folder(&mut self, id: Uuid) -> Result {
         self.store.remove_folder(id).map_err(map_fs_error)
     }

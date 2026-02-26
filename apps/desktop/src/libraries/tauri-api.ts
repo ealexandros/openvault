@@ -29,6 +29,10 @@ type TauriCommands = {
     args: { id: string; itemType: "file" | "folder" };
     return: void;
   };
+  rename_item: {
+    args: { id: string; itemType: "file" | "folder"; newName: string };
+    return: void;
+  };
 };
 
 export const tauriApi = {

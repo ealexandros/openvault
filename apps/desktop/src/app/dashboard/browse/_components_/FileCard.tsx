@@ -5,7 +5,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
 import { cn } from "@/utils/cn";
-import { FileTextIcon, FolderIcon, MoreVerticalIcon, Trash2Icon } from "lucide-react";
+import {
+  FileTextIcon,
+  FolderIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
 
 type FileItem = {
   id: string;
@@ -19,9 +25,10 @@ type FileCardProps = {
   item: FileItem;
   onClick: () => void;
   onDelete: () => void;
+  onRename: () => void;
 };
 
-export const FileCard = ({ item, onClick, onDelete }: FileCardProps) => {
+export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) => {
   const isFolder = item.type === "folder";
 
   return (
@@ -53,6 +60,14 @@ export const FileCard = ({ item, onClick, onDelete }: FileCardProps) => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={e => {
+                e.stopPropagation();
+                onRename();
+              }}>
+              <PencilIcon className="mr-2 size-3.5" />
+              Rename
+            </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
               onClick={e => {

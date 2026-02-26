@@ -2,9 +2,12 @@
 
 import { Button } from "@/components/ui/shadcn/button";
 import { PlusIcon } from "lucide-react";
+import { useState } from "react";
 import { Breadcrumbs } from "./_components_/Breadcrumbs";
 import { EmptyState } from "./_components_/EmptyState";
 import { FileCard } from "./_components_/FileCard";
+import { NewFolderDialog } from "./_components_/NewFolderDialog";
+import { RenameItemDialog } from "./_components_/RenameItemDialog";
 import { useBrowse } from "./useBrowse";
 
 const BrowsePage = () => {
@@ -16,7 +19,14 @@ const BrowsePage = () => {
     handleResetPath,
     handleCreateFolder,
     handleDeleteItem,
+    handleRenameItem,
   } = useBrowse();
+
+  const [renamingItem, setRenamingItem] = useState<{
+    id: string;
+    name: string;
+    type: "file" | "folder";
+  } | null>(null);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -31,16 +41,7 @@ const BrowsePage = () => {
             />
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                void handleCreateFolder("example-folder");
-              }}
-              variant="outline"
-              size="sm"
-              className="h-9 rounded-xl px-4 text-xs font-semibold md:flex">
-              <PlusIcon className="mr-2 size-3.5" />
-              New Folder
-            </Button>
+            <NewFolderDialog onCreate={handleCreateFolder} />
             <Button
               size="sm"
               className="h-9 rounded-xl px-4 text-xs font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
@@ -59,12 +60,27 @@ const BrowsePage = () => {
               onDelete={() => {
                 void handleDeleteItem(item.id, item.type);
               }}
+              onRename={() => {
+                setRenamingItem({ id: item.id, name: item.name, type: item.type });
+              }}
             />
           ))}
 
           {currentFiles.length === 0 && <EmptyState />}
         </div>
       </div>
+
+      <RenameItemDialog
+        isOpen={renamingItem !== null}
+        onOpenChange={open => !open && setRenamingItem(null)}
+        initialName={renamingItem?.name ?? ""}
+        itemType={renamingItem?.type ?? "file"}
+        onRename={async newName => {
+          if (renamingItem) {
+            await handleRenameItem(renamingItem.id, renamingItem.type, newName);
+          }
+        }}
+      />
     </div>
   );
 };
