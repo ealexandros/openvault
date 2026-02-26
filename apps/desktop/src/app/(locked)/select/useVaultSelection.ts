@@ -22,7 +22,7 @@ export const useVaultSelection = () => {
     const selected = await safeAsync({
       promise: open({
         title: "Select a folder to vault",
-        directory: true,
+        directory: false,
         multiple: false,
       }),
       errorMessage: "Failed to open folder picker",
