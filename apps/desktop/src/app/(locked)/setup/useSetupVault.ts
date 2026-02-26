@@ -40,15 +40,14 @@ export const useSetupVault = () => {
     validationSchema: toFormikValidationSchema(setupVaultSchema),
     onSubmit: async values => {
       setIsEncrypting(true);
-      const result = await tauriApi.safeInvoke("create_vault", {
-        params: {
-          path: values.path,
-          name: values.name,
-          password: values.password,
-        },
+
+      const result = await tauriApi.createVault({
+        path: values.path,
+        name: values.name,
+        password: values.password,
       });
 
-      if (result.error == null) {
+      if (result.success) {
         setIsUnlocked(true);
         router.push(hrefs.dashboard.get());
       }

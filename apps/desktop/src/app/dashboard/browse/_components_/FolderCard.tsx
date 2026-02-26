@@ -4,7 +4,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
-import { FolderItem } from "@/libraries/tauri-api";
+import { type FolderItem } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { FolderIcon, MoreVerticalIcon, PencilIcon, Trash2Icon } from "lucide-react";
 

@@ -17,15 +17,13 @@ export const useVaultUnlock = () => {
   };
 
   const handleProcessVault = async () => {
-    const { error } = await tauriApi.safeInvoke("open_vault", {
-      params: {
-        path: selectedPath ?? "",
-        password,
-      },
+    const result = await tauriApi.openVault({
+      path: selectedPath ?? "",
+      password,
     });
 
-    if (error != null) {
-      const message = typeof error === "string" ? error : "Failed to open vault";
+    if (!result.success) {
+      const message = typeof result.error === "string" ? result.error : "Failed to open vault";
       setError(message);
       return;
     }

@@ -1,4 +1,5 @@
-import { FileItem, FolderItem, tauriApi } from "@/libraries/tauri-api";
+import { tauriApi } from "@/libraries/tauri-api";
+import { type FileItem, type FolderItem } from "@/types/filesystem";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useState } from "react";
@@ -29,13 +30,11 @@ export const useBrowse = () => {
 
   const fetchFiles = useCallback(async (folderId: string) => {
     setIsLoading(true);
-    const { data, error } = await tauriApi.safeInvoke("browse_vault", {
-      params: { parentId: folderId },
-    });
+    const result = await tauriApi.browseVault({ parentId: folderId });
 
-    if (data != null && error == null) {
-      setFolders(data.folders);
-      setFiles(data.files);
+    if (result.success) {
+      setFolders(result.data.folders);
+      setFiles(result.data.files);
     }
     setIsLoading(false);
   }, []);
@@ -45,11 +44,9 @@ export const useBrowse = () => {
   }, [currentFolder.id, fetchFiles]);
 
   const performUpload = async (path: string) => {
-    const { error } = await tauriApi.safeInvoke("upload_file", {
-      params: { parentId: currentFolder.id, sourcePath: path },
-    });
+    const result = await tauriApi.uploadFile({ parentId: currentFolder.id, sourcePath: path });
 
-    if (error == null) {
+    if (result.success) {
       await fetchFiles(currentFolder.id);
     }
   };
@@ -99,21 +96,17 @@ export const useBrowse = () => {
   };
 
   const handleCreateFolder = async (name: string) => {
-    const { error } = await tauriApi.safeInvoke("create_folder", {
-      params: { parentId: currentFolder.id, name },
-    });
+    const result = await tauriApi.createFolder({ parentId: currentFolder.id, name });
 
-    if (error == null) {
+    if (result.success) {
       await fetchFiles(currentFolder.id);
     }
   };
 
   const handleDeleteItem = async (id: string, itemType: "file" | "folder") => {
-    const { error } = await tauriApi.safeInvoke("delete_item", {
-      params: { id, itemType },
-    });
+    const result = await tauriApi.deleteItem({ id, itemType });
 
-    if (error == null) {
+    if (result.success) {
       await fetchFiles(currentFolder.id);
     }
   };
@@ -123,11 +116,9 @@ export const useBrowse = () => {
     itemType: "file" | "folder",
     newName: string,
   ) => {
-    const { error } = await tauriApi.safeInvoke("rename_item", {
-      params: { id, itemType, newName },
-    });
+    const result = await tauriApi.renameItem({ id, itemType, newName });
 
-    if (error == null) {
+    if (result.success) {
       await fetchFiles(currentFolder.id);
     }
   };
@@ -144,13 +135,11 @@ export const useBrowse = () => {
   };
 
   const getFileContent = async (id: string) => {
-    const { data, error } = await tauriApi.safeInvoke("get_file_content", {
-      params: { id },
-    });
-    if (error != null) {
+    const result = await tauriApi.getFileContent({ id });
+    if (!result.success) {
       return null;
     }
-    return data;
+    return result.data;
   };
 
   return {

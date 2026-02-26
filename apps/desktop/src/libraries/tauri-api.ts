@@ -1,81 +1,53 @@
 import { logger } from "@/libraries/logger";
+import { type BrowseResult } from "@/types/filesystem";
 import { invoke } from "@tauri-apps/api/core";
 
-export type FolderItem = {
-  id: string;
-  name: string;
-  itemCount: number;
-};
+export type Result<T> = { success: true; data: T } | { success: false; error: unknown };
 
-export type FileItem = {
-  id: string;
-  name: string;
-  size: number;
-  extension: string;
-};
-
-export type BrowseResponse = {
-  folders: FolderItem[];
-  files: FileItem[];
-};
-
-type TauriCommands = {
-  create_vault: {
-    args: { params: { path: string; name: string; password: string } };
-    return: void;
-  };
-  open_vault: {
-    args: { params: { path: string; password: string } };
-    return: void;
-  };
-  browse_vault: {
-    args: { params: { parentId: string } };
-    return: BrowseResponse;
-  };
-  create_folder: {
-    args: { params: { parentId: string; name: string } };
-    return: string;
-  };
-  delete_item: {
-    args: { params: { id: string; itemType: "file" | "folder" } };
-    return: void;
-  };
-  rename_item: {
-    args: { params: { id: string; itemType: "file" | "folder"; newName: string } };
-    return: void;
-  };
-  upload_file: {
-    args: { params: { parentId: string; sourcePath: string } };
-    return: void;
-  };
-  get_file_content: {
-    args: { params: { id: string } };
-    return: number[] | null;
-  };
+export const safeInvokeTauri = async <T>(
+  command: string,
+  args: Record<string, unknown>,
+  errorMessage?: string,
+): Promise<Result<T>> => {
+  try {
+    const data = await invoke<T>(command, args);
+    return { success: true, data };
+  } catch (error) {
+    logger.error(errorMessage ?? `Failed to execute ${command}`, error);
+    return { success: false, error };
+  }
 };
 
 export const tauriApi = {
-  invoke: async <K extends keyof TauriCommands>(
-    command: K,
-    args: TauriCommands[K]["args"],
-  ): Promise<TauriCommands[K]["return"]> => {
-    return invoke(command, args);
+  createVault: (params: { path: string; name: string; password: string }) => {
+    return safeInvokeTauri<void>("create_vault", { params });
   },
 
-  safeInvoke: async <K extends keyof TauriCommands>(
-    command: K,
-    args: TauriCommands[K]["args"],
-    errorMessage?: string,
-  ): Promise<{
-    data: TauriCommands[K]["return"] | null;
-    error: unknown;
-  }> => {
-    try {
-      const data: TauriCommands[K]["return"] | null = await invoke(command, args);
-      return { data, error: null };
-    } catch (err) {
-      logger.error(errorMessage ?? `Failed to execute ${command}`, err);
-      return { data: null, error: err };
-    }
+  openVault: (params: { path: string; password: string }) => {
+    return safeInvokeTauri<void>("open_vault", { params });
+  },
+
+  browseVault: (params: { parentId: string }) => {
+    return safeInvokeTauri<BrowseResult>("browse_vault", { params });
+  },
+
+  createFolder: (params: { parentId: string; name: string }) => {
+    return safeInvokeTauri<string>("create_folder", { params });
+  },
+
+  deleteItem: (params: { id: string; itemType: "file" | "folder" }) => {
+    return safeInvokeTauri<void>("delete_item", { params });
+  },
+
+  renameItem: (params: { id: string; itemType: "file" | "folder"; newName: string }) => {
+    return safeInvokeTauri<void>("rename_item", { params });
+  },
+
+  uploadFile: (params: { parentId: string; sourcePath: string }) => {
+    return safeInvokeTauri<void>("upload_file", { params });
+  },
+
+  getFileContent: (params: { id: string }) => {
+    return safeInvokeTauri<number[] | null>("get_file_content", { params });
   },
 };
