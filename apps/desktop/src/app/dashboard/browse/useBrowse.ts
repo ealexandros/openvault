@@ -1,34 +1,40 @@
-import { FilesystemItem, tauriApi } from "@/libraries/tauri-api";
+import { FileItem, FolderItem, tauriApi } from "@/libraries/tauri-api";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useState } from "react";
 
 type PathSegment = {
-  id: string | null;
+  id: string;
   name: string;
 };
+
+const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
 
 // @todo-now performUpload executes twice
 
 export const useBrowse = () => {
-  const [currentPath, setCurrentPath] = useState<PathSegment[]>([{ id: null, name: "Root" }]);
-  const [currentFiles, setCurrentFiles] = useState<FilesystemItem[]>([]);
+  const [currentPath, setCurrentPath] = useState<PathSegment[]>([
+    { id: ROOT_FOLDER_ID, name: "/" },
+  ]);
+  const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const currentFolder = currentPath[currentPath.length - 1] ?? {
-    id: "00000000-00000000-00000000-00000000",
+    id: ROOT_FOLDER_ID,
     name: "/",
   };
 
-  const fetchFiles = useCallback(async (folderId: string | null) => {
+  const fetchFiles = useCallback(async (folderId: string) => {
     setIsLoading(true);
     const { data, error } = await tauriApi.safeInvoke("browse_vault", {
       parentId: folderId,
     });
 
     if (data != null && error == null) {
-      setCurrentFiles(data);
+      setFolders(data.folders);
+      setFiles(data.files);
     }
     setIsLoading(false);
   }, []);
@@ -80,10 +86,8 @@ export const useBrowse = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFolderClick = (item: FilesystemItem) => {
-    if (item.type === "folder") {
-      setCurrentPath(prev => [...prev, { id: item.id, name: item.name }]);
-    }
+  const handleFolderClick = (item: FolderItem) => {
+    setCurrentPath(prev => [...prev, { id: item.id, name: item.name }]);
   };
 
   const handleBreadcrumbClick = (index: number) => {
@@ -91,7 +95,7 @@ export const useBrowse = () => {
   };
 
   const handleResetPath = () => {
-    setCurrentPath([{ id: null, name: "Root" }]);
+    setCurrentPath([{ id: ROOT_FOLDER_ID, name: "/" }]);
   };
 
   const handleCreateFolder = async (name: string) => {
@@ -153,7 +157,8 @@ export const useBrowse = () => {
 
   return {
     currentPath: currentPath.map(p => p.name),
-    currentFiles,
+    folders,
+    files,
     isLoading,
     isDragging,
     handleFolderClick,

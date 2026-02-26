@@ -8,6 +8,12 @@ pub enum Error {
 
     #[error("Internal error: {0}")]
     Internal(String),
+
+    #[error("Invalid UUID: {0}")]
+    InvalidUuid(String),
+
+    #[error("Vault not opened")]
+    VaultNotOpened,
 }
 
 impl Serialize for Error {

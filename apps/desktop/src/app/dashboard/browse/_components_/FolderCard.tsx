@@ -4,15 +4,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
+import { FolderItem } from "@/libraries/tauri-api";
 import { cn } from "@/utils/cn";
 import { FolderIcon, MoreVerticalIcon, PencilIcon, Trash2Icon } from "lucide-react";
-
-type FolderItem = {
-  id: string;
-  name: string;
-  type: "folder";
-  details?: string;
-};
 
 type FolderCardProps = {
   item: FolderItem;
@@ -72,7 +66,7 @@ export const FolderCard = ({ item, onClick, onDelete, onRename }: FolderCardProp
         {item.name}
       </p>
       <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
-        {item.details ?? 0} items
+        {item.item_count} items
       </p>
     </div>
 

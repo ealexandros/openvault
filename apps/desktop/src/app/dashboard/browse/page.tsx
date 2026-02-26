@@ -18,7 +18,8 @@ import { useBrowse } from "./useBrowse";
 const BrowsePage = () => {
   const {
     currentPath,
-    currentFiles,
+    folders,
+    files,
     isDragging,
     handleFolderClick,
     handleBreadcrumbClick,
@@ -39,22 +40,22 @@ const BrowsePage = () => {
   const [viewingItem, setViewingItem] = useState<{
     id: string;
     name: string;
-    mimeType?: string;
+    extension?: string;
     content: number[] | null;
   } | null>(null);
 
-  const handleFileClick = async (item: { id: string; name: string; mimeType?: string }) => {
+  const handleFileClick = async (item: { id: string; name: string; extension: string }) => {
     setViewingItem({
       id: item.id,
       name: item.name,
-      mimeType: item.mimeType,
+      extension: item.extension,
       content: null,
     });
     const content = await getFileContent(item.id);
     setViewingItem({
       id: item.id,
       name: item.name,
-      mimeType: item.mimeType,
+      extension: item.extension,
       content,
     });
   };
@@ -114,37 +115,37 @@ const BrowsePage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {currentFiles.map(item =>
-            item.type === "folder" ? (
-              <FolderCard
-                key={item.id}
-                item={item}
-                onClick={() => handleFolderClick(item)}
-                onDelete={() => {
-                  void handleDeleteItem(item.id, item.type);
-                }}
-                onRename={() => {
-                  setRenamingItem({ id: item.id, name: item.name, type: item.type });
-                }}
-              />
-            ) : (
-              <FileCard
-                key={item.id}
-                item={item}
-                onClick={() => {
-                  void handleFileClick(item);
-                }}
-                onDelete={() => {
-                  void handleDeleteItem(item.id, item.type);
-                }}
-                onRename={() => {
-                  setRenamingItem({ id: item.id, name: item.name, type: item.type });
-                }}
-              />
-            ),
-          )}
+          {folders.map(item => (
+            <FolderCard
+              key={item.id}
+              item={item}
+              onClick={() => handleFolderClick(item)}
+              onDelete={() => {
+                void handleDeleteItem(item.id, "folder");
+              }}
+              onRename={() => {
+                setRenamingItem({ id: item.id, name: item.name, type: "folder" });
+              }}
+            />
+          ))}
 
-          {currentFiles.length === 0 && <EmptyState />}
+          {files.map(item => (
+            <FileCard
+              key={item.id}
+              item={item}
+              onClick={() => {
+                void handleFileClick(item);
+              }}
+              onDelete={() => {
+                void handleDeleteItem(item.id, "file");
+              }}
+              onRename={() => {
+                setRenamingItem({ id: item.id, name: item.name, type: "file" });
+              }}
+            />
+          ))}
+
+          {folders.length === 0 && files.length === 0 && <EmptyState />}
         </div>
       </div>
 
@@ -168,7 +169,7 @@ const BrowsePage = () => {
           if (!open) setViewingItem(null);
         }}
         fileName={viewingItem?.name ?? ""}
-        mimeType={viewingItem?.mimeType}
+        extension={viewingItem?.extension}
         content={viewingItem?.content ?? null}
       />
     </div>

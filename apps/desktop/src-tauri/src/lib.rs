@@ -1,6 +1,5 @@
 mod commands;
 mod errors;
-mod models;
 mod state;
 
 use crate::state::AppState;

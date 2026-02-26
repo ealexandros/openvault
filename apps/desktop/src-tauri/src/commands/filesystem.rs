@@ -1,81 +1,69 @@
-use crate::errors::{Error, Result};
-use crate::models::FilesystemItem;
-use crate::state::TauriState;
 use uuid::Uuid;
 
+use crate::commands::responses::{BrowseResponse, FileItem, FolderItem};
+use crate::errors::{Error, Result};
+use crate::state::TauriState;
+
+fn parse_uuid(id: &str) -> Result<Uuid> {
+    Uuid::parse_str(id).map_err(|_| Error::InvalidUuid(id.to_string()))
+}
+
 #[tauri::command]
-pub async fn browse_vault(
-    state: TauriState<'_>,
-    parent_id: Option<String>,
-) -> Result<Vec<FilesystemItem>> {
+pub async fn browse_vault(state: TauriState<'_>, parent_id: String) -> Result<BrowseResponse> {
     let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state
-        .as_mut()
-        .ok_or_else(|| Error::Internal("Vault not opened".into()))?;
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
-    let parent_uuid = if let Some(id_str) = parent_id {
-        Uuid::parse_str(&id_str).map_err(|_| Error::Internal("Invalid UUID".into()))?
-    } else {
-        openvault_sdk::ROOT_FOLDER_ID
-    };
+    let parent_uuid = parse_uuid(&parent_id)?;
 
-    let (folders, files) = vault.filesystem().browse(&parent_uuid)?;
+    let mut fs = vault.filesystem();
 
-    let mut items = Vec::new();
+    let (folders, files) = fs.browse(&parent_uuid)?;
 
-    for folder in folders {
-        items.push(FilesystemItem {
+    let folders = folders
+        .iter()
+        .map(|folder| FolderItem {
             id: folder.id.to_string(),
-            name: folder.name,
-            item_type: "folder".to_string(),
-            details: Some(vault.filesystem().children_count(&folder.id).to_string()),
-            mime_type: None,
-        });
-    }
+            name: folder.name.clone(),
+            item_count: vault.filesystem().children_count(&folder.id) as u64,
+        })
+        .collect();
 
-    for file in files {
-        items.push(FilesystemItem {
+    let files = files
+        .iter()
+        .map(|file| FileItem {
             id: file.id.to_string(),
-            name: file.name,
-            item_type: "file".to_string(),
-            details: Some(file.blob.size_bytes.to_string()),
-            mime_type: Some(file.extension),
-        });
-    }
+            name: file.name.clone(),
+            size: file.blob.size_bytes,
+            extension: file.extension.clone(),
+        })
+        .collect();
 
-    Ok(items)
+    Ok(BrowseResponse { folders, files })
 }
 
 #[tauri::command]
 pub async fn create_folder(
     state: TauriState<'_>,
-    parent_id: Option<String>,
+    parent_id: String,
     name: String,
 ) -> Result<String> {
-    let parent_id = parent_id.unwrap_or(Uuid::nil().to_string());
-
     let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state
-        .as_mut()
-        .ok_or_else(|| Error::Internal("Vault not opened".into()))?;
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
-    let parent_uuid =
-        Uuid::parse_str(&parent_id).map_err(|_| Error::Internal("Invalid UUID".into()))?;
+    let parent_uuid = parse_uuid(&parent_id)?;
+    let new_folder_id = vault.filesystem().add_folder(parent_uuid, name)?;
 
-    let new_id = vault.filesystem().add_folder(parent_uuid, name)?;
     vault.commit_all()?;
 
-    Ok(new_id.to_string())
+    Ok(new_folder_id.to_string())
 }
 
 #[tauri::command]
 pub async fn delete_item(state: TauriState<'_>, id: String, item_type: String) -> Result {
     let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state
-        .as_mut()
-        .ok_or_else(|| Error::Internal("Vault not opened".into()))?;
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
-    let uuid = Uuid::parse_str(&id).map_err(|_| Error::Internal("Invalid UUID".into()))?;
+    let uuid = parse_uuid(&id)?;
 
     match item_type.as_str() {
         "file" => vault.filesystem().remove_file(uuid)?,
@@ -95,42 +83,34 @@ pub async fn rename_item(
     new_name: String,
 ) -> Result {
     let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state
-        .as_mut()
-        .ok_or_else(|| Error::Internal("Vault not opened".into()))?;
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
-    let uuid = Uuid::parse_str(&id).map_err(|_| Error::Internal("Invalid UUID".into()))?;
+    let uuid = parse_uuid(&id)?;
+    let mut fs = vault.filesystem();
 
     match item_type.as_str() {
-        "file" => vault.filesystem().rename_file(uuid, new_name)?,
-        "folder" => vault.filesystem().rename_folder(uuid, new_name)?,
+        "file" => fs.rename_file(uuid, new_name)?,
+        "folder" => fs.rename_folder(uuid, new_name)?,
         _ => return Err(Error::Internal("Invalid item type".into())),
     }
 
-    vault.commit_all()?;
+    fs.commit()?;
+
     Ok(())
 }
 
 #[tauri::command]
-pub async fn upload_file(
-    state: TauriState<'_>,
-    parent_id: Option<String>,
-    source_path: String,
-) -> Result {
-    let parent_id = parent_id.unwrap_or(Uuid::nil().to_string());
-
+pub async fn upload_file(state: TauriState<'_>, parent_id: String, source_path: String) -> Result {
     let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state
-        .as_mut()
-        .ok_or_else(|| Error::Internal("Vault not opened".into()))?;
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
-    let parent_uuid =
-        Uuid::parse_str(&parent_id).map_err(|_| Error::Internal("Invalid UUID".into()))?;
+    let mut fs = vault.filesystem();
 
+    let parent_uuid = parse_uuid(&parent_id)?;
     let source_path = std::path::PathBuf::from(source_path);
 
-    vault.filesystem().add_file(parent_uuid, &source_path)?;
-    vault.commit_all()?;
+    fs.add_file(parent_uuid, &source_path)?;
+    fs.commit()?;
 
     Ok(())
 }
@@ -138,13 +118,12 @@ pub async fn upload_file(
 #[tauri::command]
 pub async fn get_file_content(state: TauriState<'_>, id: String) -> Result<Option<Vec<u8>>> {
     let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state
-        .as_mut()
-        .ok_or_else(|| Error::Internal("Vault not opened".into()))?;
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
-    let uuid = Uuid::parse_str(&id).map_err(|_| Error::Internal("Invalid UUID".into()))?;
+    let mut fs = vault.filesystem();
 
-    let content = vault.filesystem().read_file_content(uuid)?;
+    let uuid = parse_uuid(&id)?;
+    let content = fs.read_file_content(uuid)?;
 
     Ok(content)
 }

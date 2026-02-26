@@ -10,7 +10,7 @@ type FileViewerDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   fileName: string;
-  mimeType?: string; // extension
+  extension?: string;
   content: number[] | null;
 };
 
@@ -18,10 +18,10 @@ export const FileViewerDialog = ({
   isOpen,
   onOpenChange,
   fileName,
-  mimeType,
+  extension,
   content,
 }: FileViewerDialogProps) => {
-  const isImage = mimeType === "png" || mimeType === "jpg";
+  const isImage = extension === "png" || extension === "jpg";
 
   const bytes = useMemo(() => (content ? new Uint8Array(content) : null), [content]);
 
@@ -34,12 +34,12 @@ export const FileViewerDialog = ({
       return;
     }
 
-    const blob = new Blob([bytes], { type: `image/${mimeType}` });
+    const blob = new Blob([bytes], { type: `image/${extension}` });
     const url = URL.createObjectURL(blob);
     setImageUrl(url);
 
     return () => URL.revokeObjectURL(url);
-  }, [isImage, bytes, mimeType]);
+  }, [isImage, bytes, extension]);
 
   const text = useMemo(() => {
     if (isImage || !bytes) return null;

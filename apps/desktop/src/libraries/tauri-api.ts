@@ -1,19 +1,23 @@
 import { logger } from "@/libraries/logger";
 import { invoke } from "@tauri-apps/api/core";
 
-export type FilesystemItem = {
+export type FolderItem = {
   id: string;
   name: string;
-  details?: string;
-  mimeType?: string;
-} & (
-  | {
-      type: "file";
-    }
-  | {
-      type: "folder";
-    }
-);
+  item_count: number;
+};
+
+export type FileItem = {
+  id: string;
+  name: string;
+  size: number;
+  extension: string;
+};
+
+export type BrowseResponse = {
+  folders: FolderItem[];
+  files: FileItem[];
+};
 
 type TauriCommands = {
   create_vault: {
@@ -25,11 +29,11 @@ type TauriCommands = {
     return: void;
   };
   browse_vault: {
-    args: { parentId: string | null };
-    return: FilesystemItem[];
+    args: { parentId: string };
+    return: BrowseResponse;
   };
   create_folder: {
-    args: { parentId: string | null; name: string };
+    args: { parentId: string; name: string };
     return: string;
   };
   delete_item: {
@@ -41,7 +45,7 @@ type TauriCommands = {
     return: void;
   };
   upload_file: {
-    args: { parentId: string | null; sourcePath: string };
+    args: { parentId: string; sourcePath: string };
     return: void;
   };
   get_file_content: {

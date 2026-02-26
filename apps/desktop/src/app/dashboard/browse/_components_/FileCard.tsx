@@ -4,16 +4,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
+import { FileItem } from "@/libraries/tauri-api";
 import { cn } from "@/utils/cn";
 import { formatBytes } from "@/utils/format";
 import { FileTextIcon, MoreVerticalIcon, PencilIcon, Trash2Icon } from "lucide-react";
-
-type FileItem = {
-  id: string;
-  name: string;
-  type: "file";
-  details?: string;
-};
 
 type FileCardProps = {
   item: FileItem;
@@ -72,9 +66,15 @@ export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) =
       <p className="truncate text-sm font-semibold text-foreground/90 transition-colors group-hover:text-foreground">
         {item.name}
       </p>
-      <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
-        {formatBytes(Number(item.details ?? 0))}
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
+          {formatBytes(item.size)}
+        </p>
+        <span className="text-[10px] text-muted-foreground/30">•</span>
+        <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
+          {item.extension}
+        </p>
+      </div>
     </div>
 
     <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-white/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
