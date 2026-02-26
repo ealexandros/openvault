@@ -8,6 +8,8 @@ type PathSegment = {
   name: string;
 };
 
+// @todo-now performUpload executes twice
+
 export const useBrowse = () => {
   const [currentPath, setCurrentPath] = useState<PathSegment[]>([{ id: null, name: "Root" }]);
   const [currentFiles, setCurrentFiles] = useState<FilesystemItem[]>([]);
@@ -32,24 +34,19 @@ export const useBrowse = () => {
   }, []);
 
   useEffect(() => {
-    // @todo-now fix this..
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchFiles(currentFolder.id);
   }, [currentFolder.id, fetchFiles]);
 
-  const performUpload = useCallback(
-    async (path: string) => {
-      const { error } = await tauriApi.safeInvoke("upload_file", {
-        parentId: currentFolder.id,
-        sourcePath: path,
-      });
+  const performUpload = async (path: string) => {
+    const { error } = await tauriApi.safeInvoke("upload_file", {
+      parentId: currentFolder.id,
+      sourcePath: path,
+    });
 
-      if (error == null) {
-        await fetchFiles(currentFolder.id);
-      }
-    },
-    [currentFolder.id, fetchFiles],
-  );
+    if (error == null) {
+      await fetchFiles(currentFolder.id);
+    }
+  };
 
   useEffect(() => {
     const unlisten: (() => void)[] = [];
@@ -80,7 +77,8 @@ export const useBrowse = () => {
     return () => {
       unlisten.forEach(u => u());
     };
-  }, [performUpload]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFolderClick = (item: FilesystemItem) => {
     if (item.type === "folder") {

@@ -38,7 +38,7 @@ impl FolderMetadata {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default, Eq)]
 pub struct FolderMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
@@ -54,14 +54,18 @@ impl FolderMetadataPatch {
         }
     }
 
-    pub fn set_name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
-        self
+    pub fn rename(name: impl Into<String>) -> Self {
+        Self {
+            name: Some(name.into()),
+            ..Default::default()
+        }
     }
 
-    pub fn set_parent_id(mut self, parent_id: Uuid) -> Self {
-        self.parent_id = Some(parent_id);
-        self
+    pub fn move_to(parent_id: Uuid) -> Self {
+        Self {
+            parent_id: Some(parent_id),
+            ..Default::default()
+        }
     }
 }
 
@@ -70,7 +74,7 @@ pub struct FileMetadata {
     pub id: Uuid,
     pub parent_id: Uuid,
     pub name: String,
-    pub mime_type: String,
+    pub extension: String,
     pub blob: BlobRef,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -80,7 +84,7 @@ impl FileMetadata {
     pub fn new(
         parent_id: Uuid,
         name: impl Into<String>,
-        mime_type: impl Into<String>,
+        extension: impl Into<String>,
         blob: BlobRef,
     ) -> Self {
         let now = Utc::now();
@@ -88,7 +92,7 @@ impl FileMetadata {
             id: Uuid::new_v4(),
             parent_id,
             name: name.into(),
-            mime_type: mime_type.into(),
+            extension: extension.into(),
             blob,
             created_at: now,
             updated_at: now,
@@ -100,11 +104,11 @@ impl FileMetadata {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default, Eq)]
 pub struct FileMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
-    pub mime_type: Option<String>,
+    pub extension: Option<String>,
     pub blob: Option<BlobRef>,
     pub updated_at: DateTime<Utc>,
 }
@@ -114,14 +118,23 @@ impl FileMetadataPatch {
         Self {
             parent_id: None,
             name: None,
-            mime_type: None,
+            extension: None,
             blob: None,
             updated_at: Utc::now(),
         }
     }
 
-    pub fn set_name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
-        self
+    pub fn rename(name: impl Into<String>) -> Self {
+        Self {
+            name: Some(name.into()),
+            ..Default::default()
+        }
+    }
+
+    pub fn move_to(parent_id: Uuid) -> Self {
+        Self {
+            parent_id: Some(parent_id),
+            ..Default::default()
+        }
     }
 }

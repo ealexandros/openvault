@@ -8,6 +8,8 @@ use uuid::Uuid;
 
 use crate::errors::Result;
 
+// @todo-now refactor everything from here..
+
 #[derive(Default)]
 struct AppState {
     vault: Mutex<Option<Vault>>,
@@ -82,7 +84,7 @@ async fn browse_vault(
             id: folder.id.to_string(),
             name: folder.name,
             item_type: "folder".to_string(),
-            details: Some(vault.filesystem().count_children(&folder.id).to_string()),
+            details: Some(vault.filesystem().children_count(&folder.id).to_string()),
             mime_type: None,
         });
     }
@@ -93,7 +95,7 @@ async fn browse_vault(
             name: file.name,
             item_type: "file".to_string(),
             details: Some(file.blob.size_bytes.to_string()),
-            mime_type: Some(file.mime_type),
+            mime_type: Some(file.extension),
         });
     }
 
@@ -134,8 +136,8 @@ async fn delete_item(state: TauriState<'_>, id: String, item_type: String) -> Re
         .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
 
     match item_type.as_str() {
-        "file" => vault.filesystem().delete_file(uuid)?,
-        "folder" => vault.filesystem().delete_folder(uuid)?,
+        "file" => vault.filesystem().remove_file(uuid)?,
+        "folder" => vault.filesystem().remove_folder(uuid)?,
         _ => return Err(crate::errors::Error::Internal("Invalid item type".into())),
     }
 
@@ -179,6 +181,7 @@ async fn upload_file(
     let parent_id = parent_id.unwrap_or(Uuid::nil().to_string());
 
     let mut vault_state = state.vault.lock().unwrap();
+
     let vault = vault_state
         .as_mut()
         .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
@@ -204,7 +207,7 @@ async fn get_file_content(state: TauriState<'_>, id: String) -> Result<Option<Ve
     let uuid = uuid::Uuid::parse_str(&id)
         .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
 
-    let content = vault.filesystem().get_file_content(uuid)?;
+    let content = vault.filesystem().read_file_content(uuid)?;
 
     Ok(content)
 }

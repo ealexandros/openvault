@@ -2,9 +2,7 @@ use std::path::Path;
 
 use uuid::Uuid;
 
-use openvault_core::features::filesystem::{
-    FileMetadata, FileMetadataPatch, FilesystemStore, FolderMetadata, FolderMetadataPatch,
-};
+use openvault_core::features::filesystem::{FileMetadata, FilesystemStore, FolderMetadata};
 use openvault_core::operations::blob::get_blob;
 use openvault_core::operations::filesystem::{
     add_file, commit_filesystem_store, load_filesystem_store,
@@ -23,24 +21,16 @@ impl<'a> FilesystemFeature<'a> {
         Self { session, store }
     }
 
-    pub fn refresh(&mut self) -> Result<&mut FilesystemStore> {
-        *self.store = load_filesystem_store(self.session)?;
-        Ok(self.store)
+    pub fn read_file_content(&mut self, id: Uuid) -> Result<Option<Vec<u8>>> {
+        let Some(file) = self.store.file(&id) else {
+            return Ok(None);
+        };
+
+        Ok(Some(get_blob(&mut self.session, &file.blob)?))
     }
 
-    pub fn commit(&mut self) -> Result<bool> {
-        commit_filesystem_store(self.session, self.store).map_err(Into::into)
-    }
-
-    pub fn get_file_content(&mut self, id: Uuid) -> Result<Option<Vec<u8>>> {
-        let file = self.store.file(&id).cloned();
-
-        if let Some(file) = file {
-            let blob = get_blob(&mut self.session, &file.blob)?;
-            Ok(Some(blob))
-        } else {
-            Ok(None)
-        }
+    pub fn browse(&mut self, parent_id: &Uuid) -> Result<(Vec<FolderMetadata>, Vec<FileMetadata>)> {
+        self.store.browse(parent_id).map_err(map_fs_error)
     }
 
     pub fn add_folder(&mut self, parent_id: Uuid, name: String) -> Result<Uuid> {
@@ -52,14 +42,6 @@ impl<'a> FilesystemFeature<'a> {
             .map_err(|_| Error::Filesystem("Failed to add file".to_string()))
     }
 
-    pub fn update_folder(&mut self, id: Uuid, patch: FolderMetadataPatch) -> Result {
-        self.store.patch_folder(id, patch).map_err(map_fs_error)
-    }
-
-    pub fn update_file(&mut self, id: Uuid, patch: FileMetadataPatch) -> Result {
-        self.store.patch_file(id, patch).map_err(map_fs_error)
-    }
-
     pub fn rename_folder(&mut self, id: Uuid, new_name: String) -> Result {
         self.store.rename_folder(id, new_name).map_err(map_fs_error)
     }
@@ -68,32 +50,25 @@ impl<'a> FilesystemFeature<'a> {
         self.store.rename_file(id, new_name).map_err(map_fs_error)
     }
 
-    pub fn delete_folder(&mut self, id: Uuid) -> Result {
+    pub fn remove_folder(&mut self, id: Uuid) -> Result {
         self.store.remove_folder(id).map_err(map_fs_error)
     }
 
-    pub fn delete_file(&mut self, id: Uuid) -> Result {
+    pub fn remove_file(&mut self, id: Uuid) -> Result {
         self.store.remove_file(id).map_err(map_fs_error)
     }
 
-    pub fn browse(&mut self, parent_id: &Uuid) -> Result<(Vec<FolderMetadata>, Vec<FileMetadata>)> {
-        self.store.browse(parent_id).map_err(map_fs_error)
+    pub fn children_count(&self, parent_id: &Uuid) -> usize {
+        self.store.children_count(parent_id)
     }
 
-    pub fn count_children(&self, parent_id: &Uuid) -> usize {
-        self.store.count_children(parent_id)
+    pub fn reload(&mut self) -> Result<&FilesystemStore> {
+        *self.store = load_filesystem_store(self.session)?;
+        Ok(&self.store)
     }
 
-    pub fn file(&mut self, id: &Uuid) -> Result<Option<FileMetadata>> {
-        Ok(self.store.file(id).cloned())
-    }
-
-    pub fn files(&mut self, parent_id: Uuid) -> Result<Vec<FileMetadata>> {
-        Ok(self.store.files(parent_id))
-    }
-
-    pub fn folders(&mut self, parent_id: Uuid) -> Result<Vec<FolderMetadata>> {
-        Ok(self.store.folders(parent_id))
+    pub fn commit(&mut self) -> Result<bool> {
+        commit_filesystem_store(self.session, self.store).map_err(Into::into)
     }
 }
 

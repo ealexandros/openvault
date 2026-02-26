@@ -8,15 +8,15 @@ use crate::features::filesystem::metadata::{
 use crate::features::filesystem::records::FilesystemDelta;
 
 impl FilesystemStore {
-    pub(super) fn apply_delta_without_tracking(&mut self, delta: &FilesystemDelta) -> Result {
+    pub(super) fn replay_delta(&mut self, delta: &FilesystemDelta) -> Result {
         self.apply_delta(delta, false)
     }
 
-    pub(super) fn apply_delta_with_tracking(&mut self, delta: &FilesystemDelta) -> Result {
+    pub(super) fn commit_delta(&mut self, delta: &FilesystemDelta) -> Result {
         self.apply_delta(delta, true)
     }
 
-    pub(super) fn apply_delta(&mut self, delta: &FilesystemDelta, track_delta: bool) -> Result {
+    fn apply_delta(&mut self, delta: &FilesystemDelta, track_delta: bool) -> Result {
         match delta {
             FilesystemDelta::FolderAdded(folder) => self.internal_insert_folder(folder.clone())?,
             FilesystemDelta::FolderUpdated { id, patch } => {
@@ -37,7 +37,7 @@ impl FilesystemStore {
         Ok(())
     }
 
-    pub(super) fn internal_insert_folder(&mut self, folder: FolderMetadata) -> Result {
+    fn internal_insert_folder(&mut self, folder: FolderMetadata) -> Result {
         if folder.id == ROOT_FOLDER_ID {
             return Err(FilesystemError::RootFolderInvariant(
                 "root folder metadata is reserved".to_string(),
@@ -61,12 +61,14 @@ impl FilesystemStore {
 
         let mut folder = folder;
         folder.name = normalized_name;
+
+        self.index.insert_folder(parent_id, folder.id);
         self.folders.insert(folder.id, folder);
 
         Ok(())
     }
 
-    pub(super) fn internal_patch_folder(&mut self, id: Uuid, patch: FolderMetadataPatch) -> Result {
+    fn internal_patch_folder(&mut self, id: Uuid, patch: FolderMetadataPatch) -> Result {
         if id == ROOT_FOLDER_ID {
             return Err(FilesystemError::RootFolderInvariant(
                 "root folder metadata cannot be modified".to_string(),
@@ -107,6 +109,11 @@ impl FilesystemStore {
 
         self.ensure_name_available(target_parent, &target_name, Some(id), None)?;
 
+        if current_parent != target_parent {
+            self.index.remove_folder(current_parent, id);
+            self.index.insert_folder(target_parent, id);
+        }
+
         let folder = self
             .folders
             .get_mut(&id)
@@ -117,30 +124,30 @@ impl FilesystemStore {
         Ok(())
     }
 
-    pub(super) fn internal_remove_folder(&mut self, id: Uuid) -> Result {
+    fn internal_remove_folder(&mut self, id: Uuid) -> Result {
         if id == ROOT_FOLDER_ID {
             return Err(FilesystemError::CannotDeleteRootFolder);
         }
 
-        if !self.folders.contains_key(&id) {
-            return Err(FilesystemError::FolderNotFound(id));
-        }
-
-        let has_folder_children = self
+        let folder = self
             .folders
-            .values()
-            .any(|folder| folder.parent_id == Some(id));
-        let has_file_children = self.files.values().any(|file| file.parent_id == id);
+            .get(&id)
+            .ok_or(FilesystemError::FolderNotFound(id))?;
 
-        if has_folder_children || has_file_children {
+        if self.index.children_count(&id) > 0 {
             return Err(FilesystemError::FolderNotEmpty(id));
         }
 
+        let parent_id = folder.parent_id.ok_or_else(|| {
+            FilesystemError::RootFolderInvariant(format!("folder {} is missing parent id", id))
+        })?;
+
+        self.index.remove_folder(parent_id, id);
         self.folders.remove(&id);
         Ok(())
     }
 
-    pub(super) fn internal_insert_file(&mut self, file: FileMetadata) -> Result {
+    fn internal_insert_file(&mut self, file: FileMetadata) -> Result {
         if self.files.contains_key(&file.id) || self.folders.contains_key(&file.id) {
             return Err(FilesystemError::DuplicateId(file.id));
         }
@@ -154,11 +161,13 @@ impl FilesystemStore {
 
         let mut file = file;
         file.name = normalized_name;
+
+        self.index.insert_file(file.parent_id, file.id);
         self.files.insert(file.id, file);
         Ok(())
     }
 
-    pub(super) fn internal_patch_file(&mut self, id: Uuid, patch: FileMetadataPatch) -> Result {
+    fn internal_patch_file(&mut self, id: Uuid, patch: FileMetadataPatch) -> Result {
         let current = self
             .files
             .get(&id)
@@ -179,6 +188,11 @@ impl FilesystemStore {
 
         self.ensure_name_available(target_parent, &target_name, None, Some(id))?;
 
+        if current.parent_id != target_parent {
+            self.index.remove_file(current.parent_id, id);
+            self.index.insert_file(target_parent, id);
+        }
+
         let file = self
             .files
             .get_mut(&id)
@@ -188,8 +202,8 @@ impl FilesystemStore {
         file.name = target_name;
         file.updated_at = patch.updated_at;
 
-        if let Some(mime_type) = patch.mime_type {
-            file.mime_type = mime_type;
+        if let Some(extension) = patch.extension {
+            file.extension = extension;
         }
         if let Some(blob) = patch.blob {
             file.blob = blob;
@@ -198,15 +212,21 @@ impl FilesystemStore {
         Ok(())
     }
 
-    pub(super) fn internal_remove_file(&mut self, id: Uuid) -> Result {
-        if self.files.remove(&id).is_none() {
-            return Err(FilesystemError::FileNotFound(id));
-        }
+    fn internal_remove_file(&mut self, id: Uuid) -> Result {
+        let file = self
+            .files
+            .get(&id)
+            .ok_or(FilesystemError::FileNotFound(id))?;
+
+        let parent_id = file.parent_id;
+
+        self.index.remove_file(parent_id, id);
+        self.files.remove(&id);
         Ok(())
     }
 }
 
-pub(super) fn normalize_entry_name(name: &str) -> Result<String> {
+pub(crate) fn normalize_entry_name(name: &str) -> Result<String> {
     let trimmed = name.trim();
     if trimmed.is_empty()
         || trimmed == "."

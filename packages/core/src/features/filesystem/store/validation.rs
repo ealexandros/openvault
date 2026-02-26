@@ -1,99 +1,26 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 use super::FilesystemStore;
 use super::mutations::normalize_entry_name;
+use crate::features::filesystem::FolderMetadata;
 use crate::features::filesystem::error::{FilesystemError, Result};
+use crate::features::filesystem::metadata::FileMetadata;
 use crate::features::filesystem::metadata::ROOT_FOLDER_ID;
 
 impl FilesystemStore {
     pub(super) fn validate_snapshot(&self) -> Result {
-        let root = self.folders.get(&ROOT_FOLDER_ID).ok_or_else(|| {
-            FilesystemError::RootFolderInvariant("root folder is missing".to_string())
-        })?;
+        validate_root(&self.folders)?;
 
-        if root.parent_id.is_some() {
-            return Err(FilesystemError::RootFolderInvariant(
-                "root folder must not have a parent".to_string(),
-            ));
-        }
-
-        if root.name != "/" {
-            return Err(FilesystemError::RootFolderInvariant(
-                "root folder name must be '/'".to_string(),
-            ));
-        }
-
-        for folder in self.folders.values() {
-            if folder.id == ROOT_FOLDER_ID {
-                continue;
-            }
-
-            let parent_id = folder.parent_id.ok_or_else(|| {
-                FilesystemError::InvalidMove(format!("folder {} is missing parent id", folder.id))
-            })?;
-
-            if !self.folders.contains_key(&parent_id) {
-                return Err(FilesystemError::ParentFolderNotFound(parent_id));
-            }
-
-            if self.would_create_cycle(folder.id, parent_id) {
-                return Err(FilesystemError::InvalidMove(format!(
-                    "cycle detected for folder {}",
-                    folder.id
-                )));
-            }
-
-            let normalized = normalize_entry_name(&folder.name)?;
-            if normalized != folder.name {
-                return Err(FilesystemError::InvalidName(folder.name.clone()));
-            }
+        for folder in self.non_root_folders() {
+            validate_folder(folder, &self.folders)?;
         }
 
         for file in self.files.values() {
-            if !self.folders.contains_key(&file.parent_id) {
-                return Err(FilesystemError::ParentFolderNotFound(file.parent_id));
-            }
-
-            let normalized = normalize_entry_name(&file.name)?;
-            if normalized != file.name {
-                return Err(FilesystemError::InvalidName(file.name.clone()));
-            }
+            validate_file(file, &self.folders)?;
         }
 
-        self.ensure_no_name_conflicts()
-    }
-
-    pub(super) fn ensure_no_name_conflicts(&self) -> Result {
-        let mut occupied = HashSet::<(Uuid, String)>::new();
-
-        for folder in self.folders.values() {
-            if folder.id == ROOT_FOLDER_ID {
-                continue;
-            }
-
-            let parent_id = folder.parent_id.ok_or_else(|| {
-                FilesystemError::InvalidMove(format!("folder {} is missing parent id", folder.id))
-            })?;
-
-            let key = (parent_id, folder.name.clone());
-            if !occupied.insert(key.clone()) {
-                return Err(FilesystemError::NameConflict {
-                    parent_id: key.0,
-                    name: key.1,
-                });
-            }
-        }
-
-        for file in self.files.values() {
-            let key = (file.parent_id, file.name.clone());
-            if !occupied.insert(key.clone()) {
-                return Err(FilesystemError::NameConflict {
-                    parent_id: key.0,
-                    name: key.1,
-                });
-            }
-        }
+        ensure_no_name_conflicts(&self.folders, &self.files)?;
 
         Ok(())
     }
@@ -105,23 +32,16 @@ impl FilesystemStore {
         ignore_folder_id: Option<Uuid>,
         ignore_file_id: Option<Uuid>,
     ) -> Result {
-        let folder_conflict = self.folders.values().any(|folder| {
-            folder.id != ROOT_FOLDER_ID
-                && folder.parent_id == Some(parent_id)
-                && folder.name == name
-                && Some(folder.id) != ignore_folder_id
-        });
-        if folder_conflict {
-            return Err(FilesystemError::NameConflict {
-                parent_id,
-                name: name.to_string(),
-            });
-        }
+        let is_name_not_available = name_conflict(
+            parent_id,
+            name,
+            &self.folders,
+            &self.files,
+            ignore_folder_id,
+            ignore_file_id,
+        );
 
-        let file_conflict = self.files.values().any(|file| {
-            file.parent_id == parent_id && file.name == name && Some(file.id) != ignore_file_id
-        });
-        if file_conflict {
+        if is_name_not_available {
             return Err(FilesystemError::NameConflict {
                 parent_id,
                 name: name.to_string(),
@@ -132,19 +52,136 @@ impl FilesystemStore {
     }
 
     pub(super) fn would_create_cycle(&self, folder_id: Uuid, target_parent_id: Uuid) -> bool {
-        let mut cursor = Some(target_parent_id);
+        would_create_cycle(&self.folders, folder_id, target_parent_id)
+    }
 
-        while let Some(current) = cursor {
-            if current == folder_id {
-                return true;
-            }
+    fn non_root_folders(&self) -> impl Iterator<Item = &FolderMetadata> {
+        self.folders.values().filter(|f| f.id != ROOT_FOLDER_ID)
+    }
+}
 
-            cursor = self
-                .folders
-                .get(&current)
-                .and_then(|folder| folder.parent_id);
+fn validate_root(folders: &HashMap<Uuid, FolderMetadata>) -> Result {
+    let root = folders
+        .get(&ROOT_FOLDER_ID)
+        .ok_or_else(|| FilesystemError::RootFolderInvariant("root folder is missing".into()))?;
+
+    if root.parent_id.is_some() {
+        return Err(FilesystemError::RootFolderInvariant(
+            "root folder must not have a parent".into(),
+        ));
+    }
+
+    if root.name != "/" {
+        return Err(FilesystemError::RootFolderInvariant(
+            "root folder name must be '/'".into(),
+        ));
+    }
+
+    Ok(())
+}
+
+fn validate_folder(folder: &FolderMetadata, folders: &HashMap<Uuid, FolderMetadata>) -> Result {
+    let parent_id = folder.parent_id.ok_or_else(|| {
+        FilesystemError::InvalidMove(format!("folder {} is missing parent id", folder.id))
+    })?;
+
+    if !folders.contains_key(&parent_id) {
+        return Err(FilesystemError::ParentFolderNotFound(parent_id));
+    }
+
+    if would_create_cycle(folders, folder.id, parent_id) {
+        return Err(FilesystemError::InvalidMove(format!(
+            "cycle detected for folder {}",
+            folder.id
+        )));
+    }
+
+    validate_name(&folder.name)
+}
+
+fn validate_file(file: &FileMetadata, folders: &HashMap<Uuid, FolderMetadata>) -> Result {
+    if !folders.contains_key(&file.parent_id) {
+        return Err(FilesystemError::ParentFolderNotFound(file.parent_id));
+    }
+
+    validate_name(&file.name)
+}
+
+fn validate_name(name: &str) -> Result {
+    let normalized = normalize_entry_name(name)?;
+
+    if normalized != name {
+        return Err(FilesystemError::InvalidName(name.to_string()));
+    }
+
+    Ok(())
+}
+
+fn ensure_no_name_conflicts(
+    folders: &HashMap<Uuid, FolderMetadata>,
+    files: &HashMap<Uuid, FileMetadata>,
+) -> Result {
+    let mut occupied = HashSet::<(Uuid, &str)>::new();
+
+    for folder in folders.values() {
+        if folder.id == ROOT_FOLDER_ID {
+            continue;
         }
 
-        false
+        let parent_id = folder.parent_id.unwrap();
+
+        if !occupied.insert((parent_id, &folder.name)) {
+            return Err(FilesystemError::NameConflict {
+                parent_id,
+                name: folder.name.clone(),
+            });
+        }
     }
+
+    for file in files.values() {
+        if !occupied.insert((file.parent_id, &file.name)) {
+            return Err(FilesystemError::NameConflict {
+                parent_id: file.parent_id,
+                name: file.name.clone(),
+            });
+        }
+    }
+
+    Ok(())
+}
+
+fn would_create_cycle(
+    folders: &HashMap<Uuid, FolderMetadata>,
+    folder_id: Uuid,
+    target_parent_id: Uuid,
+) -> bool {
+    let mut cursor = Some(target_parent_id);
+
+    while let Some(current) = cursor {
+        if current == folder_id {
+            return true;
+        }
+
+        cursor = folders.get(&current).and_then(|f| f.parent_id);
+    }
+
+    false
+}
+
+fn name_conflict(
+    parent_id: Uuid,
+    name: &str,
+    folders: &HashMap<Uuid, FolderMetadata>,
+    files: &HashMap<Uuid, FileMetadata>,
+    ignore_folder_id: Option<Uuid>,
+    ignore_file_id: Option<Uuid>,
+) -> bool {
+    folders.values().any(|folder| {
+        folder.id != ROOT_FOLDER_ID
+            && folder.parent_id == Some(parent_id)
+            && folder.name == name
+            && Some(folder.id) != ignore_folder_id
+    }) || files.values().any(|file| {
+        file.parent_id == parent_id && file.name == name && Some(file.id) != ignore_file_id
+    })
 }

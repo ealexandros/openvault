@@ -38,6 +38,9 @@ pub enum FilesystemError {
 
     #[error("Invalid filesystem payload: {0}")]
     InvalidPayload(String),
+
+    #[error("Item already exists: {0}")]
+    ItemAlreadyExists(String),
 }
 
 pub type Result<T = ()> = std::result::Result<T, FilesystemError>;

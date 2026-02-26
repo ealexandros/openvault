@@ -34,6 +34,6 @@ fn main() {
 
     println!(
         "{}",
-        String::from_utf8(fs.get_file_content(files[0].id).unwrap().unwrap()).unwrap()
+        String::from_utf8(fs.read_file_content(files[0].id).unwrap().unwrap()).unwrap()
     );
 }

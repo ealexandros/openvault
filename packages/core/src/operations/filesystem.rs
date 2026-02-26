@@ -3,7 +3,9 @@ use std::path::Path;
 use uuid::Uuid;
 
 use crate::errors::{Error, Result};
-use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
+use crate::features::filesystem::{
+    FilesystemChange, FilesystemCodec, FilesystemError, FilesystemStore,
+};
 use crate::features::shared::feature_trait::FeatureCodec;
 use crate::operations::blob;
 use crate::operations::replay::replay_since_checkpoint;
@@ -71,6 +73,10 @@ pub fn add_file(
         .and_then(|ext| ext.to_str())
         .unwrap_or("")
         .to_string();
+
+    if store.file_exists_in_folder(&parent_id, &name) {
+        return Err(Error::Filesystem(FilesystemError::ItemAlreadyExists(name)));
+    }
 
     let mut file = File::open(source_path)?;
     let blob_ref = blob::put_blob(session, &mut file)?;
