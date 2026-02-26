@@ -145,6 +145,14 @@ export const useBrowse = () => {
     }
   };
 
+  const getFileContent = async (id: string) => {
+    const { data, error } = await tauriApi.safeInvoke("get_file_content", { id });
+    if (error != null) {
+      return null;
+    }
+    return data;
+  };
+
   return {
     currentPath: currentPath.map(p => p.name),
     currentFiles,
@@ -157,6 +165,7 @@ export const useBrowse = () => {
     handleDeleteItem,
     handleRenameItem,
     handleUploadFile,
+    getFileContent,
     refresh: () => fetchFiles(currentFolder.id),
   };
 };

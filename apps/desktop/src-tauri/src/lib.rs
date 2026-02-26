@@ -43,6 +43,7 @@ struct FilesystemItem {
     #[serde(rename = "type")]
     item_type: String, // "file" | "folder"
     details: Option<String>,
+    mime_type: Option<String>,
 }
 
 #[tauri::command]
@@ -82,6 +83,7 @@ async fn browse_vault(
             name: folder.name,
             item_type: "folder".to_string(),
             details: Some(vault.filesystem().count_children(&folder.id).to_string()),
+            mime_type: None,
         });
     }
 
@@ -91,6 +93,7 @@ async fn browse_vault(
             name: file.name,
             item_type: "file".to_string(),
             details: Some(file.blob.size_bytes.to_string()),
+            mime_type: Some(file.mime_type),
         });
     }
 
@@ -191,6 +194,21 @@ async fn upload_file(
     Ok(())
 }
 
+#[tauri::command]
+async fn get_file_content(state: TauriState<'_>, id: String) -> Result<Option<Vec<u8>>> {
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state
+        .as_mut()
+        .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
+
+    let uuid = uuid::Uuid::parse_str(&id)
+        .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
+
+    let content = vault.filesystem().get_file_content(uuid)?;
+
+    Ok(content)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -202,7 +220,8 @@ pub fn run() {
             create_folder,
             delete_item,
             rename_item,
-            upload_file
+            upload_file,
+            get_file_content
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

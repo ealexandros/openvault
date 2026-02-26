@@ -4,9 +4,16 @@ import { invoke } from "@tauri-apps/api/core";
 export type FilesystemItem = {
   id: string;
   name: string;
-  type: "file" | "folder";
   details?: string;
-};
+  mimeType?: string;
+} & (
+  | {
+      type: "file";
+    }
+  | {
+      type: "folder";
+    }
+);
 
 type TauriCommands = {
   create_vault: {
@@ -36,6 +43,10 @@ type TauriCommands = {
   upload_file: {
     args: { parentId: string | null; sourcePath: string };
     return: void;
+  };
+  get_file_content: {
+    args: { id: string };
+    return: number[] | null;
   };
 };
 

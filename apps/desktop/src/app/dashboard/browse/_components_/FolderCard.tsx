@@ -5,37 +5,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
 import { cn } from "@/utils/cn";
-import { formatBytes } from "@/utils/format";
-import { FileTextIcon, MoreVerticalIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { FolderIcon, MoreVerticalIcon, PencilIcon, Trash2Icon } from "lucide-react";
 
-type FileItem = {
+type FolderItem = {
   id: string;
   name: string;
-  type: "file";
+  type: "folder";
   details?: string;
 };
 
-type FileCardProps = {
-  item: FileItem;
+type FolderCardProps = {
+  item: FolderItem;
   onClick: () => void;
   onDelete: () => void;
   onRename: () => void;
 };
 
-export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) => (
+export const FolderCard = ({ item, onClick, onDelete, onRename }: FolderCardProps) => (
   <div
     onClick={onClick}
     className={cn(
       "group relative flex cursor-pointer flex-col gap-3 overflow-hidden rounded-2xl border p-4 transition-all duration-300",
-      "border-border/40 bg-card hover:border-border hover:bg-muted/30 hover:shadow-md",
+      "border-primary/10 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
     )}>
     <div className="flex items-start justify-between">
       <div
         className={cn(
           "rounded-xl border p-2.5 transition-all duration-300",
-          "border-border/50 bg-muted/50 text-muted-foreground group-hover:border-foreground/10 group-hover:bg-background group-hover:text-foreground",
+          "border-primary/20 bg-primary/10 text-primary group-hover:scale-110 group-hover:rotate-3",
         )}>
-        <FileTextIcon className="size-5" />
+        <FolderIcon className="size-5" />
       </div>
 
       <DropdownMenu>
@@ -73,10 +72,10 @@ export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) =
         {item.name}
       </p>
       <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
-        {formatBytes(Number(item.details ?? 0))}
+        {item.details ?? 0} items
       </p>
     </div>
 
-    <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-white/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+    <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
   </div>
 );

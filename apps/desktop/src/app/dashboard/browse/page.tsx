@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Breadcrumbs } from "./_components_/Breadcrumbs";
 import { EmptyState } from "./_components_/EmptyState";
 import { FileCard } from "./_components_/FileCard";
+import { FileViewerDialog } from "./_components_/FileViewerDialog";
+import { FolderCard } from "./_components_/FolderCard";
 import { NewFolderDialog } from "./_components_/NewFolderDialog";
 import { RenameItemDialog } from "./_components_/RenameItemDialog";
 import { useBrowse } from "./useBrowse";
@@ -23,6 +25,7 @@ const BrowsePage = () => {
     handleDeleteItem,
     handleRenameItem,
     handleUploadFile,
+    getFileContent,
   } = useBrowse();
 
   const [renamingItem, setRenamingItem] = useState<{
@@ -30,6 +33,29 @@ const BrowsePage = () => {
     name: string;
     type: "file" | "folder";
   } | null>(null);
+
+  const [viewingItem, setViewingItem] = useState<{
+    id: string;
+    name: string;
+    mimeType?: string;
+    content: number[] | null;
+  } | null>(null);
+
+  const handleFileClick = async (item: { id: string; name: string; mimeType?: string }) => {
+    setViewingItem({
+      id: item.id,
+      name: item.name,
+      mimeType: item.mimeType,
+      content: null,
+    });
+    const content = await getFileContent(item.id);
+    setViewingItem({
+      id: item.id,
+      name: item.name,
+      mimeType: item.mimeType,
+      content,
+    });
+  };
 
   return (
     <div className="relative mx-auto max-w-5xl space-y-8">
@@ -86,19 +112,35 @@ const BrowsePage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {currentFiles.map(item => (
-            <FileCard
-              key={item.id}
-              item={item}
-              onClick={() => handleFolderClick(item)}
-              onDelete={() => {
-                void handleDeleteItem(item.id, item.type);
-              }}
-              onRename={() => {
-                setRenamingItem({ id: item.id, name: item.name, type: item.type });
-              }}
-            />
-          ))}
+          {currentFiles.map(item =>
+            item.type === "folder" ? (
+              <FolderCard
+                key={item.id}
+                item={item}
+                onClick={() => handleFolderClick(item)}
+                onDelete={() => {
+                  void handleDeleteItem(item.id, item.type);
+                }}
+                onRename={() => {
+                  setRenamingItem({ id: item.id, name: item.name, type: item.type });
+                }}
+              />
+            ) : (
+              <FileCard
+                key={item.id}
+                item={item}
+                onClick={() => {
+                  void handleFileClick(item);
+                }}
+                onDelete={() => {
+                  void handleDeleteItem(item.id, item.type);
+                }}
+                onRename={() => {
+                  setRenamingItem({ id: item.id, name: item.name, type: item.type });
+                }}
+              />
+            ),
+          )}
 
           {currentFiles.length === 0 && <EmptyState />}
         </div>
@@ -106,7 +148,9 @@ const BrowsePage = () => {
 
       <RenameItemDialog
         isOpen={renamingItem !== null}
-        onOpenChange={open => !open && setRenamingItem(null)}
+        onOpenChange={open => {
+          if (!open) setRenamingItem(null);
+        }}
         initialName={renamingItem?.name ?? ""}
         itemType={renamingItem?.type ?? "file"}
         onRename={async newName => {
@@ -114,6 +158,16 @@ const BrowsePage = () => {
             await handleRenameItem(renamingItem.id, renamingItem.type, newName);
           }
         }}
+      />
+
+      <FileViewerDialog
+        isOpen={viewingItem !== null}
+        onOpenChange={open => {
+          if (!open) setViewingItem(null);
+        }}
+        fileName={viewingItem?.name ?? ""}
+        mimeType={viewingItem?.mimeType}
+        content={viewingItem?.content ?? null}
       />
     </div>
   );
