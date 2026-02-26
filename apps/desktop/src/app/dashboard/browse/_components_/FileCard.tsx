@@ -5,6 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
 import { cn } from "@/utils/cn";
+import { formatBytes } from "@/utils/format";
 import {
   FileTextIcon,
   FolderIcon,
@@ -18,7 +19,6 @@ type FileItem = {
   name: string;
   type: "file" | "folder";
   details?: string;
-  children?: FileItem[];
 };
 
 type FileCardProps = {
@@ -86,7 +86,7 @@ export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) =
           {item.name}
         </p>
         <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
-          {isFolder ? `${item.children?.length ?? 0} items` : item.details}
+          {isFolder ? `${item.details ?? 0} items` : formatBytes(Number(item.details))}
         </p>
       </div>
 

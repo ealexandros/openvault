@@ -104,6 +104,24 @@ impl FilesystemStore {
         Ok((self.folders(*parent_id), self.files(*parent_id)))
     }
 
+    pub fn count_children(&self, parent_id: &Uuid) -> usize {
+        // @todo-now make this faster..
+
+        let folders_count = self
+            .folders
+            .values()
+            .filter(|f| f.parent_id == Some(*parent_id))
+            .count();
+
+        let files_count = self
+            .files
+            .values()
+            .filter(|f| f.parent_id == *parent_id)
+            .count();
+
+        folders_count + files_count
+    }
+
     pub fn add_folder(&mut self, parent_id: Uuid, name: String) -> Result<Uuid> {
         let folder = FolderMetadata::new(Some(parent_id), name);
         let id = folder.id;

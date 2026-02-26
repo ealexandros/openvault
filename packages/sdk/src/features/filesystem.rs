@@ -80,6 +80,10 @@ impl<'a> FilesystemFeature<'a> {
         self.store.browse(parent_id).map_err(map_fs_error)
     }
 
+    pub fn count_children(&self, parent_id: &Uuid) -> usize {
+        self.store.count_children(parent_id)
+    }
+
     pub fn file(&mut self, id: &Uuid) -> Result<Option<FileMetadata>> {
         Ok(self.store.file(id).cloned())
     }

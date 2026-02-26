@@ -81,7 +81,7 @@ async fn browse_vault(
             id: folder.id.to_string(),
             name: folder.name,
             item_type: "folder".to_string(),
-            details: None,
+            details: Some(vault.filesystem().count_children(&folder.id).to_string()),
         });
     }
 
@@ -90,7 +90,7 @@ async fn browse_vault(
             id: file.id.to_string(),
             name: file.name,
             item_type: "file".to_string(),
-            details: Some(format!("{} bytes", file.blob.size_bytes)),
+            details: Some(file.blob.size_bytes.to_string()),
         });
     }
 
@@ -167,6 +167,30 @@ async fn rename_item(
     Ok(())
 }
 
+#[tauri::command]
+async fn upload_file(
+    state: TauriState<'_>,
+    parent_id: Option<String>,
+    source_path: String,
+) -> Result {
+    let parent_id = parent_id.unwrap_or(Uuid::nil().to_string());
+
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state
+        .as_mut()
+        .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
+
+    let parent_uuid = uuid::Uuid::parse_str(&parent_id)
+        .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
+
+    let source_path = std::path::PathBuf::from(source_path);
+
+    vault.filesystem().add_file(parent_uuid, &source_path)?;
+    vault.commit_all()?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -177,7 +201,8 @@ pub fn run() {
             browse_vault,
             create_folder,
             delete_item,
-            rename_item
+            rename_item,
+            upload_file
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

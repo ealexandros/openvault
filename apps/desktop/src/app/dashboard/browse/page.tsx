@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/shadcn/button";
-import { PlusIcon } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { PlusIcon, UploadCloudIcon } from "lucide-react";
 import { useState } from "react";
 import { Breadcrumbs } from "./_components_/Breadcrumbs";
 import { EmptyState } from "./_components_/EmptyState";
@@ -14,12 +15,14 @@ const BrowsePage = () => {
   const {
     currentPath,
     currentFiles,
+    isDragging,
     handleFolderClick,
     handleBreadcrumbClick,
     handleResetPath,
     handleCreateFolder,
     handleDeleteItem,
     handleRenameItem,
+    handleUploadFile,
   } = useBrowse();
 
   const [renamingItem, setRenamingItem] = useState<{
@@ -29,7 +32,35 @@ const BrowsePage = () => {
   } | null>(null);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="relative mx-auto max-w-5xl space-y-8">
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-primary bg-primary/5 p-12 text-center shadow-2xl shadow-primary/20">
+              <div className="rounded-full bg-primary/10 p-4 text-primary">
+                <UploadCloudIcon className="size-12 animate-bounce" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold tracking-tight text-primary">
+                  Drop files to upload
+                </h2>
+                <p className="text-muted-foreground">
+                  Release your files to securely add them
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="space-y-6">
         <div className="sticky top-0 z-10 flex flex-col gap-4 bg-background/95 py-2 backdrop-blur md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
@@ -43,10 +74,13 @@ const BrowsePage = () => {
           <div className="flex gap-2">
             <NewFolderDialog onCreate={handleCreateFolder} />
             <Button
+              onClick={() => {
+                void handleUploadFile();
+              }}
               size="sm"
               className="h-9 rounded-xl px-4 text-xs font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
               <PlusIcon className="mr-2 size-3.5" />
-              Upload
+              Upload file
             </Button>
           </div>
         </div>

@@ -32,6 +32,8 @@ export const RenameItemDialog = ({
 
   useEffect(() => {
     if (isOpen) {
+      // @todo-now fix this..
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(initialName);
     }
   }, [isOpen, initialName]);

@@ -33,6 +33,10 @@ type TauriCommands = {
     args: { id: string; itemType: "file" | "folder"; newName: string };
     return: void;
   };
+  upload_file: {
+    args: { parentId: string | null; sourcePath: string };
+    return: void;
+  };
 };
 
 export const tauriApi = {
