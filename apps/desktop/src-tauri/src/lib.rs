@@ -4,6 +4,7 @@ use openvault_sdk::{CompressionAlgorithm, CreateConfig, EncryptionAlgorithm, Vau
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
+use uuid::Uuid;
 
 use crate::errors::Result;
 
@@ -35,6 +36,15 @@ async fn create_vault(
     Ok(())
 }
 
+#[derive(serde::Serialize)]
+struct FilesystemItem {
+    id: String,
+    name: String,
+    #[serde(rename = "type")]
+    item_type: String, // "file" | "folder"
+    details: Option<String>,
+}
+
 #[tauri::command]
 async fn open_vault(state: TauriState<'_>, path: String, password: String) -> Result {
     let vault = openvault_sdk::open_vault(PathBuf::from(path), password)?;
@@ -45,11 +55,103 @@ async fn open_vault(state: TauriState<'_>, path: String, password: String) -> Re
     Ok(())
 }
 
+#[tauri::command]
+async fn browse_vault(
+    state: TauriState<'_>,
+    parent_id: Option<String>,
+) -> Result<Vec<FilesystemItem>> {
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state
+        .as_mut()
+        .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
+
+    let parent_uuid = if let Some(id_str) = parent_id {
+        uuid::Uuid::parse_str(&id_str)
+            .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?
+    } else {
+        openvault_sdk::ROOT_FOLDER_ID
+    };
+
+    let (folders, files) = vault.filesystem().browse(&parent_uuid)?;
+
+    let mut items = Vec::new();
+
+    for folder in folders {
+        items.push(FilesystemItem {
+            id: folder.id.to_string(),
+            name: folder.name,
+            item_type: "folder".to_string(),
+            details: None,
+        });
+    }
+
+    for file in files {
+        items.push(FilesystemItem {
+            id: file.id.to_string(),
+            name: file.name,
+            item_type: "file".to_string(),
+            details: Some(format!("{} bytes", file.blob.size_bytes)),
+        });
+    }
+
+    Ok(items)
+}
+
+#[tauri::command]
+async fn create_folder(
+    state: TauriState<'_>,
+    parent_id: Option<String>,
+    name: String,
+) -> Result<String> {
+    let parent_id = parent_id.unwrap_or(Uuid::nil().to_string());
+
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state
+        .as_mut()
+        .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
+
+    let parent_uuid = uuid::Uuid::parse_str(&parent_id)
+        .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
+
+    let new_id = vault.filesystem().add_folder(parent_uuid, name)?;
+    vault.commit_all()?;
+
+    Ok(new_id.to_string())
+}
+
+#[tauri::command]
+async fn delete_item(state: TauriState<'_>, id: String, item_type: String) -> Result {
+    let mut vault_state = state.vault.lock().unwrap();
+
+    let vault = vault_state
+        .as_mut()
+        .ok_or_else(|| crate::errors::Error::Internal("Vault not opened".into()))?;
+
+    let uuid = uuid::Uuid::parse_str(&id)
+        .map_err(|_| crate::errors::Error::Internal("Invalid UUID".into()))?;
+
+    match item_type.as_str() {
+        "file" => vault.filesystem().delete_file(uuid)?,
+        "folder" => vault.filesystem().delete_folder(uuid)?,
+        _ => return Err(crate::errors::Error::Internal("Invalid item type".into())),
+    }
+
+    vault.commit_all()?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(AppState::default())
-        .invoke_handler(tauri::generate_handler![create_vault, open_vault])
+        .invoke_handler(tauri::generate_handler![
+            create_vault,
+            open_vault,
+            browse_vault,
+            create_folder,
+            delete_item
+        ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .run(tauri::generate_context!())

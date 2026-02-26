@@ -5,6 +5,9 @@ use thiserror::Error;
 pub enum Error {
     #[error(transparent)]
     Sdk(#[from] openvault_sdk::Error),
+
+    #[error("Internal error: {0}")]
+    Internal(String),
 }
 
 impl Serialize for Error {

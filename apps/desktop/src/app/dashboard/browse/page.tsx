@@ -14,6 +14,8 @@ const BrowsePage = () => {
     handleFolderClick,
     handleBreadcrumbClick,
     handleResetPath,
+    handleCreateFolder,
+    handleDeleteItem,
   } = useBrowse();
 
   return (
@@ -28,12 +30,24 @@ const BrowsePage = () => {
               onClick={handleBreadcrumbClick}
             />
           </div>
-          <Button
-            size="sm"
-            className="h-9 rounded-xl px-4 text-xs font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-            <PlusIcon className="mr-2 size-3.5" />
-            Upload
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                void handleCreateFolder("example-folder");
+              }}
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-xl px-4 text-xs font-semibold md:flex">
+              <PlusIcon className="mr-2 size-3.5" />
+              New Folder
+            </Button>
+            <Button
+              size="sm"
+              className="h-9 rounded-xl px-4 text-xs font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+              <PlusIcon className="mr-2 size-3.5" />
+              Upload
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -41,7 +55,10 @@ const BrowsePage = () => {
             <FileCard
               key={item.id}
               item={item}
-              onClick={() => item.type === "folder" && handleFolderClick(item.name)}
+              onClick={() => handleFolderClick(item)}
+              onDelete={() => {
+                void handleDeleteItem(item.id, item.type);
+              }}
             />
           ))}
 

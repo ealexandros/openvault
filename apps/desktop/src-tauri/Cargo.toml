@@ -25,4 +25,5 @@ tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2.6.0"
 tauri-plugin-opener = "2"
 thiserror = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
 zeroize = "1.8.2"

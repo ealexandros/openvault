@@ -1,7 +1,11 @@
-"use client";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
 import { cn } from "@/utils/cn";
-import { FileTextIcon, FolderIcon, MoreVerticalIcon } from "lucide-react";
+import { FileTextIcon, FolderIcon, MoreVerticalIcon, Trash2Icon } from "lucide-react";
 
 type FileItem = {
   id: string;
@@ -14,9 +18,10 @@ type FileItem = {
 type FileCardProps = {
   item: FileItem;
   onClick: () => void;
+  onDelete: () => void;
 };
 
-export const FileCard = ({ item, onClick }: FileCardProps) => {
+export const FileCard = ({ item, onClick, onDelete }: FileCardProps) => {
   const isFolder = item.type === "folder";
 
   return (
@@ -39,9 +44,26 @@ export const FileCard = ({ item, onClick }: FileCardProps) => {
           {isFolder ? <FolderIcon className="size-5" /> : <FileTextIcon className="size-5" />}
         </div>
 
-        <button className="rounded-lg p-1.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-foreground/5 hover:text-foreground">
-          <MoreVerticalIcon className="size-4" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={e => e.stopPropagation()}
+              className="rounded-lg p-1.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-foreground/5 hover:text-foreground">
+              <MoreVerticalIcon className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={e => {
+                e.stopPropagation();
+                onDelete();
+              }}>
+              <Trash2Icon className="mr-2 size-3.5" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="space-y-0.5">

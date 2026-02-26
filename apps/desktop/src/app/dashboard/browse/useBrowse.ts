@@ -1,71 +1,41 @@
-"use client";
+import { FilesystemItem, tauriApi } from "@/libraries/tauri-api";
+import { useEffect, useState } from "react";
 
-import { useState } from "react";
-
-export type FileItem = {
-  id: string;
+type PathSegment = {
+  id: string | null;
   name: string;
-  type: "file" | "folder";
-  details?: string;
-  children?: FileItem[];
 };
 
-const MOCK_FILES_HIERARCHY: FileItem[] = [
-  {
-    id: "f1",
-    name: "Work",
-    type: "folder",
-    children: [
-      {
-        id: "f1-1",
-        name: "Projects",
-        type: "folder",
-        children: [
-          { id: "f1-1-1", name: "roadmap.pdf", type: "file", details: "324 KB" },
-          { id: "f1-1-2", name: "specs.docx", type: "file", details: "1.2 MB" },
-        ],
-      },
-      { id: "f1-2", name: "budget.xlsx", type: "file", details: "45 KB" },
-    ],
-  },
-  {
-    id: "f2",
-    name: "Personal",
-    type: "folder",
-    children: [
-      {
-        id: "f2-1",
-        name: "Photos",
-        type: "folder",
-        children: [
-          { id: "f2-1-1", name: "vacation.jpg", type: "file", details: "2.4 MB" },
-          { id: "f2-1-2", name: "family.png", type: "file", details: "1.8 MB" },
-        ],
-      },
-      { id: "f2-2", name: "notes.txt", type: "file", details: "2 KB" },
-    ],
-  },
-  { id: "f3", name: "credentials.env", type: "file", details: "1 KB" },
-];
-
 export const useBrowse = () => {
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
+  const [currentPath, setCurrentPath] = useState<PathSegment[]>([{ id: null, name: "Root" }]);
+  const [currentFiles, setCurrentFiles] = useState<FilesystemItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getCurrentFiles = () => {
-    let files = MOCK_FILES_HIERARCHY;
-    for (const segment of currentPath) {
-      const folder = files.find(f => f.name === segment && f.type === "folder");
-      if (folder && folder.children) {
-        files = folder.children;
-      } else {
-        return [];
-      }
-    }
-    return files;
+  const currentFolder = currentPath[currentPath.length - 1] ?? {
+    id: "00000000-00000000-00000000-00000000",
+    name: "/",
   };
 
-  const handleFolderClick = (name: string) => {
-    setCurrentPath(prev => [...prev, name]);
+  const fetchFiles = async (folderId: string | null) => {
+    setIsLoading(true);
+    const { data, error } = await tauriApi.safeInvoke("browse_vault", {
+      parentId: folderId,
+    });
+
+    if (data != null && error == null) {
+      setCurrentFiles(data);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    void fetchFiles(currentFolder.id);
+  }, [currentFolder.id]);
+
+  const handleFolderClick = (item: FilesystemItem) => {
+    if (item.type === "folder") {
+      setCurrentPath(prev => [...prev, { id: item.id, name: item.name }]);
+    }
   };
 
   const handleBreadcrumbClick = (index: number) => {
@@ -73,14 +43,40 @@ export const useBrowse = () => {
   };
 
   const handleResetPath = () => {
-    setCurrentPath([]);
+    setCurrentPath([{ id: null, name: "Root" }]);
+  };
+
+  const handleCreateFolder = async (name: string) => {
+    const { error } = await tauriApi.safeInvoke("create_folder", {
+      parentId: currentFolder.id,
+      name,
+    });
+
+    if (error == null) {
+      await fetchFiles(currentFolder.id);
+    }
+  };
+
+  const handleDeleteItem = async (id: string, itemType: "file" | "folder") => {
+    const { error } = await tauriApi.safeInvoke("delete_item", {
+      id,
+      itemType,
+    });
+
+    if (error == null) {
+      await fetchFiles(currentFolder.id);
+    }
   };
 
   return {
-    currentPath,
-    currentFiles: getCurrentFiles(),
+    currentPath: currentPath.map(p => p.name),
+    currentFiles,
+    isLoading,
     handleFolderClick,
     handleBreadcrumbClick,
     handleResetPath,
+    handleCreateFolder,
+    handleDeleteItem,
+    refresh: () => fetchFiles(currentFolder.id),
   };
 };

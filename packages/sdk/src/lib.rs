@@ -12,6 +12,8 @@ pub use errors::Error;
 pub use features::{CommitResult, FilesystemFeature};
 pub use vault::Vault;
 
+pub use openvault_core::features::filesystem::ROOT_FOLDER_ID;
+
 pub use openvault_core::operations::config::CreateConfig;
 pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;
