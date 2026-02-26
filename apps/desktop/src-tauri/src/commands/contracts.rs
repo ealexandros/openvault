@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-// Requests
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowseVaultParams {
@@ -57,7 +56,6 @@ pub struct OpenVaultParams {
     pub password: String,
 }
 
-// Responses
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FolderItem {
