@@ -1,12 +1,11 @@
+use std::fs::File;
 use std::path::Path;
 
+use openvault_core::operations::filesystem::FilesystemOps;
 use uuid::Uuid;
 
 use openvault_core::features::filesystem::{FileMetadata, FilesystemStore, FolderMetadata};
-use openvault_core::operations::blob::get_blob;
-use openvault_core::operations::filesystem::{
-    add_file, commit_filesystem_store, load_filesystem_store,
-};
+use openvault_core::operations::blob::{self, get_blob};
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::{Error, Result};
@@ -38,8 +37,31 @@ impl<'a> FilesystemFeature<'a> {
     }
 
     pub fn add_file(&mut self, parent_id: Uuid, source_path: &Path) -> Result<Uuid> {
-        add_file(&mut self.session, &mut self.store, parent_id, source_path)
-            .map_err(|_| Error::Filesystem("Failed to add file".to_string()))
+        let name = source_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .ok_or(Error::InvalidPath)?
+            .to_owned();
+
+        let extension = source_path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or_default()
+            .to_owned();
+
+        if self.store.file_exists_in_folder(&parent_id, &name) {
+            return Err(Error::ItemAlreadyExists(name));
+        }
+
+        let mut file = File::open(source_path)?;
+        let blob_ref = blob::put_blob(self.session, &mut file)?;
+
+        let file_id = self
+            .store
+            .add_file(parent_id, name, extension, blob_ref)
+            .map_err(map_fs_error)?;
+
+        Ok(file_id)
     }
 
     pub fn rename_folder(&mut self, id: Uuid, new_name: String) -> Result {
@@ -63,12 +85,12 @@ impl<'a> FilesystemFeature<'a> {
     }
 
     pub fn reload(&mut self) -> Result<&FilesystemStore> {
-        *self.store = load_filesystem_store(self.session)?;
+        *self.store = FilesystemOps::load(self.session)?;
         Ok(&self.store)
     }
 
     pub fn commit(&mut self) -> Result<bool> {
-        commit_filesystem_store(self.session, self.store).map_err(Into::into)
+        FilesystemOps::commit(self.session, self.store).map_err(Into::into)
     }
 }
 

@@ -1,5 +1,5 @@
 use openvault_core::features::filesystem::FilesystemStore;
-use openvault_core::operations::filesystem::load_filesystem_store;
+use openvault_core::operations::filesystem::FilesystemOps;
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::Result;
@@ -12,7 +12,7 @@ pub struct Vault {
 
 impl Vault {
     pub(crate) fn new(mut session: VaultSession) -> Result<Self> {
-        let filesystem_store = load_filesystem_store(&mut session)?;
+        let filesystem_store = FilesystemOps::load(&mut session)?;
 
         Ok(Self {
             session,
