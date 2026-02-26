@@ -129,14 +129,21 @@ impl FilesystemStore {
             return Err(FilesystemError::CannotDeleteRootFolder);
         }
 
+        let files: Vec<Uuid> = self.index.file_children(&id).to_vec();
+        for file_id in files {
+            self.internal_remove_file(file_id)?;
+        }
+
+        let subfolders: Vec<Uuid> = self.index.folder_children(&id).to_vec();
+
+        for subfolder_id in subfolders {
+            self.internal_remove_folder(subfolder_id)?;
+        }
+
         let folder = self
             .folders
             .get(&id)
             .ok_or(FilesystemError::FolderNotFound(id))?;
-
-        if self.index.children_count(&id) > 0 {
-            return Err(FilesystemError::FolderNotEmpty(id));
-        }
 
         let parent_id = folder.parent_id.ok_or_else(|| {
             FilesystemError::RootFolderInvariant(format!("folder {} is missing parent id", id))

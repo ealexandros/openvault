@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/shadcn/button";
 import { Input } from "@/components/ui/shadcn/input";
 import { useVault } from "@/context/VaultContext";
-import { LockIcon, MoreVerticalIcon, SearchIcon, ShieldAlertIcon } from "lucide-react";
+import { MoreVerticalIcon, SearchIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -42,30 +42,6 @@ export const DashboardHeader = () => {
         {activeTitle}
       </h2>
       <div className="flex items-center gap-4">
-        <div className="mr-4 flex items-center gap-2 border-r border-border/50 pr-4">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={lockVault}
-            className="group/panic relative h-8 rounded-lg px-3 text-[10px] font-bold tracking-tighter uppercase">
-            <LockIcon className="mr-1.5 size-3" />
-            Panic Lock
-            <span className="ml-2 hidden rounded border border-white/20 bg-white/10 px-1 font-mono text-[9px] italic opacity-60 group-hover/panic:opacity-100 lg:inline-block">
-              ⇧ ESC
-            </span>
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="group/decoy h-8 rounded-lg border border-orange-500/20 bg-orange-500/10 px-3 text-[10px] font-bold tracking-tighter text-orange-500 uppercase hover:bg-orange-500/20">
-            <ShieldAlertIcon className="mr-1.5 size-3" />
-            Decoy
-            <span className="ml-2 hidden rounded border border-orange-500/20 bg-orange-500/5 px-1 font-mono text-[9px] italic opacity-60 group-hover/decoy:opacity-100 lg:inline-block">
-              ⇧ D
-            </span>
-          </Button>
-        </div>
-
         <div className="group relative">
           <SearchIcon className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
           <Input
