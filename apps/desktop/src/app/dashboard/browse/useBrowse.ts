@@ -10,6 +10,7 @@ type PathSegment = {
 
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
 
+// @todo-now refactor everything from here..
 // @todo-now performUpload executes twice
 
 export const useBrowse = () => {
@@ -29,7 +30,7 @@ export const useBrowse = () => {
   const fetchFiles = useCallback(async (folderId: string) => {
     setIsLoading(true);
     const { data, error } = await tauriApi.safeInvoke("browse_vault", {
-      parentId: folderId,
+      params: { parentId: folderId },
     });
 
     if (data != null && error == null) {
@@ -45,8 +46,7 @@ export const useBrowse = () => {
 
   const performUpload = async (path: string) => {
     const { error } = await tauriApi.safeInvoke("upload_file", {
-      parentId: currentFolder.id,
-      sourcePath: path,
+      params: { parentId: currentFolder.id, sourcePath: path },
     });
 
     if (error == null) {
@@ -100,8 +100,7 @@ export const useBrowse = () => {
 
   const handleCreateFolder = async (name: string) => {
     const { error } = await tauriApi.safeInvoke("create_folder", {
-      parentId: currentFolder.id,
-      name,
+      params: { parentId: currentFolder.id, name },
     });
 
     if (error == null) {
@@ -111,8 +110,7 @@ export const useBrowse = () => {
 
   const handleDeleteItem = async (id: string, itemType: "file" | "folder") => {
     const { error } = await tauriApi.safeInvoke("delete_item", {
-      id,
-      itemType,
+      params: { id, itemType },
     });
 
     if (error == null) {
@@ -126,9 +124,7 @@ export const useBrowse = () => {
     newName: string,
   ) => {
     const { error } = await tauriApi.safeInvoke("rename_item", {
-      id,
-      itemType,
-      newName,
+      params: { id, itemType, newName },
     });
 
     if (error == null) {
@@ -148,7 +144,9 @@ export const useBrowse = () => {
   };
 
   const getFileContent = async (id: string) => {
-    const { data, error } = await tauriApi.safeInvoke("get_file_content", { id });
+    const { data, error } = await tauriApi.safeInvoke("get_file_content", {
+      params: { id },
+    });
     if (error != null) {
       return null;
     }

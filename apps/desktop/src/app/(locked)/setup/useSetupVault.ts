@@ -41,9 +41,11 @@ export const useSetupVault = () => {
     onSubmit: async values => {
       setIsEncrypting(true);
       const result = await tauriApi.safeInvoke("create_vault", {
-        path: values.path,
-        name: values.name,
-        password: values.password,
+        params: {
+          path: values.path,
+          name: values.name,
+          password: values.password,
+        },
       });
 
       if (result.error == null) {

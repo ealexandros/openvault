@@ -1,3 +1,3 @@
+pub mod contracts;
 pub mod filesystem;
-pub mod responses;
 pub mod vault;

@@ -18,8 +18,10 @@ export const useVaultUnlock = () => {
 
   const handleProcessVault = async () => {
     const { error } = await tauriApi.safeInvoke("open_vault", {
-      path: selectedPath ?? "",
-      password,
+      params: {
+        path: selectedPath ?? "",
+        password,
+      },
     });
 
     if (error != null) {

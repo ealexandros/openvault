@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 export type FolderItem = {
   id: string;
   name: string;
-  item_count: number;
+  itemCount: number;
 };
 
 export type FileItem = {
@@ -21,35 +21,35 @@ export type BrowseResponse = {
 
 type TauriCommands = {
   create_vault: {
-    args: { path: string; name: string; password: string };
+    args: { params: { path: string; name: string; password: string } };
     return: void;
   };
   open_vault: {
-    args: { path: string; password: string };
+    args: { params: { path: string; password: string } };
     return: void;
   };
   browse_vault: {
-    args: { parentId: string };
+    args: { params: { parentId: string } };
     return: BrowseResponse;
   };
   create_folder: {
-    args: { parentId: string; name: string };
+    args: { params: { parentId: string; name: string } };
     return: string;
   };
   delete_item: {
-    args: { id: string; itemType: "file" | "folder" };
+    args: { params: { id: string; itemType: "file" | "folder" } };
     return: void;
   };
   rename_item: {
-    args: { id: string; itemType: "file" | "folder"; newName: string };
+    args: { params: { id: string; itemType: "file" | "folder"; newName: string } };
     return: void;
   };
   upload_file: {
-    args: { parentId: string; sourcePath: string };
+    args: { params: { parentId: string; sourcePath: string } };
     return: void;
   };
   get_file_content: {
-    args: { id: string };
+    args: { params: { id: string } };
     return: number[] | null;
   };
 };

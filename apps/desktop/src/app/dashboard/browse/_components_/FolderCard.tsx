@@ -66,7 +66,7 @@ export const FolderCard = ({ item, onClick, onDelete, onRename }: FolderCardProp
         {item.name}
       </p>
       <p className="text-[10px] font-medium tracking-wider text-muted-foreground/70 uppercase">
-        {item.item_count} items
+        {item.itemCount} items
       </p>
     </div>
 
