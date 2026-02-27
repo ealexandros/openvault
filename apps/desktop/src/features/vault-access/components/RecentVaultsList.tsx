@@ -1,5 +1,5 @@
 import { cn } from "@/utils/cn";
-import { useEffect, useState } from "react";
+import { History } from "lucide-react";
 import { RecentVault } from "../hooks/useVaultAccess";
 import { RecentVaultItem, RecentVaultSkeleton } from "./RecentVaultItem";
 
@@ -17,64 +17,51 @@ export const RecentVaultsList = ({
   onRemove,
   onClear,
   isLoading,
-}: RecentVaultsListProps) => {
-  const [isConfirming, setIsConfirming] = useState(false);
-
-  useEffect(() => {
-    if (isConfirming) {
-      const timer = setTimeout(() => setIsConfirming(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isConfirming]);
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-4 w-1 rounded-full bg-primary/60" />
-          <h3 className="text-xs font-bold tracking-wide text-muted-foreground uppercase">
-            Recent Activity
-          </h3>
-        </div>
-        {!Boolean(isLoading) && vaults.length > 0 && (
-          <button
-            onClick={() => {
-              if (isConfirming) {
-                onClear();
-                setIsConfirming(false);
-              } else {
-                setIsConfirming(true);
-              }
-            }}
-            className={cn(
-              "cursor-pointer text-[10px] font-bold tracking-wider uppercase transition-all duration-300",
-              isConfirming
-                ? "scale-105 text-red-500"
-                : "text-muted-foreground/40 hover:text-red-500",
-            )}>
-            {isConfirming ? "Are you sure?" : "Clear All"}
-          </button>
-        )}
+}: RecentVaultsListProps) => (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="h-4 w-1 rounded-full bg-primary/70" />
+        <h3 className="text-xs font-bold tracking-wide text-muted-foreground uppercase">
+          Recent Activity
+        </h3>
       </div>
-
-      {Boolean(isLoading) ? (
-        <div className="grid gap-3">
-          <RecentVaultSkeleton />
-          <RecentVaultSkeleton />
-          <RecentVaultSkeleton />
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {vaults.map(vault => (
-            <RecentVaultItem
-              key={vault.id}
-              vault={vault}
-              onConnect={onConnect}
-              onRemove={onRemove}
-            />
-          ))}
-        </div>
+      {!Boolean(isLoading) && vaults.length > 0 && (
+        <button
+          onClick={onClear}
+          className={cn(
+            "cursor-pointer text-[10px] font-bold tracking-wider uppercase transition-all duration-300",
+            "text-muted-foreground/40 hover:text-red-500",
+          )}>
+          Clear All
+        </button>
       )}
     </div>
-  );
-};
+
+    {Boolean(isLoading) ? (
+      <div className="grid gap-3">
+        <RecentVaultSkeleton />
+        <RecentVaultSkeleton />
+        <RecentVaultSkeleton />
+      </div>
+    ) : vaults.length > 0 ? (
+      <div className="grid gap-3">
+        {vaults.map(vault => (
+          <RecentVaultItem
+            key={vault.id}
+            vault={vault}
+            onConnect={onConnect}
+            onRemove={onRemove}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-slate-200/50 bg-slate-50/20 py-12 text-center">
+        <History className="size-5 text-gray-400" />
+        <p className="text-[10px] font-bold text-gray-400 uppercase">
+          There are no recent vaults
+        </p>
+      </div>
+    )}
+  </div>
+);

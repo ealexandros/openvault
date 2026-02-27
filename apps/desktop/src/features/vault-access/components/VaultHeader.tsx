@@ -39,7 +39,7 @@ export const VaultHeader = ({ view, path }: VaultHeaderProps) => (
           <Shield strokeWidth={2.5} className="size-9 text-primary" />
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 font-medium">
             <div className="h-px w-6 bg-slate-200" />
             <p className="text-[10px] tracking-[0.2em] text-slate-400 uppercase">
@@ -47,7 +47,7 @@ export const VaultHeader = ({ view, path }: VaultHeaderProps) => (
             </p>
             <div className="h-px w-6 bg-slate-200" />
           </div>
-          <p className="text-sm tracking-tight text-muted-foreground/60">{path}</p>
+          <p className="text-sm tracking-tight text-muted-foreground">{path}</p>
         </div>
       </div>
     )}

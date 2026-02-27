@@ -1,7 +1,6 @@
 "use client";
 
 import { CenterLayout } from "@/components/layout/center";
-import { cn } from "@/utils/cn";
 import { motion } from "framer-motion";
 import { ActionSection } from "./components/ActionSection";
 import { RecentVaultsList } from "./components/RecentVaultsList";
@@ -19,7 +18,6 @@ export const VaultAccessScreen = () => {
     password,
     rememberVault,
     showPassword,
-    hasRecentActivity,
     setPassword,
     toggleShowPassword,
     handleSelect,
@@ -35,23 +33,20 @@ export const VaultAccessScreen = () => {
     <CenterLayout className="overflow-hidden p-6 selection:bg-primary/80 sm:p-12">
       <main className="mx-auto w-full max-w-xl">
         {view === "selection" ? (
-          <div
-            className={cn("space-y-12", !hasRecentActivity && !isLoadingVaults && "-mt-12")}>
+          <div className="space-y-12">
             <VaultHeader view="selection" path="" />
 
             <div className="grid gap-12 lg:grid-cols-[1fr,320px]">
               <div className="space-y-8">
                 <ActionSection onBrowse={handleSelect} />
               </div>
-              {hasRecentActivity && !isLoadingVaults && (
-                <RecentVaultsList
-                  vaults={recentVaults}
-                  onConnect={handleConnect}
-                  onRemove={handleRemoveRecent}
-                  onClear={handleClearRecent}
-                  isLoading={isLoadingVaults}
-                />
-              )}
+              <RecentVaultsList
+                vaults={recentVaults}
+                onConnect={handleConnect}
+                onRemove={handleRemoveRecent}
+                onClear={handleClearRecent}
+                isLoading={isLoadingVaults}
+              />
             </div>
           </div>
         ) : (

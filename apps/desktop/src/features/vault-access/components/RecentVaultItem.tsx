@@ -3,7 +3,7 @@
 import { Skeleton } from "@/components/ui/shadcn/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { cn } from "@/utils/cn";
-import { CheckIcon, ChevronRightIcon, FileIcon, XIcon } from "lucide-react";
+import { ChevronRightIcon, FileIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { RecentVault } from "../hooks/useVaultAccess";
 
@@ -59,19 +59,13 @@ export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemP
         <button
           onClick={e => {
             e.stopPropagation();
-            if (isConfirming) {
-              onRemove(vault.id);
-            } else {
-              setIsConfirming(true);
-            }
+            onRemove(vault.id);
           }}
           className={cn(
-            "flex size-7 items-center justify-center rounded-lg transition-all duration-200",
-            isConfirming
-              ? "scale-110 bg-red-500 text-white opacity-100 shadow-lg shadow-red-200"
-              : "text-slate-300 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500",
+            "flex size-7 cursor-pointer items-center justify-center rounded-lg transition-all duration-200",
+            "text-slate-300 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500",
           )}>
-          {isConfirming ? <CheckIcon className="size-3.5" /> : <XIcon className="size-3.5" />}
+          <XIcon className="size-3.5" />
         </button>
         <ChevronRightIcon className="size-4 text-slate-300 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-primary/50" />
       </div>
