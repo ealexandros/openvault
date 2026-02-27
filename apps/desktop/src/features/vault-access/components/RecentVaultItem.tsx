@@ -34,7 +34,7 @@ export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemP
   return (
     <div
       onClick={() => (isConfirming ? setIsConfirming(false) : onConnect(vault.path))}
-      className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-200/60 bg-slate-50/50 p-3.5 transition-all duration-300 hover:border-primary/20 hover:bg-white hover:shadow-[0_6px_8px_rgb(0,0,0,0.03)]">
+      className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-200/60 bg-slate-50/50 p-3.5 transition-all duration-300 hover:border-primary/20 hover:bg-white hover:shadow-[0_6px_8px_rgb(0,0,0,0.02)]">
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white transition-all duration-300 group-hover:border-primary/10 group-hover:bg-primary/5">
           <FileIcon className="size-5 text-slate-400 transition-colors duration-300 group-hover:text-primary" />

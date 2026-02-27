@@ -14,7 +14,7 @@ export const ActionSection = ({ onBrowse }: FileActionProps) => (
     <div className="relative flex flex-col items-center justify-center space-y-6 text-center">
       <div className="space-y-2">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900 transition-colors duration-500 group-hover:text-primary">
-          Choose a File
+          Choose a Vault
         </h2>
         <p className="mx-auto max-w-72 text-sm leading-relaxed font-medium text-slate-500/80 transition-colors duration-500 group-hover:text-slate-600">
           Select an encrypted vault file from your device to unlock your data.

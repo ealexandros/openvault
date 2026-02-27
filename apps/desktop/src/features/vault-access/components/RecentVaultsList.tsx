@@ -22,7 +22,7 @@ export const RecentVaultsList = ({
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="h-4 w-1 rounded-full bg-primary/70" />
-        <h3 className="text-xs font-bold tracking-wide text-muted-foreground uppercase">
+        <h3 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
           Recent Activity
         </h3>
       </div>
@@ -56,9 +56,9 @@ export const RecentVaultsList = ({
         ))}
       </div>
     ) : (
-      <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-slate-200/50 bg-slate-50/20 py-12 text-center">
-        <History className="size-5 text-gray-400" />
-        <p className="text-[10px] font-bold text-gray-400 uppercase">
+      <div className="flex flex-col items-center justify-center space-y-2 rounded-2xl border border-slate-200/50 bg-slate-50/20 py-12 text-center">
+        <History className="size-5 text-muted-foreground/50" />
+        <p className="text-xs font-semibold text-muted-foreground/50">
           There are no recent vaults
         </p>
       </div>

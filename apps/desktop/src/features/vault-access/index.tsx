@@ -1,11 +1,11 @@
 "use client";
 
-import { CenterLayout } from "@/components/layout/center";
 import { motion } from "framer-motion";
 import { ActionSection } from "./components/ActionSection";
 import { RecentVaultsList } from "./components/RecentVaultsList";
+import { SelectionVaultHeader } from "./components/SelectionVaultHeader";
 import { UnlockForm } from "./components/UnlockForm";
-import { VaultHeader } from "./components/VaultHeader";
+import { UnlockedVaultHeader } from "./components/UnlockedVaultHeader";
 import { useVaultAccess } from "./hooks/useVaultAccess";
 
 export const VaultAccessScreen = () => {
@@ -30,12 +30,11 @@ export const VaultAccessScreen = () => {
   } = useVaultAccess();
 
   return (
-    <CenterLayout className="overflow-hidden p-6 selection:bg-primary/80 sm:p-12">
+    <div className="mt-52 overflow-hidden p-6 selection:bg-primary/80 sm:p-12">
       <main className="mx-auto w-full max-w-xl">
         {view === "selection" ? (
           <div className="space-y-12">
-            <VaultHeader view="selection" path="" />
-
+            <SelectionVaultHeader />
             <div className="grid gap-12 lg:grid-cols-[1fr,320px]">
               <div className="space-y-8">
                 <ActionSection onBrowse={handleSelect} />
@@ -54,8 +53,7 @@ export const VaultAccessScreen = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="mx-auto max-w-md space-y-10 py-12">
-            <VaultHeader view="unlock" path={selectedVaultPath ?? ""} />
-
+            <UnlockedVaultHeader path={selectedVaultPath ?? ""} />
             <div className="space-y-8">
               <UnlockForm
                 password={password}
@@ -75,6 +73,6 @@ export const VaultAccessScreen = () => {
           </motion.div>
         )}
       </main>
-    </CenterLayout>
+    </div>
   );
 };
