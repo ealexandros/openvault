@@ -87,7 +87,7 @@ export function PasswordSection({
             value={passwordValue}
             onChange={onChange}
             onBlur={onBlur}
-            className={`h-12 rounded-2xl bg-muted/30 px-4 pr-12 focus:ring-primary/20 ${
+            className={`h-12 rounded-xl bg-muted/30 px-4 pr-12 focus:ring-primary/20 ${
               passwordTouched === true && passwordError != null
                 ? "border-red-500/50"
                 : "border-border"
@@ -140,7 +140,7 @@ export function PasswordSection({
           value={verifyValue}
           onChange={onChange}
           onBlur={onBlur}
-          className={`h-12 rounded-2xl bg-muted/30 px-4 focus:ring-primary/20 ${
+          className={`h-12 rounded-xl bg-muted/30 px-4 focus:ring-primary/20 ${
             verifyTouched === true && verifyError != null
               ? "border-red-500/50"
               : "border-border"

@@ -1,3 +1,3 @@
-import { VaultSelectionPage } from "./(locked)/select";
+import { VaultAccessScreen } from "@/features/vault-access";
 
-export default VaultSelectionPage;
+export default VaultAccessScreen;

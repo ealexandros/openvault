@@ -28,7 +28,7 @@ export const VaultNameInput = ({
       onChange={onChange}
       onBlur={onBlur}
       className={cn(
-        "h-12 rounded-2xl bg-muted/30 px-4 focus:ring-primary/20",
+        "h-12 rounded-xl bg-muted/30 px-4 focus:ring-primary/20",
         touched === true && error != null ? "border-red-500/50" : "border-border",
       )}
     />

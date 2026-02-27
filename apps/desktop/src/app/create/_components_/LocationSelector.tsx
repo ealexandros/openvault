@@ -42,7 +42,7 @@ export function LocationSelector({
       </Label>
       <div
         onClick={handleSelectFolder}
-        className={`group flex cursor-pointer items-center gap-3 rounded-2xl border ${
+        className={`group flex cursor-pointer items-center gap-3 rounded-xl border ${
           touched === true && error != null ? "border-red-500" : "border-border"
         } bg-muted/30 p-4 transition-all hover:border-primary/30`}>
         <div className="rounded-lg border border-border bg-background p-2 shadow-sm transition-transform group-hover:scale-105">

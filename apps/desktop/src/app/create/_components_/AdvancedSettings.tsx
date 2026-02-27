@@ -42,7 +42,7 @@ export const AdvancedSettings = ({ algorithm, setFieldValue }: AdvancedSettingsP
               Encryption Algorithm
             </Label>
             <Select value={algorithm} onValueChange={val => setFieldValue("algorithm", val)}>
-              <SelectTrigger className="h-16! w-full rounded-2xl border-border bg-muted/30 px-4 text-sm focus:ring-primary/20">
+              <SelectTrigger className="h-16! w-full rounded-xl border-border bg-muted/30 px-4 text-sm focus:ring-primary/20">
                 <SelectValue placeholder="Select algorithm" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border bg-card">

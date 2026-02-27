@@ -2,14 +2,8 @@ export const hrefs = {
   home: {
     get: () => "/",
   },
-  setup: {
-    get: () => "/setup",
-  },
-  select: {
-    get: () => "/select",
-  },
-  unlock: {
-    get: () => "/unlock",
+  create: {
+    get: () => "/create",
   },
   dashboard: {
     get: () => "/dashboard",
