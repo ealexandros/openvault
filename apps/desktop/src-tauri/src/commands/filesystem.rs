@@ -2,13 +2,18 @@ use uuid::Uuid;
 
 use crate::commands::contracts::{
     BrowseResult, BrowseVaultParams, CreateFolderParams, DeleteItemParams, FileItem, FolderItem,
-    GetFileContentParams, RenameItemParams, UploadFileParams,
+    GetFileContentParams, PathIsFileParams, RenameItemParams, UploadFileParams,
 };
 use crate::errors::{Error, Result};
 use crate::state::TauriState;
 
 fn parse_uuid(id: &str) -> Result<Uuid> {
     Uuid::parse_str(id).map_err(|_| Error::InvalidUuid(id.to_string()))
+}
+
+#[tauri::command]
+pub async fn path_is_file(params: PathIsFileParams) -> Result<bool> {
+    Ok(std::path::Path::new(&params.path).is_file())
 }
 
 #[tauri::command]

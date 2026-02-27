@@ -50,4 +50,8 @@ export const tauriApi = {
   getFileContent: (params: { id: string }) => {
     return safeInvokeTauri<number[] | null>("get_file_content", { params });
   },
+
+  checkPathIsFile: (params: { path: string }) => {
+    return safeInvokeTauri<boolean>("path_is_file", { params });
+  },
 };

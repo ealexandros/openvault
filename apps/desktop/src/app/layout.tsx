@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/shadcn/sonner";
 import { figtree, geistMono, geistSans } from "@/config/fonts";
 import { globalMetadata } from "@/config/metadata";
 import { VaultProvider } from "@/context/VaultContext";
@@ -14,6 +15,7 @@ const AppLayout = ({ children }: PropsWithChildren) => (
   <html lang="en" className={figtree.variable}>
     <body className={cn(geistSans.variable, geistMono.variable)}>
       <VaultProvider>{children}</VaultProvider>
+      <Toaster position="bottom-right" />
     </body>
   </html>
 );

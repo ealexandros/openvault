@@ -43,6 +43,12 @@ pub struct GetFileContentParams {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PathIsFileParams {
+    pub path: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateVaultParams {
     pub path: String,
     pub name: String,

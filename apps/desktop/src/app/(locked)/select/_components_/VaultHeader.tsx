@@ -7,16 +7,23 @@ export const VaultHeader = () => {
   const router = useRouter();
 
   return (
-    <div className="flex items-center justify-between">
-      <h1 className="text-xl font-semibold tracking-tight">Vault</h1>
-      <Button
-        onClick={() => router.push(hrefs.setup.get())}
-        variant="ghost"
-        size="sm"
-        className="rounded-lg text-xs text-muted-foreground hover:bg-muted hover:text-foreground">
-        <PlusIcon className="mr-2 size-3.5" />
-        New Vault
-      </Button>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">OpenVault</h1>
+          <p className="text-sm text-muted-foreground/60">
+            Secure your data with geometric precision.
+          </p>
+        </div>
+        <Button
+          onClick={() => router.push(hrefs.setup.get())}
+          variant="outline"
+          size="sm"
+          className="gap-2 rounded-xl border-primary/20 bg-primary/5 p-4 text-xs font-semibold text-primary transition-all hover:bg-primary hover:text-primary-foreground">
+          <PlusIcon className="size-3.5" />
+          Create New Vault
+        </Button>
+      </div>
     </div>
   );
 };

@@ -1,15 +1,25 @@
 import { hrefs } from "@/config/hrefs";
 import { useVault } from "@/context/VaultContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { tauriApi } from "@/libraries/tauri-api";
 import { safeAsync } from "@/utils/safe-async";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useRouter } from "next/navigation";
-import { type RecentVault } from "./_components_/RecentVaultItem";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const RECENT_VAULTS_KEY = "recent-vaults";
 
+export type RecentVault = {
+  id: string;
+  name: string;
+  path: string;
+  lastAccessed: string;
+};
+
 export const useVaultSelection = () => {
-  const { selectedPath, setSelectedPath } = useVault();
+  const { selectedPath: globalPath, setSelectedPath } = useVault();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const router = useRouter();
 
@@ -19,26 +29,29 @@ export const useVaultSelection = () => {
   });
 
   const select = async () => {
+    const toastId = toast.loading("Selecting a file...");
+
     const selected = await safeAsync({
       promise: open({
-        title: "Select a folder to vault",
+        title: "Select a file to vault",
         directory: false,
         multiple: false,
       }),
-      errorMessage: "Failed to open folder picker",
+      errorMessage: "Failed to open file picker",
     });
+
+    toast.dismiss(toastId);
 
     if (selected == null || typeof selected !== "string") return;
 
-    setSelectedPath(selected);
+    setIsNavigating(true);
 
     const name = selected.split("/").pop() ?? selected;
     const newRecent: RecentVault = {
       id: crypto.randomUUID(),
       name,
       path: selected,
-      lastAccessed: "Just now",
-      isEncrypted: false,
+      lastAccessed: new Date().toISOString(),
     };
 
     setRecentVaults(prev => {
@@ -50,14 +63,41 @@ export const useVaultSelection = () => {
   };
 
   const connect = (path: string) => {
-    setSelectedPath(path);
+    setIsNavigating(true);
     router.push(hrefs.unlock.get());
+    setSelectedPath(path);
   };
 
+  const [validatedVaults, setValidatedVaults] = useState<RecentVault[]>([]);
+
+  useEffect(() => {
+    const validateVaults = async () => {
+      const results = await Promise.all(
+        recentVaults.map(async v => {
+          const result = await tauriApi.checkPathIsFile({
+            path: v.path,
+          });
+          return result.success && result.data ? v : null;
+        }),
+      );
+
+      setValidatedVaults(results.filter(Boolean) as RecentVault[]);
+    };
+
+    void validateVaults();
+  }, [recentVaults]);
+
+  const [prevPath, setPrevPath] = useState(globalPath);
+
+  if (globalPath !== prevPath && !isNavigating) {
+    setPrevPath(globalPath);
+  }
+
   return {
-    selectedPath,
-    recentVaults,
+    selectedPath: isNavigating ? prevPath : globalPath,
+    recentVaults: validatedVaults,
     select,
     connect,
+    isNavigating,
   };
 };
