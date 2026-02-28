@@ -3,8 +3,7 @@
 import { Skeleton } from "@/components/ui/shadcn/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { cn } from "@/utils/cn";
-import { ChevronRightIcon, FileIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { FileIcon, XIcon } from "lucide-react";
 import { RecentVault } from "../hooks/useVaultAccess";
 
 type RecentVaultItemProps = {
@@ -14,26 +13,11 @@ type RecentVaultItemProps = {
 };
 
 export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemProps) => {
-  const [isConfirming, setIsConfirming] = useState(false);
   const nameWithoutExtension = vault.name.replace(/\.[^/.]+$/, "");
-
-  const truncateMiddle = (str: string, maxLen: number = 40) => {
-    if (str.length <= maxLen) return str;
-    const start = str.slice(0, Math.floor(maxLen / 2) - 1);
-    const end = str.slice(-Math.floor(maxLen / 2) + 1);
-    return `${start}...${end}`;
-  };
-
-  useEffect(() => {
-    if (isConfirming) {
-      const timer = setTimeout(() => setIsConfirming(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isConfirming]);
 
   return (
     <div
-      onClick={() => (isConfirming ? setIsConfirming(false) : onConnect(vault.path))}
+      onClick={() => onConnect(vault.path)}
       className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-200/60 bg-slate-50/50 p-3.5 transition-all duration-300 hover:border-primary/20 hover:bg-white hover:shadow-[0_6px_8px_rgb(0,0,0,0.02)]">
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white transition-all duration-300 group-hover:border-primary/10 group-hover:bg-primary/5">
@@ -45,8 +29,10 @@ export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemP
           </h4>
           <Tooltip>
             <TooltipTrigger asChild>
-              <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400 group-hover:text-slate-500">
-                {truncateMiddle(vault.path)}
+              <p
+                className="mt-0.5 max-w-48 truncate text-[11px] font-semibold text-slate-400 group-hover:text-slate-500"
+                dir="rtl">
+                {vault.path}
               </p>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-[400px] break-all">
@@ -67,7 +53,6 @@ export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemP
           )}>
           <XIcon className="size-3.5" />
         </button>
-        <ChevronRightIcon className="size-4 text-slate-300 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-primary/50" />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
+import { cn } from "@/utils/cn";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -87,11 +88,12 @@ export function PasswordSection({
             value={passwordValue}
             onChange={onChange}
             onBlur={onBlur}
-            className={`h-12 rounded-xl bg-muted/30 px-4 pr-12 focus:ring-primary/20 ${
+            className={cn(
+              "h-12 bg-muted/30 px-4 pr-12 focus:ring-primary/20",
               passwordTouched === true && passwordError != null
                 ? "border-red-500/50"
-                : "border-border"
-            }`}
+                : "border-border",
+            )}
           />
           <button
             type="button"
@@ -105,7 +107,6 @@ export function PasswordSection({
           </button>
         </div>
 
-        {/* Strength Meter */}
         <div className="flex h-1 gap-1.5 px-1">
           {[1, 2, 3, 4].map(i => (
             <div
@@ -140,11 +141,12 @@ export function PasswordSection({
           value={verifyValue}
           onChange={onChange}
           onBlur={onBlur}
-          className={`h-12 rounded-xl bg-muted/30 px-4 focus:ring-primary/20 ${
+          className={cn(
+            "h-12 bg-muted/30 px-4 focus:ring-primary/20",
             verifyTouched === true && verifyError != null
               ? "border-red-500/50"
-              : "border-border"
-          }`}
+              : "border-border",
+          )}
         />
         {verifyTouched === true && verifyError != null && (
           <p className="ml-1 text-[10px] font-medium text-red-500">{verifyError}</p>

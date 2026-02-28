@@ -28,12 +28,12 @@ export const VaultNameInput = ({
       onChange={onChange}
       onBlur={onBlur}
       className={cn(
-        "h-12 rounded-xl bg-muted/30 px-4 focus:ring-primary/20",
+        "h-12 bg-muted/30 px-4 focus:ring-primary/20",
         touched === true && error != null ? "border-red-500/50" : "border-border",
       )}
     />
     {touched === true && error != null && (
-      <p className="ml-1 text-[10px] font-medium text-red-500">{error}</p>
+      <p className="ml-1 text-[11px] text-destructive">{error}</p>
     )}
   </div>
 );

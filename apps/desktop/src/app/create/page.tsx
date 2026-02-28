@@ -3,7 +3,7 @@
 import { CenterLayout } from "@/components/layout/center";
 import { Button } from "@/components/ui/shadcn/button";
 import { hrefs } from "@/config/hrefs";
-import { ChevronLeftIcon, LockIcon, ShieldCheckIcon } from "lucide-react";
+import { ChevronLeftIcon, ShieldCheckIcon } from "lucide-react";
 import { AdvancedSettings } from "./_components_/AdvancedSettings";
 import { EncryptionProgress } from "./_components_/EncryptionProgress";
 import { LocationSelector } from "./_components_/LocationSelector";
@@ -20,14 +20,14 @@ const SetupVaultPage = () => {
 
   return (
     <CenterLayout className="p-6 selection:bg-primary/30 sm:p-12">
-      <main className="w-full max-w-md animate-in space-y-10 duration-500 fade-in slide-in-from-bottom-4">
+      <main className="w-full max-w-md animate-in space-y-10 duration-500 fade-in">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.push(hrefs.home.get())}
-            className="h-10 w-10 rounded-xl border border-border/50 hover:bg-muted">
-            <ChevronLeftIcon className="h-5 w-5" />
+            className="size-10 rounded-md border border-border/50 hover:bg-muted">
+            <ChevronLeftIcon className="size-5" />
           </Button>
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Create New Vault</h1>
@@ -44,7 +44,6 @@ const SetupVaultPage = () => {
             touched={formik.touched.path}
             setFieldValue={formik.setFieldValue}
           />
-
           <VaultNameInput
             value={formik.values.name}
             error={formik.errors.name}
@@ -52,7 +51,6 @@ const SetupVaultPage = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />
-
           <PasswordSection
             passwordValue={formik.values.password}
             verifyValue={formik.values.verifyPassword}
@@ -72,9 +70,11 @@ const SetupVaultPage = () => {
           <Button
             type="submit"
             disabled={!formik.isValid || !formik.dirty || formik.isSubmitting}
-            className="h-14 w-full rounded-2xl bg-white text-sm font-semibold text-black shadow-xl shadow-white/5 transition-all hover:bg-zinc-200 active:scale-[0.98] disabled:opacity-50">
-            <LockIcon className="mr-2 h-4 w-4" />
-            Encrypt Vault
+            className="group relative h-14 w-full overflow-hidden rounded-2xl bg-primary text-[15px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100">
+            <span className="relative flex items-center justify-center gap-2">
+              <ShieldCheckIcon className="size-4" />
+              Encrypt Vault
+            </span>
           </Button>
         </form>
 

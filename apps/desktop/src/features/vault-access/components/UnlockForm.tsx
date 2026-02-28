@@ -28,13 +28,13 @@ export const UnlockForm = ({
 }: UnlockFormProps) => {
   const isButtonDisabled = !password || isLoading;
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
   return (
-    <form
-      onSubmit={e => {
-        e.preventDefault();
-        onSubmit();
-      }}
-      className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="group relative">
         <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
           <ShieldIcon

@@ -1,6 +1,7 @@
 "use client";
 
 import { Label } from "@/components/ui/shadcn/label";
+import { cn } from "@/utils/cn";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FolderIcon } from "lucide-react";
 
@@ -42,10 +43,11 @@ export function LocationSelector({
       </Label>
       <div
         onClick={handleSelectFolder}
-        className={`group flex cursor-pointer items-center gap-3 rounded-xl border ${
-          touched === true && error != null ? "border-red-500" : "border-border"
-        } bg-muted/30 p-4 transition-all hover:border-primary/30`}>
-        <div className="rounded-lg border border-border bg-background p-2 shadow-sm transition-transform group-hover:scale-105">
+        className={cn(
+          "group flex cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 p-4 transition-all hover:border-primary/30",
+          touched === true && error != null ? "border-red-500" : "border-border",
+        )}>
+        <div className="rounded-sm border border-border bg-background p-2 transition-transform group-hover:scale-105">
           <FolderIcon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="min-w-0 flex-1">
@@ -53,7 +55,7 @@ export function LocationSelector({
         </div>
       </div>
       {touched === true && error != null && (
-        <p className="ml-1 text-[10px] font-medium text-red-500">{error}</p>
+        <p className="ml-1 text-[10px] text-red-500">{error}</p>
       )}
     </div>
   );
