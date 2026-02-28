@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { CenterLayout } from "@/components/layout/center";
 import { ActionSection } from "./components/ActionSection";
 import { RecentVaultsList } from "./components/RecentVaultsList";
 import { SelectionVaultHeader } from "./components/SelectionVaultHeader";
@@ -30,29 +30,22 @@ export const VaultAccessScreen = () => {
   } = useVaultAccess();
 
   return (
-    <div className="mt-52 overflow-hidden p-6 selection:bg-primary/80 sm:p-12">
-      <main className="mx-auto w-full max-w-xl">
+    <CenterLayout className="overflow-hidden p-6 sm:p-12">
+      <main className="w-full max-w-xl">
         {view === "selection" ? (
           <div className="space-y-12">
             <SelectionVaultHeader />
-            <div className="grid gap-12 lg:grid-cols-[1fr,320px]">
-              <div className="space-y-8">
-                <ActionSection onBrowse={handleSelect} />
-              </div>
-              <RecentVaultsList
-                vaults={recentVaults}
-                onConnect={handleConnect}
-                onRemove={handleRemoveRecent}
-                onClear={handleClearRecent}
-                isLoading={isLoadingVaults}
-              />
-            </div>
+            <ActionSection onBrowse={handleSelect} />
+            <RecentVaultsList
+              vaults={recentVaults}
+              onConnect={handleConnect}
+              onRemove={handleRemoveRecent}
+              onClear={handleClearRecent}
+              isLoading={isLoadingVaults}
+            />
           </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mx-auto max-w-md space-y-10 py-12">
+          <div className="mx-auto max-w-md animate-in space-y-10 duration-300 fade-in">
             <UnlockedVaultHeader path={selectedVaultPath ?? ""} />
             <div className="space-y-8">
               <UnlockForm
@@ -66,13 +59,13 @@ export const VaultAccessScreen = () => {
                 rememberVault={rememberVault}
                 setRememberVault={setRememberVault}
               />
-              <p className="mx-auto max-w-xs text-center text-[12px] leading-relaxed text-muted-foreground/40">
+              <p className="mx-auto max-w-xs text-center text-xs leading-relaxed text-muted-foreground/50">
                 Your password is never stored and is used locally to derive the encryption key.
               </p>
             </div>
-          </motion.div>
+          </div>
         )}
       </main>
-    </div>
+    </CenterLayout>
   );
 };

@@ -33,7 +33,7 @@ export const VaultNameInput = ({
       )}
     />
     {touched === true && error != null && (
-      <p className="ml-1 text-sm text-destructive">{error}</p>
+      <p className="ml-1 text-xs text-destructive">{error}</p>
     )}
   </div>
 );

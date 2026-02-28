@@ -4,8 +4,6 @@ import { Label } from "@/components/ui/shadcn/label";
 import { cn } from "@/utils/cn";
 import { FolderIcon } from "lucide-react";
 
-// @todo-soon refactor this..
-
 type LocationSelectorProps = {
   path: string;
   error?: string;
