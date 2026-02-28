@@ -1,6 +1,7 @@
 import { hrefs } from "@/config/hrefs";
 import { useVault } from "@/context/VaultContext";
 import { tauriApi } from "@/libraries/tauri-api";
+import { open } from "@tauri-apps/plugin-dialog";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -56,10 +57,23 @@ export const useSetupVault = () => {
     },
   });
 
+  const chooseFolder = async () => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: "Select folder to encrypt",
+    });
+
+    if (selected != null && typeof selected === "string") {
+      await formik.setFieldValue("path", selected);
+    }
+  };
+
   return {
     formik,
     isEncrypting,
-    setIsEncrypting,
     router,
+    setIsEncrypting,
+    chooseFolder,
   };
 };

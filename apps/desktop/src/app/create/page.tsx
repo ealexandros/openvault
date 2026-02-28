@@ -11,8 +11,10 @@ import { PasswordSection } from "./_components_/PasswordSection";
 import { VaultNameInput } from "./_components_/VaultNameInput";
 import { useSetupVault } from "./useSetupVault";
 
+import { cn } from "@/utils/cn";
+
 const SetupVaultPage = () => {
-  const { formik, isEncrypting, router, setIsEncrypting } = useSetupVault();
+  const { formik, isEncrypting, router, chooseFolder, setIsEncrypting } = useSetupVault();
 
   if (isEncrypting) {
     return <EncryptionProgress onCancel={() => setIsEncrypting(false)} />;
@@ -29,7 +31,7 @@ const SetupVaultPage = () => {
             className="size-10 rounded-md border border-border/50 hover:bg-muted">
             <ChevronLeftIcon className="size-5" />
           </Button>
-          <div>
+          <div className="space-y-0.5">
             <h1 className="text-xl font-semibold tracking-tight">Create New Vault</h1>
             <p className="text-xs text-muted-foreground">
               Set up a secure encrypted container
@@ -42,7 +44,7 @@ const SetupVaultPage = () => {
             path={formik.values.path}
             error={formik.errors.path}
             touched={formik.touched.path}
-            setFieldValue={formik.setFieldValue}
+            chooseFolder={chooseFolder}
           />
           <VaultNameInput
             value={formik.values.name}
@@ -61,7 +63,6 @@ const SetupVaultPage = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />
-
           <AdvancedSettings
             algorithm={formik.values.algorithm}
             setFieldValue={formik.setFieldValue}
@@ -70,7 +71,9 @@ const SetupVaultPage = () => {
           <Button
             type="submit"
             disabled={!formik.isValid || !formik.dirty || formik.isSubmitting}
-            className="group relative h-14 w-full overflow-hidden rounded-2xl bg-primary text-[15px] font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100">
+            className={cn(
+              "group relative h-14 w-full overflow-hidden rounded-2xl bg-primary text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100",
+            )}>
             <span className="relative flex items-center justify-center gap-2">
               <ShieldCheckIcon className="size-4" />
               Encrypt Vault
@@ -79,10 +82,10 @@ const SetupVaultPage = () => {
         </form>
 
         <div className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4">
-          <ShieldCheckIcon className="h-5 w-5 shrink-0 text-primary" />
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
-            All files within the selected folder will be encrypted using industry-standard
-            AES-256 GCM. Your password is the only key to reverse this process.
+          <ShieldCheckIcon className="size-5 shrink-0 text-primary" />
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            All files within the selected folder will be encrypted using industry-standards.
+            Your password is the only key to reverse this process.
           </p>
         </div>
       </main>
