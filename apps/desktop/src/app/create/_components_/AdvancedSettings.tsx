@@ -39,20 +39,20 @@ export const AdvancedSettings = ({ algorithm, setFieldValue }: AdvancedSettingsP
         Advanced Settings
       </Button>
     </DrawerTrigger>
-    <DrawerContent className="p-0 before:inset-0 before:rounded-none">
-      <div className="mx-auto flex h-full w-full max-w-md flex-col gap-8 p-6">
-        <DrawerHeader className="p-0">
-          <DrawerTitle className="text-2xl font-bold tracking-tight">
+    <DrawerContent className="max-w-md! p-0 before:inset-0 before:rounded-none">
+      <div className="mx-auto flex h-full w-full flex-col gap-8 px-6 py-8">
+        <DrawerHeader className="p-0 px-1">
+          <DrawerTitle className="text-3xl font-bold tracking-tight">
             Advanced Settings
           </DrawerTitle>
-          <DrawerDescription className="text-sm text-muted-foreground">
+          <DrawerDescription className="text-base text-muted-foreground">
             Configure technical encryption parameters for your vault
           </DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 space-y-8 pt-4">
           <div className="space-y-4">
-            <Label className="text-xs font-bold tracking-widest text-foreground uppercase">
+            <Label className="ml-1 text-sm font-bold tracking-wider text-foreground uppercase">
               Encryption Algorithm
             </Label>
             <Select value={algorithm} onValueChange={val => setFieldValue("algorithm", val)}>
@@ -83,7 +83,7 @@ export const AdvancedSettings = ({ algorithm, setFieldValue }: AdvancedSettingsP
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <p className="text-xs leading-relaxed text-muted-foreground/80">
+            <p className="ml-1 text-sm leading-relaxed text-muted-foreground/80">
               XChaCha20-Poly1305 is set as the default, offering an extended nonce and robust
               security across all devices.
             </p>

@@ -7,8 +7,6 @@ import { cn } from "@/utils/cn";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
-// @todo-soon refactor this into a reusable component..
-
 type PasswordSectionProps = {
   passwordValue: string;
   verifyValue: string;
@@ -33,10 +31,10 @@ export const PasswordSection = ({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="space-y-4 border-t border-border/50 pt-2">
+    <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
-          <Label className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
+          <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
             Password
           </Label>
         </div>
@@ -49,7 +47,7 @@ export const PasswordSection = ({
             onChange={onChange}
             onBlur={onBlur}
             className={cn(
-              "h-12 rounded-lg bg-muted/30 px-4 pr-12 focus:ring-primary/20",
+              "px-4 pr-12",
               passwordTouched === true && passwordError != null
                 ? "border-destructive/50"
                 : "border-border",
@@ -66,7 +64,7 @@ export const PasswordSection = ({
         {passwordValue && <PasswordStrength password={passwordValue} />}
 
         {passwordTouched === true && passwordError != null && (
-          <p className="ml-1 text-xs font-medium text-destructive">{passwordError}</p>
+          <p className="ml-1 text-xs text-destructive">{passwordError}</p>
         )}
       </div>
 
@@ -82,14 +80,13 @@ export const PasswordSection = ({
           onChange={onChange}
           onBlur={onBlur}
           className={cn(
-            "h-12 rounded-lg bg-muted/30 px-4 focus:ring-primary/20",
             verifyTouched === true && verifyError != null
               ? "border-destructive/50"
               : "border-border",
           )}
         />
         {verifyTouched === true && verifyError != null && (
-          <p className="ml-1 text-xs font-medium text-destructive">{verifyError}</p>
+          <p className="ml-1 text-xs text-destructive">{verifyError}</p>
         )}
       </div>
     </div>

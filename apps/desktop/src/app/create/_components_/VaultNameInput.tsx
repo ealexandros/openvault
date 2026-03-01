@@ -18,7 +18,7 @@ export const VaultNameInput = ({
   onBlur,
 }: VaultNameInputProps) => (
   <div className="space-y-2">
-    <Label className="ml-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+    <Label className="ml-1 text-xs font-bold tracking-wider text-muted-foreground uppercase">
       Vault Name
     </Label>
     <Input
@@ -28,7 +28,6 @@ export const VaultNameInput = ({
       onChange={onChange}
       onBlur={onBlur}
       className={cn(
-        "h-12 rounded-lg bg-muted/30 px-4 focus:ring-primary/20",
         touched === true && error != null ? "border-destructive/50" : "border-border",
       )}
     />

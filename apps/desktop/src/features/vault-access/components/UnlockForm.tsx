@@ -53,7 +53,7 @@ export const UnlockForm = ({
           onChange={e => setPassword(e.target.value)}
           disabled={isLoading}
           autoFocus
-          className="h-13 w-full px-11 text-sm! font-medium placeholder:text-muted-foreground/40"
+          className="w-full px-11 text-sm! placeholder:text-muted-foreground/40"
         />
         <Button
           type="button"

@@ -11,33 +11,33 @@ import { PasswordSection } from "./_components_/PasswordSection";
 import { VaultNameInput } from "./_components_/VaultNameInput";
 import { useSetupVault } from "./useSetupVault";
 
+import { Separator } from "@/components/ui/shadcn/separator";
 import { cn } from "@/utils/cn";
+import Link from "next/link";
 
 const SetupVaultPage = () => {
-  const { formik, isEncrypting, router, chooseFolder, setIsEncrypting } = useSetupVault();
+  const { formik, isEncrypting, chooseFolder, setIsEncrypting } = useSetupVault();
 
   if (isEncrypting) {
     return <EncryptionProgress onCancel={() => setIsEncrypting(false)} />;
   }
 
   return (
-    <CenterLayout className="p-6 selection:bg-primary/30 sm:p-12">
-      <main className="w-full max-w-md animate-in space-y-10 duration-500 fade-in">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push(hrefs.home.get())}
-            className="size-10 rounded-md border border-border/50 hover:bg-muted">
-            <ChevronLeftIcon className="size-5" />
+    <CenterLayout>
+      <main className="w-full max-w-lg animate-in space-y-10 duration-500 fade-in">
+        <header className="flex items-center gap-4">
+          <Button variant="outline" size="icon" className="size-10" asChild>
+            <Link href={hrefs.home.get()}>
+              <ChevronLeftIcon className="size-5" />
+            </Link>
           </Button>
-          <div className="space-y-0.5">
-            <h1 className="text-xl font-semibold tracking-tight">Create New Vault</h1>
-            <p className="text-xs text-muted-foreground">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">Create a Vault</h1>
+            <p className="text-base text-muted-foreground">
               Set up a secure encrypted container
             </p>
           </div>
-        </div>
+        </header>
 
         <form onSubmit={formik.handleSubmit} className="space-y-6">
           <LocationSelector
@@ -53,6 +53,7 @@ const SetupVaultPage = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
           />
+          <Separator className="my-7" />
           <PasswordSection
             passwordValue={formik.values.password}
             verifyValue={formik.values.verifyPassword}
