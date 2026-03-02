@@ -11,7 +11,7 @@ import {
   UploadCloudIcon,
 } from "lucide-react";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { NewFolderDialog } from "./NewFolderDialog";
+import { NewFolderDialog } from "./folders/NewFolderDialog";
 
 type BrowseHeaderProps = {
   currentPath: string[];
