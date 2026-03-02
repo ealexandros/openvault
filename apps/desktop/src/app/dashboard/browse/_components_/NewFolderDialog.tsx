@@ -40,9 +40,9 @@ export const NewFolderDialog = ({ onCreate }: NewFolderDialogProps) => {
         <Button
           variant="outline"
           size="sm"
-          className="h-9 rounded-xl px-4 text-xs font-semibold md:flex">
-          <PlusIcon className="mr-2 size-3.5" />
-          New Folder
+          className="h-10 gap-2 px-4 text-sm font-medium md:flex">
+          <PlusIcon className="size-4" />
+          <span>New Folder</span>
         </Button>
       </DialogTrigger>
       <DialogContent>

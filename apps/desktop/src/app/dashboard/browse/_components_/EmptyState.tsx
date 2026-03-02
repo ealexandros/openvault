@@ -1,16 +1,25 @@
 "use client";
 
-import { FolderIcon } from "lucide-react";
+import { FolderIcon, PlusIcon } from "lucide-react";
 
 export const EmptyState = () => (
-  <div className="col-span-full flex animate-in flex-col items-center justify-center space-y-4 py-20 text-center duration-300 fade-in zoom-in">
-    <div className="flex h-20 w-20 items-center justify-center rounded-full border border-muted/30 bg-muted/20">
-      <FolderIcon className="size-10 text-muted-foreground/30" />
+  <div className="col-span-full flex animate-in flex-col items-center justify-center space-y-6 py-32 text-center duration-500 fade-in slide-in-from-bottom-4">
+    <div className="relative">
+      <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-3xl" />
+      <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-primary/20 bg-card/50">
+        <FolderIcon className="size-12 text-primary/40" strokeWidth={1.5} />
+        <div className="absolute -top-2 -right-2 flex size-8 items-center justify-center rounded-full border border-primary/50 bg-primary text-white">
+          <PlusIcon className="size-4" />
+        </div>
+      </div>
     </div>
-    <div className="space-y-1">
-      <p className="text-sm font-medium text-foreground">No files found</p>
-      <p className="mx-auto max-w-xs text-xs text-muted-foreground">
-        This folder is empty. Upload a file to get started.
+    <div className="space-y-2">
+      <h3 className="text-xl font-bold tracking-tight text-foreground">
+        Welcome to your vault
+      </h3>
+      <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
+        This folder is currently empty. Start by creating a new folder or uploading your
+        important files to keep them secure.
       </p>
     </div>
   </div>

@@ -1,168 +1,131 @@
 "use client";
 
 import { Button } from "@/components/ui/shadcn/button";
-import { AnimatePresence, motion } from "framer-motion";
-import { PlusIcon, UploadCloudIcon } from "lucide-react";
-import { useState } from "react";
-import { Breadcrumbs } from "./_components_/Breadcrumbs";
+import { FileIcon, FolderIcon } from "lucide-react";
+import { BrowseDropOverlay } from "./_components_/BrowseDropOverlay";
+import { BrowseHeader } from "./_components_/BrowseHeader";
+import { BrowseLoadingState } from "./_components_/BrowseLoadingState";
+import { BrowseSection } from "./_components_/BrowseSection";
 import { EmptyState } from "./_components_/EmptyState";
 import { FileCard } from "./_components_/FileCard";
 import { FileViewerDialog } from "./_components_/FileViewerDialog";
 import { FolderCard } from "./_components_/FolderCard";
-import { NewFolderDialog } from "./_components_/NewFolderDialog";
 import { RenameItemDialog } from "./_components_/RenameItemDialog";
 import { useBrowse } from "./useBrowse";
-
-// @todo-now refactor everything from here..
 
 const BrowsePage = () => {
   const {
     currentPath,
     folders,
     files,
+    folderCount,
+    fileCount,
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    viewState,
     isDragging,
+    renamingItem,
+    viewingItem,
     handleFolderClick,
     handleBreadcrumbClick,
     handleCreateFolder,
-    handleDeleteItem,
-    handleRenameItem,
     handleUploadFile,
-    getFileContent,
+    handleDeleteFolder,
+    handleDeleteFile,
+    handleRequestFolderRename,
+    handleRequestFileRename,
+    handleRenameDialogOpenChange,
+    handleRenameFromDialog,
+    handleFileClick,
+    handleFileViewerOpenChange,
   } = useBrowse();
 
-  const [renamingItem, setRenamingItem] = useState<{
-    id: string;
-    name: string;
-    type: "file" | "folder";
-  } | null>(null);
-
-  const [viewingItem, setViewingItem] = useState<{
-    id: string;
-    name: string;
-    extension?: string;
-    content: number[] | null;
-  } | null>(null);
-
-  const handleFileClick = async (item: { id: string; name: string; extension: string }) => {
-    setViewingItem({
-      id: item.id,
-      name: item.name,
-      extension: item.extension,
-      content: null,
-    });
-    const content = await getFileContent(item.id);
-    setViewingItem({
-      id: item.id,
-      name: item.name,
-      extension: item.extension,
-      content,
-    });
-  };
-
   return (
-    <div className="relative mx-auto max-w-5xl space-y-8">
-      <AnimatePresence>
-        {isDragging && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-primary bg-primary/5 p-12 text-center shadow-2xl shadow-primary/20">
-              <div className="rounded-full bg-primary/10 p-4 text-primary">
-                <UploadCloudIcon className="size-12 animate-bounce" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold tracking-tight text-primary">
-                  Drop files to upload
-                </h2>
-                <p className="text-muted-foreground">
-                  Release your files to securely add them
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="relative mx-auto max-w-7xl space-y-12 px-4 pb-12">
+      <BrowseDropOverlay isVisible={isDragging} />
 
-      <div className="space-y-6">
-        <div className="sticky top-0 z-10 flex flex-col gap-4 bg-background/95 py-2 backdrop-blur md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold tracking-tight">Files</h3>
-            <Breadcrumbs currentPath={currentPath} onClick={handleBreadcrumbClick} />
-          </div>
-          <div className="flex gap-2">
-            <NewFolderDialog onCreate={handleCreateFolder} />
-            <Button
-              onClick={() => {
-                void handleUploadFile();
-              }}
-              size="sm"
-              className="h-9 rounded-xl px-4 text-xs font-semibold">
-              <PlusIcon className="mr-2 size-3.5" />
-              Upload file
-            </Button>
-          </div>
+      <BrowseHeader
+        currentPath={currentPath}
+        folderCount={folderCount}
+        fileCount={fileCount}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        onBreadcrumbClick={handleBreadcrumbClick}
+        onUploadFile={() => {
+          void handleUploadFile();
+        }}
+        onCreateFolder={handleCreateFolder}
+      />
+
+      {viewState === "loading" && <BrowseLoadingState />}
+
+      {viewState === "empty" && <EmptyState />}
+
+      {viewState === "no-results" && (
+        <div className="flex animate-in flex-col items-center gap-3 rounded-2xl border border-dashed px-8 py-16 text-center duration-300 fade-in slide-in-from-bottom-2">
+          <p className="text-base font-medium">No matches found</p>
+          <p className="max-w-md text-sm text-muted-foreground">
+            Nothing matches <span>&ldquo;{searchQuery}&rdquo;</span>. Try another keyword.
+          </p>
+          <Button variant="outline" onClick={clearSearch}>
+            Clear search
+          </Button>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {folders.map(item => (
-            <FolderCard
-              key={item.id}
-              item={item}
-              onClick={() => handleFolderClick(item)}
-              onDelete={() => {
-                void handleDeleteItem(item.id, "folder");
-              }}
-              onRename={() => {
-                setRenamingItem({ id: item.id, name: item.name, type: "folder" });
-              }}
-            />
-          ))}
+      {viewState === "results" && (
+        <div className="space-y-10">
+          {folders.length > 0 && (
+            <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {folders.map(item => (
+                  <FolderCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => handleFolderClick(item)}
+                    onDelete={() => {
+                      void handleDeleteFolder(item.id);
+                    }}
+                    onRename={() => handleRequestFolderRename(item)}
+                  />
+                ))}
+              </div>
+            </BrowseSection>
+          )}
 
-          {files.map(item => (
-            <FileCard
-              key={item.id}
-              item={item}
-              onClick={() => {
-                void handleFileClick(item);
-              }}
-              onDelete={() => {
-                void handleDeleteItem(item.id, "file");
-              }}
-              onRename={() => {
-                setRenamingItem({ id: item.id, name: item.name, type: "file" });
-              }}
-            />
-          ))}
-
-          {folders.length === 0 && files.length === 0 && <EmptyState />}
+          {files.length > 0 && (
+            <BrowseSection title="Files" count={files.length} icon={FileIcon}>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {files.map(item => (
+                  <FileCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => {
+                      void handleFileClick(item);
+                    }}
+                    onDelete={() => {
+                      void handleDeleteFile(item.id);
+                    }}
+                    onRename={() => handleRequestFileRename(item)}
+                  />
+                ))}
+              </div>
+            </BrowseSection>
+          )}
         </div>
-      </div>
+      )}
 
       <RenameItemDialog
         isOpen={renamingItem !== null}
-        onOpenChange={open => {
-          if (!open) setRenamingItem(null);
-        }}
+        onOpenChange={handleRenameDialogOpenChange}
         initialName={renamingItem?.name ?? ""}
         itemType={renamingItem?.type ?? "file"}
-        onRename={async newName => {
-          if (renamingItem) {
-            await handleRenameItem(renamingItem.id, renamingItem.type, newName);
-          }
-        }}
+        onRename={handleRenameFromDialog}
       />
-
       <FileViewerDialog
         isOpen={viewingItem !== null}
-        onOpenChange={open => {
-          if (!open) setViewingItem(null);
-        }}
+        onOpenChange={handleFileViewerOpenChange}
         fileName={viewingItem?.name ?? ""}
         extension={viewingItem?.extension}
         content={viewingItem?.content ?? null}

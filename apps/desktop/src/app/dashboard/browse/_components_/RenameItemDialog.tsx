@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { Input } from "@/components/ui/shadcn/input";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type RenameItemDialogProps = {
   isOpen: boolean;
@@ -30,13 +30,12 @@ export const RenameItemDialog = ({
   const [name, setName] = useState(initialName);
   const [isRenaming, setIsRenaming] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      // @todo-now fix this..
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
       setName(initialName);
     }
-  }, [isOpen, initialName]);
+    onOpenChange(open);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +51,7 @@ export const RenameItemDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Rename {itemType}</DialogTitle>
