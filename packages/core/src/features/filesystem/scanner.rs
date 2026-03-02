@@ -7,6 +7,8 @@ use walkdir::WalkDir;
 use super::metadata::{FolderMetadata, ROOT_FOLDER_ID};
 use crate::errors::{Error, Result};
 
+pub const EXCLUDED_FILES: [&str; 1] = [".DS_Store"];
+
 pub fn scan_directory(
     root: &Path,
     parent_id: Option<Uuid>,
@@ -26,6 +28,12 @@ pub fn scan_directory(
         let relative = absolute
             .strip_prefix(root)
             .map_err(|_| Error::InvalidPath)?;
+
+        if relative.file_name().map_or(false, |name| {
+            EXCLUDED_FILES.contains(&name.to_str().unwrap_or(""))
+        }) {
+            continue;
+        }
 
         let parent_path = relative.parent().unwrap_or(Path::new(""));
         let parent_id = id_map.get(parent_path).copied().ok_or(Error::InvalidPath)?;
