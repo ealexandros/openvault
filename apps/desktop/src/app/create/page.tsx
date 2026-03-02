@@ -12,7 +12,6 @@ import { VaultNameInput } from "./_components_/VaultNameInput";
 import { useSetupVault } from "./useSetupVault";
 
 import { Separator } from "@/components/ui/shadcn/separator";
-import { cn } from "@/utils/cn";
 import Link from "next/link";
 
 const SetupVaultPage = () => {
@@ -73,9 +72,7 @@ const SetupVaultPage = () => {
           <Button
             type="submit"
             disabled={!formik.isValid || !formik.dirty || formik.isSubmitting}
-            className={cn(
-              "group relative h-14 w-full overflow-hidden rounded-2xl bg-primary text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100",
-            )}>
+            className="relative h-14 w-full overflow-hidden bg-primary text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100">
             <span className="relative flex items-center justify-center gap-2">
               <ShieldCheckIcon className="size-4" />
               Encrypt Vault
