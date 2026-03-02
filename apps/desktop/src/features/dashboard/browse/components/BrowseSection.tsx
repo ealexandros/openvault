@@ -10,7 +10,7 @@ type BrowseSectionProps = {
 };
 
 export const BrowseSection = ({ title, count, icon: Icon, children }: BrowseSectionProps) => (
-  <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+  <section className="space-y-4">
     <div className="flex items-center gap-3">
       <Icon className="size-4 text-muted-foreground" />
       <h2 className="text-base font-semibold">{title}</h2>

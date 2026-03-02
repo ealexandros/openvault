@@ -85,6 +85,9 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
   const [listing, setListing] = useState<BrowseResult>({ folders: [], files: [] });
   const [loadedFolderId, setLoadedFolderId] = useState<string | null>(null);
   const [renamingItem, setRenamingItem] = useState<FolderRenamingItem | null>(null);
+  const [folderIdForIconChange, setFolderIdForIconChange] = useState<string | null>(null);
+
+  const canGoBack = currentPath.length > 1;
 
   const loadSequenceRef = useRef(0);
 
@@ -217,6 +220,23 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     await handleRenameFolder(renamingItem.id, newName);
   };
 
+  const handleIconDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setFolderIdForIconChange(null);
+    }
+  };
+
+  const handleIconSelect = async (iconName: string) => {
+    const folderId = folderIdForIconChange;
+
+    if (folderId == null) {
+      return;
+    }
+
+    await handleChangeFolderIcon(folderId, iconName);
+    setFolderIdForIconChange(null);
+  };
+
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const folders = normalizedSearch
     ? listing.folders.filter(item => item.name.toLowerCase().includes(normalizedSearch))
@@ -266,6 +286,8 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     isLoading,
     isNavigating,
     renamingItem,
+    canGoBack,
+    folderIdForIconChange,
     refresh,
     handleFolderClick,
     handleBreadcrumbClick,
@@ -275,5 +297,8 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     handleChangeFolderIcon,
     clearRenamingItem,
     renameRenamingItem,
+    handleIconDialogOpenChange,
+    handleIconSelect,
+    setFolderIdForIconChange,
   };
 };

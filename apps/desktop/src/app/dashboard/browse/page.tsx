@@ -2,7 +2,6 @@
 
 import { FileDropListener } from "@/components/file-drop/FileDropListener";
 import { Button } from "@/components/ui/shadcn/button";
-import { Spinner } from "@/components/ui/shadcn/spinner";
 import {
   BrowseDropOverlay,
   BrowseHeader,
@@ -20,7 +19,8 @@ import {
   useBrowse,
 } from "@/features/dashboard/browse";
 import { FileIcon, FolderIcon } from "lucide-react";
-import { useState } from "react";
+
+// @todo-soon refactor useBrowse to use useFolder and useFile
 
 const BrowsePage = () => {
   const {
@@ -30,13 +30,15 @@ const BrowsePage = () => {
     folderCount,
     fileCount,
     searchQuery,
-    setSearchQuery,
-    clearSearch,
     viewState,
     isNavigating,
-    handleDropPaths,
     renamingItem,
     viewingItem,
+    canGoBack,
+    folderIdForIconChange,
+    setSearchQuery,
+    clearSearch,
+    handleDropPaths,
     handleFolderClick,
     handleBreadcrumbClick,
     handleCreateFolder,
@@ -44,38 +46,20 @@ const BrowsePage = () => {
     handleDeleteFolder,
     handleDeleteFile,
     handleRequestFolderRename,
-    handleChangeFolderIcon,
     handleRequestFileRename,
     handleRenameDialogOpenChange,
     handleRenameFromDialog,
     handleFileClick,
     handleFileViewerOpenChange,
+    handleIconDialogOpenChange,
+    handleIconSelect,
+    setFolderIdForIconChange,
   } = useBrowse();
-
-  const canGoBack = currentPath.length > 1;
-  const [folderIdForIconChange, setFolderIdForIconChange] = useState<string | null>(null);
-
-  const handleIconDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setFolderIdForIconChange(null);
-    }
-  };
-
-  const handleIconSelect = async (iconName: string) => {
-    const folderId = folderIdForIconChange;
-
-    if (folderId == null) {
-      return;
-    }
-
-    await handleChangeFolderIcon(folderId, iconName);
-    setFolderIdForIconChange(null);
-  };
 
   return (
     <FileDropListener onDropPaths={handleDropPaths}>
       {({ isDragging }) => (
-        <div className="relative mx-auto max-w-7xl space-y-12 px-4 pb-12">
+        <div className="relative mx-auto h-full max-w-7xl space-y-16 px-4 pb-12">
           <BrowseDropOverlay isVisible={isDragging} />
 
           <BrowseHeader
@@ -91,14 +75,7 @@ const BrowsePage = () => {
             onCreateFolder={handleCreateFolder}
           />
 
-          {isNavigating && (
-            <div className="flex animate-in items-center gap-2 text-xs text-muted-foreground duration-200 fade-in">
-              <Spinner className="size-3" />
-              Loading folder...
-            </div>
-          )}
-
-          {viewState === BrowseViewState.Loading && (
+          {(viewState === BrowseViewState.Loading || isNavigating) && (
             <div className="space-y-10">
               <BrowseSection title="Folders" count={0} icon={FolderIcon}>
                 <FolderGridSkeleton />

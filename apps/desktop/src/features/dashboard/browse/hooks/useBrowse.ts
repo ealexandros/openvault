@@ -92,6 +92,8 @@ export const useBrowse = () => {
     isNavigating: folderState.isNavigating,
     renamingItem,
     viewingItem: fileState.viewingItem,
+    canGoBack: folderState.canGoBack,
+    folderIdForIconChange: folderState.folderIdForIconChange,
     setSearchQuery,
     clearSearch,
     handleDropPaths: fileState.uploadPaths,
@@ -108,5 +110,8 @@ export const useBrowse = () => {
     handleRenameFromDialog,
     handleFileClick: fileState.handleFileClick,
     handleFileViewerOpenChange: fileState.handleFileViewerOpenChange,
+    handleIconDialogOpenChange: folderState.handleIconDialogOpenChange,
+    handleIconSelect: folderState.handleIconSelect,
+    setFolderIdForIconChange: folderState.setFolderIdForIconChange,
   };
 };

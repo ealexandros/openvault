@@ -16,9 +16,9 @@ export const FolderBackButton = ({ handleBreadcrumbClick, currentPath }: BackBut
       <ArrowLeftIcon className="size-5" strokeWidth={2.25} />
     </div>
 
-    <div className="min-w-0 flex-1">
-      <p className="truncate text-sm font-semibold tracking-tight text-foreground/90 transition-colors group-hover:text-foreground">
-        Back folder
+    <div className="flex-1 space-y-1">
+      <p className="truncate text-base font-semibold tracking-wide text-foreground/90 transition-colors group-hover:text-foreground">
+        ...
       </p>
       <div className="flex items-center gap-1.5 opacity-70">
         <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">

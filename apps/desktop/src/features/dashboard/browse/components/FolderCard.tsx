@@ -24,7 +24,7 @@ export const FolderCard = ({
       onClick={onClick}
       className={cn(
         "group relative flex cursor-pointer items-center gap-4 overflow-hidden rounded-2xl border p-3.5 transition-all duration-300",
-        "border-border/40 bg-card/40 backdrop-blur-xs hover:border-primary/40 hover:bg-card hover:shadow-lg hover:shadow-primary/5",
+        "border-border/40 bg-card/40 backdrop-blur-xs hover:border-primary/40 hover:bg-card hover:shadow-lg hover:shadow-primary/3",
       )}>
       <div
         className={cn(
