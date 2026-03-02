@@ -33,7 +33,6 @@ export const FolderCard = ({
         )}>
         {renderFolderIcon(item.icon, {
           className: "size-5.5 fill-current/10",
-          strokeWidth: 2.25,
         })}
       </div>
 

@@ -2,6 +2,7 @@ import { tauriApi } from "@/libraries/tauri-api";
 import { type FileItem } from "@/types/filesystem";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { type FileRenamingItem, type ViewingItem } from "../types";
 
 type UseFileOptions = {
@@ -17,19 +18,23 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
 
   const previewSequenceRef = useRef(0);
 
+  const uploadPath = async (path: string) => {
+    const isFile = await tauriApi.checkPathIsFile({ path });
+
+    if (isFile.success && !isFile.data) {
+      return await tauriApi.uploadFolder({ parentId: currentFolderId, sourcePath: path });
+    }
+    return await tauriApi.uploadFile({ parentId: currentFolderId, sourcePath: path });
+  };
+
   const uploadPaths = async (paths: string[]) => {
     if (paths.length === 0) {
       return;
     }
 
-    const results = await Promise.all(
-      paths.map(path =>
-        tauriApi.uploadFile({
-          parentId: currentFolderId,
-          sourcePath: path,
-        }),
-      ),
-    );
+    const toastId = toast.loading("Uploading files");
+    const results = await Promise.all(paths.map(path => uploadPath(path)));
+    toast.dismiss(toastId);
 
     if (results.some(result => result.success)) {
       await refresh();
@@ -38,12 +43,24 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
 
   const handleUploadFile = async () => {
     const selected = await open({
-      multiple: false,
+      multiple: true,
       directory: false,
     });
 
-    if (typeof selected === "string") {
-      await uploadPaths([selected]);
+    if (selected) {
+      await uploadPaths(selected);
+    }
+  };
+
+  const handleUploadFolder = async () => {
+    const selected = await open({
+      multiple: false,
+      directory: true,
+    });
+
+    if (selected != null) {
+      await uploadPath(selected);
+      await refresh();
     }
   };
 
@@ -141,6 +158,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     viewingItem,
     uploadPaths,
     handleUploadFile,
+    handleUploadFolder,
     handleDeleteFile,
     handleRequestFileRename,
     clearRenamingItem,

@@ -1,16 +1,24 @@
 "use client";
 
 import { Button } from "@/components/ui/shadcn/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/shadcn/dropdown-menu";
 import { Input } from "@/components/ui/shadcn/input";
 import {
   FileIcon,
+  FilePlus,
   FolderIcon,
+  FolderPlus,
   LayoutGridIcon,
   SearchIcon,
   UploadCloudIcon,
 } from "lucide-react";
-import { Breadcrumbs } from "./Breadcrumbs";
 import { NewFolderDialog } from "./NewFolderDialog";
+import { PathBreadcrumbs } from "./PathBreadcrumbs";
 
 type BrowseHeaderProps = {
   currentPath: string[];
@@ -20,6 +28,7 @@ type BrowseHeaderProps = {
   onSearchQueryChange: (value: string) => void;
   onBreadcrumbClick: (index: number) => void;
   onUploadFile: () => void;
+  onUploadFolder: () => void;
   onCreateFolder: (name: string) => Promise<void>;
 };
 
@@ -31,6 +40,7 @@ export const BrowseHeader = ({
   onSearchQueryChange,
   onBreadcrumbClick,
   onUploadFile,
+  onUploadFolder,
   onCreateFolder,
 }: BrowseHeaderProps) => (
   <div className="sticky top-0 z-20 space-y-6 bg-background/80 backdrop-blur-md">
@@ -47,15 +57,33 @@ export const BrowseHeader = ({
 
       <div className="flex items-center gap-3">
         <NewFolderDialog onCreate={onCreateFolder} />
-        <Button onClick={onUploadFile} className="h-10 px-5 text-sm font-medium">
-          <UploadCloudIcon className="mr-2 size-4" />
-          Upload
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="h-10 gap-2 px-5 text-sm font-medium">
+              <UploadCloudIcon className="size-4" />
+              Upload
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 p-2">
+            <DropdownMenuItem
+              onClick={onUploadFile}
+              className="cursor-pointer gap-2 rounded-sm py-2">
+              <FilePlus className="size-4" />
+              <span>Upload Files</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={onUploadFolder}
+              className="cursor-pointer gap-2 rounded-sm py-2">
+              <FolderPlus className="size-4" />
+              <span>Upload Folder</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
 
     <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-      <Breadcrumbs currentPath={currentPath} onClick={onBreadcrumbClick} />
+      <PathBreadcrumbs currentPath={currentPath} onClick={onBreadcrumbClick} />
 
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-6">
         <div className="flex items-center gap-6 text-sm text-muted-foreground">

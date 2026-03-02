@@ -37,6 +37,13 @@ pub struct UploadFileParams {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct UploadFolderParams {
+    pub parent_id: String,
+    pub source_path: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GetFileContentParams {
     pub id: String,
 }

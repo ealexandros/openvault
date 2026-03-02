@@ -55,6 +55,10 @@ export const tauriApi = {
     return safeInvokeTauri<void>("upload_file", { params });
   },
 
+  uploadFolder: (params: { parentId: string; sourcePath: string }) => {
+    return safeInvokeTauri<void>("upload_folder", { params });
+  },
+
   getFileContent: (params: { id: string }) => {
     return safeInvokeTauri<number[] | null>("get_file_content", { params });
   },

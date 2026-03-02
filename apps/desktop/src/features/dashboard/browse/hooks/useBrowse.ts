@@ -101,6 +101,7 @@ export const useBrowse = () => {
     handleBreadcrumbClick,
     handleCreateFolder: folderState.handleCreateFolder,
     handleUploadFile: fileState.handleUploadFile,
+    handleUploadFolder: fileState.handleUploadFolder,
     handleDeleteFolder: folderState.handleDeleteFolder,
     handleDeleteFile: fileState.handleDeleteFile,
     handleRequestFolderRename: folderState.handleRequestFolderRename,

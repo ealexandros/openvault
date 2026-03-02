@@ -16,6 +16,7 @@ pub fn run() {
             crate::commands::filesystem::delete_item,
             crate::commands::filesystem::rename_item,
             crate::commands::filesystem::upload_file,
+            crate::commands::filesystem::upload_folder,
             crate::commands::filesystem::get_file_content,
             crate::commands::filesystem::path_is_file,
             crate::commands::filesystem::change_folder_icon,

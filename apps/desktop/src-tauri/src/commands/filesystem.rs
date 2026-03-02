@@ -3,7 +3,7 @@ use uuid::Uuid;
 use crate::commands::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
     FileItem, FolderItem, GetFileContentParams, PathIsFileParams, RenameItemParams,
-    UploadFileParams,
+    UploadFileParams, UploadFolderParams,
 };
 use crate::errors::{Error, Result};
 use crate::state::TauriState;
@@ -114,6 +114,22 @@ pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Res
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.add_file(parent_uuid, &source_path)?;
+    fs.commit()?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) -> Result {
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+
+    let mut fs = vault.filesystem();
+
+    let parent_uuid = parse_uuid(&params.parent_id)?;
+    let source_path = std::path::PathBuf::from(params.source_path);
+
+    fs.upload_folder(parent_uuid, &source_path)?;
     fs.commit()?;
 
     Ok(())

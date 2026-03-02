@@ -11,12 +11,12 @@ import {
 import { HomeIcon } from "lucide-react";
 import React from "react";
 
-type BreadcrumbsProps = {
+type PathBreadcrumbsProps = {
   currentPath: string[];
   onClick: (index: number) => void;
 };
 
-export const Breadcrumbs = ({ currentPath, onClick }: BreadcrumbsProps) => (
+export const PathBreadcrumbs = ({ currentPath, onClick }: PathBreadcrumbsProps) => (
   <Breadcrumb>
     <BreadcrumbList>
       {currentPath.map((segment, index) => {
