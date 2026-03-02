@@ -54,7 +54,7 @@ export const FolderCard = ({ item, onClick, onDelete, onRename }: FolderCardProp
       </motion.div>
     </ContextMenuTrigger>
 
-    <ContextMenuContent className="w-48 overflow-hidden rounded-xl border-border/50 bg-background/95 backdrop-blur-xl">
+    <ContextMenuContent className="w-48 overflow-hidden border-border/50 bg-background/95 backdrop-blur-xl">
       <ContextMenuItem
         onClick={e => {
           e.stopPropagation();

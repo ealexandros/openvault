@@ -1,8 +1,14 @@
 "use client";
 
+import { Button } from "@/components/ui/shadcn/button";
 import { FolderIcon, PlusIcon } from "lucide-react";
 
-export const EmptyState = () => (
+type EmptyStateProps = {
+  canGoBack: boolean;
+  onGoBack: () => void;
+};
+
+export const EmptyState = ({ canGoBack, onGoBack }: EmptyStateProps) => (
   <div className="col-span-full flex animate-in flex-col items-center justify-center space-y-6 py-32 text-center duration-500 fade-in slide-in-from-bottom-4">
     <div className="relative">
       <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-3xl" />
@@ -14,13 +20,16 @@ export const EmptyState = () => (
       </div>
     </div>
     <div className="space-y-2">
-      <h3 className="text-xl font-bold tracking-tight text-foreground">
-        Welcome to your vault
-      </h3>
+      <h3 className="text-xl font-bold tracking-tight text-foreground">Empty Folder</h3>
       <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
         This folder is currently empty. Start by creating a new folder or uploading your
         important files to keep them secure.
       </p>
     </div>
+    {canGoBack && (
+      <Button variant="outline" onClick={onGoBack}>
+        Go Back
+      </Button>
+    )}
   </div>
 );

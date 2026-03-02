@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/shadcn/button";
 import { FileDropListener } from "@/components/file-drop/FileDropListener";
+import { Button } from "@/components/ui/shadcn/button";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { FileIcon, FolderIcon } from "lucide-react";
 import { BrowseDropOverlay } from "./_components_/BrowseDropOverlay";
@@ -11,6 +11,7 @@ import { EmptyState } from "./_components_/EmptyState";
 import { FileCard } from "./_components_/files/FileCard";
 import { FileGridSkeleton } from "./_components_/files/FileGridSkeleton";
 import { FileViewerDialog } from "./_components_/files/FileViewerDialog";
+import { BackButton } from "./_components_/folders/BackButton";
 import { FolderCard } from "./_components_/folders/FolderCard";
 import { FolderGridSkeleton } from "./_components_/folders/FolderGridSkeleton";
 import { RenameItemDialog } from "./_components_/RenameItemDialog";
@@ -44,6 +45,8 @@ const BrowsePage = () => {
     handleFileClick,
     handleFileViewerOpenChange,
   } = useBrowse();
+
+  const canGoBack = currentPath.length > 1;
 
   return (
     <FileDropListener onDropPaths={handleDropPaths}>
@@ -82,14 +85,18 @@ const BrowsePage = () => {
             </div>
           )}
 
-          {viewState === BrowseViewState.Empty && <EmptyState />}
+          {viewState === BrowseViewState.Empty && (
+            <EmptyState
+              canGoBack={canGoBack}
+              onGoBack={() => handleBreadcrumbClick(currentPath.length - 2)}
+            />
+          )}
 
           {viewState === BrowseViewState.NoResults && (
             <div className="flex animate-in flex-col items-center gap-3 rounded-2xl border border-dashed px-8 py-16 text-center duration-300 fade-in slide-in-from-bottom-2">
               <p className="text-base font-medium">No matches found</p>
               <p className="max-w-md text-sm text-muted-foreground">
-                Nothing matches <span>&ldquo;{searchQuery}&rdquo;</span>. Try another
-                keyword.
+                Nothing matches <span>&ldquo;{searchQuery}&rdquo;</span>. Try another keyword.
               </p>
               <Button variant="outline" onClick={clearSearch}>
                 Clear search
@@ -99,9 +106,15 @@ const BrowsePage = () => {
 
           {viewState === BrowseViewState.Results && (
             <div className="space-y-10">
-              {folders.length > 0 && (
+              {(folders.length > 0 || canGoBack) && (
                 <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {canGoBack && (
+                      <BackButton
+                        handleBreadcrumbClick={handleBreadcrumbClick}
+                        currentPath={currentPath}
+                      />
+                    )}
                     {folders.map(item => (
                       <FolderCard
                         key={item.id}
