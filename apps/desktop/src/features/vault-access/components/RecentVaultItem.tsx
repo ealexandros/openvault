@@ -1,8 +1,8 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/shadcn/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { cn } from "@/utils/cn";
+import { truncateLeft } from "@/utils/format";
 import { FileIcon, XIcon } from "lucide-react";
 import { RecentVault } from "../hooks/useVaultAccess";
 
@@ -29,10 +29,8 @@ export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemP
           </h4>
           <Tooltip>
             <TooltipTrigger asChild>
-              <p
-                className="mt-0.5 max-w-72 truncate text-sm font-semibold text-slate-400 group-hover:text-slate-500"
-                dir="rtl">
-                {vault.path}
+              <p className="mt-0.5 max-w-72 text-sm font-semibold whitespace-nowrap text-slate-400 group-hover:text-slate-500">
+                {truncateLeft(vault.path, 35)}
               </p>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-[400px] break-all">
@@ -57,18 +55,3 @@ export const RecentVaultItem = ({ vault, onConnect, onRemove }: RecentVaultItemP
     </div>
   );
 };
-
-export const RecentVaultSkeleton = () => (
-  <div className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-slate-50/50 p-3.5">
-    <div className="flex min-w-0 items-center gap-4">
-      <Skeleton className="size-11 shrink-0 rounded-lg" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-3 w-32" />
-      </div>
-    </div>
-    <div className="flex items-center gap-4">
-      <Skeleton className="size-4 rounded-full" />
-    </div>
-  </div>
-);

@@ -1,7 +1,9 @@
+import { Empty, EmptyHeader } from "@/components/ui/shadcn/empty";
 import { cn } from "@/utils/cn";
 import { History } from "lucide-react";
 import { RecentVault } from "../hooks/useVaultAccess";
-import { RecentVaultItem, RecentVaultSkeleton } from "./RecentVaultItem";
+import { RecentVaultItem } from "./RecentVaultItem";
+import { RecentVaultListSkeleton } from "./Skeletons";
 
 type RecentVaultsListProps = {
   vaults: RecentVault[];
@@ -38,30 +40,28 @@ export const RecentVaultsList = ({
       )}
     </div>
 
-    {Boolean(isLoading) ? (
-      <div className="grid gap-3">
-        <RecentVaultSkeleton />
-        <RecentVaultSkeleton />
-        <RecentVaultSkeleton />
-      </div>
-    ) : vaults.length > 0 ? (
-      <div className="grid gap-3">
-        {vaults.map(vault => (
-          <RecentVaultItem
-            key={vault.id}
-            vault={vault}
-            onConnect={onConnect}
-            onRemove={onRemove}
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-slate-200/50 bg-slate-50/20 py-12 text-center">
-        <History className="size-6 text-muted-foreground/50" />
-        <p className="text-sm font-semibold text-muted-foreground/50">
-          There are no recent vaults
-        </p>
-      </div>
-    )}
+    <RecentVaultListSkeleton isLoading={Boolean(isLoading)}>
+      {vaults.length > 0 ? (
+        <div className="grid gap-3">
+          {vaults.map(vault => (
+            <RecentVaultItem
+              key={vault.id}
+              vault={vault}
+              onConnect={onConnect}
+              onRemove={onRemove}
+            />
+          ))}
+        </div>
+      ) : (
+        <Empty className="border-2 border-muted-foreground/10 py-12">
+          <EmptyHeader>
+            <History className="size-6 text-muted-foreground/50" />
+            <p className="text-sm font-semibold text-muted-foreground/50">
+              There are no recent vaults
+            </p>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </RecentVaultListSkeleton>
   </div>
 );

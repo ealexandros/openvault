@@ -9,3 +9,8 @@ export const formatBytes = (bytes: number, decimals: number = 2): string => {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
+
+export const truncateLeft = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value;
+  return ".." + value.slice(value.length - maxLength);
+};
