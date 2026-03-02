@@ -19,7 +19,13 @@ export const safeInvokeTauri = async <T>(
 };
 
 export const tauriApi = {
-  createVault: (params: { path: string; name: string; password: string }) => {
+  createVault: (params: {
+    path: string;
+    name: string;
+    password: string;
+    encryption: string;
+    compression: string;
+  }) => {
     return safeInvokeTauri<void>("create_vault", { params });
   },
 

@@ -12,7 +12,7 @@ import "@/styles/globals.css";
 export const metadata: Metadata = globalMetadata;
 
 const AppLayout = ({ children }: PropsWithChildren) => (
-  <html lang="en" className={figtree.variable}>
+  <html lang="en" className={figtree.variable} suppressHydrationWarning>
     <body className={cn(geistSans.variable, geistMono.variable)}>
       <Toaster position="bottom-right" />
       <AppProvider>{children}</AppProvider>

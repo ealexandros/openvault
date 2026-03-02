@@ -53,6 +53,8 @@ pub struct CreateVaultParams {
     pub path: String,
     pub name: String,
     pub password: String,
+    pub encryption: String,
+    pub compression: String,
 }
 
 #[derive(Deserialize)]

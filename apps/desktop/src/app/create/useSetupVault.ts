@@ -8,13 +8,12 @@ import { useState } from "react";
 import z from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 
-// @todo-soon rethink about position..
-
 const setupVaultSchema = z
   .object({
     path: z.string().min(1, "Please select a location"),
     name: z.string().min(1, "Vault name is required"),
-    algorithm: z.string().default("xchacha"),
+    encryption: z.enum(["xchacha"]).default("xchacha"),
+    compression: z.enum(["zstd"]).default("zstd"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     verifyPassword: z.string().min(1, "Please verify your password"),
   })
@@ -34,7 +33,8 @@ export const useSetupVault = () => {
     initialValues: {
       path: "",
       name: "",
-      algorithm: "xchacha",
+      encryption: "xchacha",
+      compression: "zstd",
       password: "",
       verifyPassword: "",
     },
@@ -46,6 +46,8 @@ export const useSetupVault = () => {
         path: values.path,
         name: values.name,
         password: values.password,
+        encryption: values.encryption,
+        compression: values.compression,
       });
 
       if (result.success) {

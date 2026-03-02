@@ -14,6 +14,12 @@ pub enum Error {
 
     #[error("Vault not opened")]
     VaultNotOpened,
+
+    #[error("Invalid encryption algorithm: {0}")]
+    InvalidEncryption(String),
+
+    #[error("Invalid compression algorithm: {0}")]
+    InvalidCompression(String),
 }
 
 impl Serialize for Error {

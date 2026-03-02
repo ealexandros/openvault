@@ -65,7 +65,8 @@ const SetupVaultPage = () => {
             onBlur={formik.handleBlur}
           />
           <AdvancedSettings
-            algorithm={formik.values.algorithm}
+            encryption={formik.values.encryption}
+            compression={formik.values.compression}
             setFieldValue={formik.setFieldValue}
           />
 
