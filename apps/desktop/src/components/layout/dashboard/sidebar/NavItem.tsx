@@ -7,9 +7,19 @@ type NavItemProps = {
   href: string;
   label: string;
   icon: LucideIcon;
+  onClick?: () => void;
+  className?: string;
+  iconClassName?: string;
 };
 
-export function NavItem({ href, label, icon: Icon }: NavItemProps) {
+export function NavItem({
+  href,
+  label,
+  icon: Icon,
+  onClick,
+  className,
+  iconClassName,
+}: NavItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href;
 
@@ -18,11 +28,13 @@ export function NavItem({ href, label, icon: Icon }: NavItemProps) {
       <Link
         href={href}
         data-active={isActive}
+        onClick={onClick}
         className={cn(
           "group flex w-full items-center gap-3 p-3 transition-all duration-300",
           "text-muted-foreground/80 hover:text-foreground/80",
           "data-[active=true]:text-primary",
           "data-[active=true]:backdrop-blur-sm",
+          className,
         )}>
         <Icon
           data-active={isActive}
@@ -30,6 +42,7 @@ export function NavItem({ href, label, icon: Icon }: NavItemProps) {
             "size-5 transition-colors",
             "text-muted-foreground/60 group-hover:text-foreground/80",
             "data-[active=true]:text-primary",
+            iconClassName,
           )}
         />
         <span className="text-base font-medium tracking-tight">{label}</span>

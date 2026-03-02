@@ -13,7 +13,7 @@ export const SidebarFooter = ({ onLogout }: SidebarFooterProps) => (
       variant="destructive"
       size="lg"
       onClick={onLogout}
-      className="w-full justify-start gap-2 bg-destructive/5 px-4 py-5.5 text-base hover:bg-destructive/70 hover:text-white">
+      className="w-full justify-start gap-2 bg-destructive/5 px-4 py-5.5 text-base font-medium hover:bg-destructive/70 hover:text-white">
       <LogOutIcon />
       <span>Lock Vault</span>
     </Button>

@@ -5,6 +5,9 @@ export const hrefs = {
   create: {
     get: () => "/create",
   },
+  samesite: {
+    get: () => "#",
+  },
   dashboard: {
     get: () => "/dashboard",
     browse: "/dashboard/browse",

@@ -1,14 +1,15 @@
+import { env } from "@/config/env";
 import { hrefs } from "@/config/hrefs";
 import {
   ActivityIcon,
   FolderIcon,
   LockIcon,
+  LogOut,
   NotebookIcon,
   SettingsIcon,
   ShieldAlertIcon,
 } from "lucide-react";
 import { NavItem } from "./NavItem";
-import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";
 
 type SidebarProps = {
@@ -29,20 +30,33 @@ const bottomNavItems = [
 ] as const;
 
 export const DashboardSidebar = ({ onLogout, vaultName }: SidebarProps) => (
-  <aside className="relative flex h-screen w-72 flex-col border-r border-border/40 bg-card/10 p-6 backdrop-blur-3xl">
+  <aside className="relative flex h-screen w-72 flex-col border-r border-muted-foreground/10 bg-foreground/1 p-6">
     <SidebarHeader />
 
-    <nav className="flex-1 space-y-2 py-4">
+    <nav className="flex-1 space-y-1.5 py-3">
       {mainNavItems.map(item => (
         <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
       ))}
     </nav>
 
-    <div className="space-y-3 pb-2">
-      {bottomNavItems.map(item => (
-        <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
-      ))}
-      <SidebarFooter vaultName={vaultName} onLogout={onLogout} />
+    <div className="space-y-6 pb-2">
+      <div className="space-y-1.5">
+        {bottomNavItems.map(item => (
+          <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+        ))}
+        <NavItem
+          href={hrefs.samesite.get()}
+          label="Logout"
+          icon={LogOut}
+          onClick={onLogout}
+          className="hover:text-destructive"
+          iconClassName="group-hover:text-destructive"
+        />
+      </div>
+
+      <div className="px-3 text-xs font-semibold text-muted-foreground/60 uppercase">
+        OPENVAULT • V{env.VERSION}
+      </div>
     </div>
 
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background/40 to-transparent" />
