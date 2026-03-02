@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/shadcn/button";
+import { Spinner } from "@/components/ui/shadcn/spinner";
 import { FileIcon, FolderIcon } from "lucide-react";
 import { BrowseDropOverlay } from "./_components_/BrowseDropOverlay";
 import { BrowseHeader } from "./_components_/BrowseHeader";
@@ -11,7 +12,7 @@ import { FileCard } from "./_components_/FileCard";
 import { FileViewerDialog } from "./_components_/FileViewerDialog";
 import { FolderCard } from "./_components_/FolderCard";
 import { RenameItemDialog } from "./_components_/RenameItemDialog";
-import { useBrowse } from "./useBrowse";
+import { BrowseViewState, useBrowse } from "./useBrowse";
 
 const BrowsePage = () => {
   const {
@@ -24,6 +25,7 @@ const BrowsePage = () => {
     setSearchQuery,
     clearSearch,
     viewState,
+    isNavigating,
     isDragging,
     renamingItem,
     viewingItem,
@@ -58,11 +60,18 @@ const BrowsePage = () => {
         onCreateFolder={handleCreateFolder}
       />
 
-      {viewState === "loading" && <BrowseLoadingState />}
+      {isNavigating && (
+        <div className="flex animate-in items-center gap-2 text-xs text-muted-foreground duration-200 fade-in">
+          <Spinner className="size-3" />
+          Loading folder...
+        </div>
+      )}
 
-      {viewState === "empty" && <EmptyState />}
+      {viewState === BrowseViewState.Loading && <BrowseLoadingState />}
 
-      {viewState === "no-results" && (
+      {viewState === BrowseViewState.Empty && <EmptyState />}
+
+      {viewState === BrowseViewState.NoResults && (
         <div className="flex animate-in flex-col items-center gap-3 rounded-2xl border border-dashed px-8 py-16 text-center duration-300 fade-in slide-in-from-bottom-2">
           <p className="text-base font-medium">No matches found</p>
           <p className="max-w-md text-sm text-muted-foreground">
@@ -74,7 +83,7 @@ const BrowsePage = () => {
         </div>
       )}
 
-      {viewState === "results" && (
+      {viewState === BrowseViewState.Results && (
         <div className="space-y-10">
           {folders.length > 0 && (
             <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>

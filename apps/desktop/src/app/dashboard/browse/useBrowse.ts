@@ -4,6 +4,8 @@ import { BrowseResult, type FileItem, type FolderItem } from "@/types/filesystem
 import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useRef, useState } from "react";
 
+// @todo-now refactor this..
+
 type PathSegment = {
   id: string;
   name: string;
@@ -22,10 +24,68 @@ type ViewingItem = {
   content: number[] | null;
 };
 
+export enum BrowseViewState {
+  Loading = "loading",
+  Empty = "empty",
+  NoResults = "no-results",
+  Results = "results",
+}
+
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
 const ROOT_FOLDER: PathSegment = { id: ROOT_FOLDER_ID, name: "Home" };
 
 const folderRequests = new Map<string, Promise<BrowseResult | null>>();
+const folderCache = new Map<string, BrowseResult>();
+
+const isSameFolder = (left: FolderItem, right: FolderItem) =>
+  left.id === right.id && left.name === right.name && left.itemCount === right.itemCount;
+
+const isSameFile = (left: FileItem, right: FileItem) =>
+  left.id === right.id &&
+  left.name === right.name &&
+  left.extension === right.extension &&
+  left.size === right.size;
+
+const isSameListing = (left: BrowseResult, right: BrowseResult) => {
+  if (
+    left.folders.length !== right.folders.length ||
+    left.files.length !== right.files.length
+  ) {
+    return false;
+  }
+
+  const hasDifferentFolder = left.folders.some(
+    (folder, index) => !isSameFolder(folder, right.folders[index] as FolderItem),
+  );
+  if (hasDifferentFolder) {
+    return false;
+  }
+
+  const hasDifferentFile = left.files.some(
+    (file, index) => !isSameFile(file, right.files[index] as FileItem),
+  );
+  return !hasDifferentFile;
+};
+
+const resolveBrowseViewState = (options: {
+  isLoading: boolean;
+  hasAnyItems: boolean;
+  hasSearchResults: boolean;
+}): BrowseViewState => {
+  if (options.isLoading) {
+    return BrowseViewState.Loading;
+  }
+
+  if (!options.hasAnyItems) {
+    return BrowseViewState.Empty;
+  }
+
+  if (!options.hasSearchResults) {
+    return BrowseViewState.NoResults;
+  }
+
+  return BrowseViewState.Results;
+};
 
 const fetchFolderListing = async (folderId: string, options: { dedupeRequest: boolean }) => {
   if (options.dedupeRequest) {
@@ -50,7 +110,6 @@ export const useBrowse = () => {
   const [currentPath, setCurrentPath] = useState<PathSegment[]>([ROOT_FOLDER]);
   const [listing, setListing] = useState<BrowseResult>({ folders: [], files: [] });
   const [loadedFolderId, setLoadedFolderId] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [renamingItem, setRenamingItem] = useState<RenamingItem | null>(null);
   const [viewingItem, setViewingItem] = useState<ViewingItem | null>(null);
@@ -59,21 +118,36 @@ export const useBrowse = () => {
   const previewSequenceRef = useRef(0);
 
   const currentFolder = currentPath[currentPath.length - 1] ?? ROOT_FOLDER;
-  const isLoading = loadedFolderId !== currentFolder.id || isRefreshing;
+  const isLoading = loadedFolderId === null;
+  const isNavigating = loadedFolderId !== null && loadedFolderId !== currentFolder.id;
 
   const requestCurrentFolder = async (options: { dedupeRequest: boolean }) => {
     return fetchFolderListing(currentFolder.id, options);
   };
 
+  const applyListing = (data: BrowseResult, folderId: string) => {
+    folderCache.set(folderId, data);
+    setListing(previousListing =>
+      isSameListing(previousListing, data) ? previousListing : data,
+    );
+    setLoadedFolderId(previousFolderId =>
+      previousFolderId === folderId ? previousFolderId : folderId,
+    );
+  };
+
   const refresh = async () => {
-    setIsRefreshing(true);
     const loadSequence = ++loadSequenceRef.current;
     const data = await requestCurrentFolder({ dedupeRequest: false });
+
     if (loadSequenceRef.current === loadSequence) {
-      if (data) setListing(data);
-      setLoadedFolderId(currentFolder.id);
+      if (data) {
+        applyListing(data, currentFolder.id);
+      } else {
+        setLoadedFolderId(previousFolderId =>
+          previousFolderId === currentFolder.id ? previousFolderId : currentFolder.id,
+        );
+      }
     }
-    setIsRefreshing(false);
   };
 
   const uploadFiles = async (paths: string[]) => {
@@ -167,7 +241,8 @@ export const useBrowse = () => {
   };
 
   const handleFileViewerOpenChange = (open: boolean) => {
-    if (!open) return;
+    if (open) return;
+
     previewSequenceRef.current += 1;
     setViewingItem(null);
   };
@@ -204,13 +279,11 @@ export const useBrowse = () => {
   const hasAnyItems = listing.folders.length > 0 || listing.files.length > 0;
   const hasSearchResults = filteredFolders.length > 0 || filteredFiles.length > 0;
 
-  const viewState: "loading" | "empty" | "no-results" | "results" = isLoading
-    ? "loading"
-    : !hasAnyItems
-      ? "empty"
-      : !hasSearchResults
-        ? "no-results"
-        : "results";
+  const viewState = resolveBrowseViewState({
+    isLoading,
+    hasAnyItems,
+    hasSearchResults,
+  });
 
   const currentPathLabels = currentPath.map(pathSegment => pathSegment.name);
 
@@ -229,10 +302,21 @@ export const useBrowse = () => {
     const loadSequence = ++loadSequenceRef.current;
 
     const load = async () => {
+      const cachedListing = folderCache.get(currentFolder.id);
+      if (cachedListing) {
+        applyListing(cachedListing, currentFolder.id);
+      }
+
       const data = await requestCurrentFolder({ dedupeRequest: true });
       if (!isMounted || loadSequenceRef.current !== loadSequence) return;
-      if (data) setListing(data);
-      setLoadedFolderId(currentFolder.id);
+
+      if (data) {
+        applyListing(data, currentFolder.id);
+      } else {
+        setLoadedFolderId(previousFolderId =>
+          previousFolderId === currentFolder.id ? previousFolderId : currentFolder.id,
+        );
+      }
     };
 
     void load();
@@ -251,6 +335,7 @@ export const useBrowse = () => {
     fileCount: listing.files.length,
     searchQuery,
     viewState,
+    isNavigating,
     isDragging,
     renamingItem,
     viewingItem,
