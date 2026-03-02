@@ -1,7 +1,6 @@
 import { type FileItem } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { formatBytes } from "@/utils/format";
-import { motion } from "framer-motion";
 import {
   FileAudioIcon,
   FileCodeIcon,
@@ -46,13 +45,11 @@ export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) =
 
   return (
     <FileContextMenu onRename={onRename} onDelete={onDelete}>
-      <motion.div
-        layout
-        whileHover={{ y: -2 }}
+      <div
         onClick={onClick}
         className={cn(
           "group relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-2xl border p-4 transition-all duration-300",
-          "border-border/40 bg-card/40 backdrop-blur-xs hover:border-border hover:bg-card hover:shadow-lg hover:shadow-black/5",
+          "border-border/40 bg-card/40 backdrop-blur-xs hover:border-border hover:bg-card hover:shadow-lg hover:shadow-gray-500/5",
         )}>
         <div className="flex items-start justify-between">
           <div
@@ -80,7 +77,7 @@ export const FileCard = ({ item, onClick, onDelete, onRename }: FileCardProps) =
         </div>
 
         <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-muted/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      </motion.div>
+      </div>
     </FileContextMenu>
   );
 };

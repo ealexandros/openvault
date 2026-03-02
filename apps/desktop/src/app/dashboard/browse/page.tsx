@@ -4,7 +4,6 @@ import { FileDropListener } from "@/components/file-drop/FileDropListener";
 import { Button } from "@/components/ui/shadcn/button";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import {
-  BackButton,
   BrowseDropOverlay,
   BrowseHeader,
   BrowseSection,
@@ -14,6 +13,7 @@ import {
   FileCard,
   FileGridSkeleton,
   FileViewerDialog,
+  FolderBackButton,
   FolderCard,
   FolderGridSkeleton,
   RenameItemDialog,
@@ -134,7 +134,7 @@ const BrowsePage = () => {
                 <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {canGoBack && (
-                      <BackButton
+                      <FolderBackButton
                         handleBreadcrumbClick={handleBreadcrumbClick}
                         currentPath={currentPath}
                       />

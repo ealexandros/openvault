@@ -7,7 +7,7 @@ type BackButtonProps = {
   currentPath: string[];
 };
 
-export const BackButton = ({ handleBreadcrumbClick, currentPath }: BackButtonProps) => (
+export const FolderBackButton = ({ handleBreadcrumbClick, currentPath }: BackButtonProps) => (
   <button
     type="button"
     onClick={() => handleBreadcrumbClick(currentPath.length - 2)}

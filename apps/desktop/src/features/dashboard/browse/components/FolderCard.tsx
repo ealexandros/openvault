@@ -1,6 +1,5 @@
 import { type FolderItem } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
-import { motion } from "framer-motion";
 import { ChevronRightIcon } from "lucide-react";
 import { FolderContextMenu } from "./FolderContextMenu";
 import { renderFolderIcon } from "./folderIcons";
@@ -21,9 +20,7 @@ export const FolderCard = ({
   onChangeIcon,
 }: FolderCardProps) => (
   <FolderContextMenu onRename={onRename} onChangeIcon={onChangeIcon} onDelete={onDelete}>
-    <motion.div
-      layout
-      whileHover={{ y: -2 }}
+    <div
       onClick={onClick}
       className={cn(
         "group relative flex cursor-pointer items-center gap-4 overflow-hidden rounded-2xl border p-3.5 transition-all duration-300",
@@ -32,7 +29,7 @@ export const FolderCard = ({
       <div
         className={cn(
           "flex size-11 items-center justify-center rounded-xl border transition-all duration-300",
-          "border-primary/10 bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/20",
+          "border-primary/10 bg-primary/5 text-primary",
         )}>
         {renderFolderIcon(item.icon, {
           className: "size-5.5 fill-current/10",
@@ -56,6 +53,6 @@ export const FolderCard = ({
       </div>
 
       <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-    </motion.div>
+    </div>
   </FolderContextMenu>
 );
