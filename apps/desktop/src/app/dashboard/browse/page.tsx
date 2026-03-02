@@ -3,21 +3,24 @@
 import { FileDropListener } from "@/components/file-drop/FileDropListener";
 import { Button } from "@/components/ui/shadcn/button";
 import { Spinner } from "@/components/ui/shadcn/spinner";
+import {
+  BackButton,
+  BrowseDropOverlay,
+  BrowseHeader,
+  BrowseSection,
+  BrowseViewState,
+  ChangeFolderIconDialog,
+  EmptyState,
+  FileCard,
+  FileGridSkeleton,
+  FileViewerDialog,
+  FolderCard,
+  FolderGridSkeleton,
+  RenameItemDialog,
+  useBrowse,
+} from "@/features/dashboard/browse";
 import { FileIcon, FolderIcon } from "lucide-react";
 import { useState } from "react";
-import { BrowseDropOverlay } from "./_components_/BrowseDropOverlay";
-import { BrowseHeader } from "./_components_/BrowseHeader";
-import { BrowseSection } from "./_components_/BrowseSection";
-import { EmptyState } from "./_components_/EmptyState";
-import { FileCard } from "./_components_/files/FileCard";
-import { FileGridSkeleton } from "./_components_/files/FileGridSkeleton";
-import { FileViewerDialog } from "./_components_/files/FileViewerDialog";
-import { BackButton } from "./_components_/folders/BackButton";
-import { ChangeFolderIconDialog } from "./_components_/folders/ChangeFolderIconDialog";
-import { FolderCard } from "./_components_/folders/FolderCard";
-import { FolderGridSkeleton } from "./_components_/folders/FolderGridSkeleton";
-import { RenameItemDialog } from "./_components_/RenameItemDialog";
-import { BrowseViewState, useBrowse } from "./useBrowse";
 
 const BrowsePage = () => {
   const {

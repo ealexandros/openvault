@@ -2,7 +2,7 @@ import { tauriApi } from "@/libraries/tauri-api";
 import { type FileItem } from "@/types/filesystem";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useRef, useState } from "react";
-import { type FileRenamingItem, type ViewingItem } from "../../types";
+import { type FileRenamingItem, type ViewingItem } from "../types";
 
 type UseFileOptions = {
   currentFolderId: string;

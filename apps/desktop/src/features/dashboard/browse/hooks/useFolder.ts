@@ -2,7 +2,7 @@ import { tauriApi } from "@/libraries/tauri-api";
 import { type BrowseResult, type FolderItem } from "@/types/filesystem";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { type FolderRenamingItem, type PathSegment } from "../../types";
+import { type FolderRenamingItem, type PathSegment } from "../types";
 
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
 const ROOT_FOLDER: PathSegment = { id: ROOT_FOLDER_ID, name: "Home" };

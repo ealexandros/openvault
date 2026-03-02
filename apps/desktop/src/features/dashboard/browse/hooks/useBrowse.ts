@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { type FolderItem } from "@/types/filesystem";
-import { BrowseViewState, type RenamingItem } from "./types";
-import { useFile } from "./_components_/files/useFile";
-import { useFolder } from "./_components_/folders/useFolder";
+import { useState } from "react";
+import { BrowseViewState, type RenamingItem } from "../types";
+import { useFile } from "./useFile";
+import { useFolder } from "./useFolder";
 
 const resolveBrowseViewState = (options: {
   isLoading: boolean;
@@ -37,8 +37,7 @@ export const useBrowse = () => {
     refresh: folderState.refresh,
   });
 
-  const hasSearchResults =
-    folderState.folders.length > 0 || fileState.files.length > 0;
+  const hasSearchResults = folderState.folders.length > 0 || fileState.files.length > 0;
 
   const viewState = resolveBrowseViewState({
     isLoading: folderState.isLoading,
@@ -46,8 +45,7 @@ export const useBrowse = () => {
     hasSearchResults,
   });
 
-  const renamingItem: RenamingItem | null =
-    folderState.renamingItem ?? fileState.renamingItem;
+  const renamingItem: RenamingItem | null = folderState.renamingItem ?? fileState.renamingItem;
 
   const clearSearch = () => {
     setSearchQuery("");
