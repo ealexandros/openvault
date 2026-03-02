@@ -45,7 +45,7 @@ export function NavItem({
             iconClassName,
           )}
         />
-        <span className="text-base font-medium tracking-tight">{label}</span>
+        <span className="text-[15px] font-medium tracking-tight">{label}</span>
       </Link>
       <div
         data-active={isActive}
