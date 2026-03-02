@@ -1,5 +1,6 @@
 import { env } from "@/config/env";
 import { hrefs } from "@/config/hrefs";
+import { cn } from "@/utils/cn";
 import {
   ActivityIcon,
   FolderIcon,
@@ -15,6 +16,7 @@ import { SidebarHeader } from "./SidebarHeader";
 type SidebarProps = {
   onLogout: () => void;
   vaultName?: string;
+  isCollapsed?: boolean;
 };
 
 const mainNavItems = [
@@ -29,36 +31,42 @@ const bottomNavItems = [
   { href: hrefs.dashboard.settings, label: "Settings", icon: SettingsIcon },
 ] as const;
 
-export const DashboardSidebar = ({ onLogout }: SidebarProps) => (
-  <aside className="relative flex h-screen w-72 flex-col border-r border-muted-foreground/10 bg-foreground/1 p-6">
-    <SidebarHeader />
+export const DashboardSidebar = ({ onLogout, vaultName, isCollapsed }: SidebarProps) => (
+  <aside
+    className={cn(
+      "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 p-6 transition-all duration-200 ease-in-out",
+      isCollapsed === true ? "w-0 overflow-hidden border-r-0 p-0 opacity-0" : "w-72",
+    )}>
+    <div className={cn("flex h-full flex-col", isCollapsed === true && "invisible")}>
+      <SidebarHeader vaultName={vaultName} />
 
-    <nav className="flex-1 space-y-1.5 py-3">
-      {mainNavItems.map(item => (
-        <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
-      ))}
-    </nav>
-
-    <div className="space-y-6 pb-2">
-      <div className="space-y-1.5">
-        {bottomNavItems.map(item => (
+      <nav className="flex-1 space-y-1.5 py-3">
+        {mainNavItems.map(item => (
           <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
         ))}
-        <NavItem
-          href={hrefs.samesite.get()}
-          label="Logout"
-          icon={LogOut}
-          onClick={onLogout}
-          className="hover:text-destructive"
-          iconClassName="group-hover:text-destructive"
-        />
+      </nav>
+
+      <div className="space-y-6 pb-2">
+        <div className="space-y-1.5">
+          {bottomNavItems.map(item => (
+            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+          ))}
+          <NavItem
+            href={hrefs.samesite.get()}
+            label="Logout"
+            icon={LogOut}
+            onClick={onLogout}
+            className="hover:text-destructive"
+            iconClassName="group-hover:text-destructive"
+          />
+        </div>
+
+        <div className="px-3 text-xs font-semibold text-muted-foreground/60 uppercase">
+          OPENVAULT • V{env.VERSION}
+        </div>
       </div>
 
-      <div className="px-3 text-xs font-semibold text-muted-foreground/60 uppercase">
-        OPENVAULT • V{env.VERSION}
-      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background/40 to-transparent" />
     </div>
-
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background/40 to-transparent" />
   </aside>
 );
