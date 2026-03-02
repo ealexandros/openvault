@@ -29,7 +29,7 @@ const bottomNavItems = [
   { href: hrefs.dashboard.settings, label: "Settings", icon: SettingsIcon },
 ] as const;
 
-export const DashboardSidebar = ({ onLogout, vaultName }: SidebarProps) => (
+export const DashboardSidebar = ({ onLogout }: SidebarProps) => (
   <aside className="relative flex h-screen w-72 flex-col border-r border-muted-foreground/10 bg-foreground/1 p-6">
     <SidebarHeader />
 
