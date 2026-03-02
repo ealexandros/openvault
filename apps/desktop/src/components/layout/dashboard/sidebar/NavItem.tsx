@@ -1,5 +1,5 @@
 import { cn } from "@/utils/cn";
-import { ChevronRightIcon, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,24 +9,38 @@ type NavItemProps = {
   icon: LucideIcon;
 };
 
-export const NavItem = ({ href, label, icon: Icon }: NavItemProps) => {
+export function NavItem({ href, label, icon: Icon }: NavItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href;
 
   return (
-    <Link
-      href={href}
-      className={cn(
-        "flex w-full items-center justify-between rounded-xl p-3 py-2.5 transition-all duration-200",
-        isActive
-          ? "border border-primary/20 bg-primary/10 text-primary"
-          : "border border-transparent text-muted-foreground hover:bg-muted/80 hover:text-foreground/80",
-      )}>
-      <div className="flex items-center gap-3">
-        <Icon className="size-4 transition-transform group-hover:scale-110" />
-        <span className="text-sm font-medium">{label}</span>
-      </div>
-      {isActive && <ChevronRightIcon className="size-4" />}
-    </Link>
+    <div className="group relative w-full">
+      <Link
+        href={href}
+        data-active={isActive}
+        className={cn(
+          "group flex w-full items-center gap-3 p-3 transition-all duration-300",
+          "text-muted-foreground/80 hover:text-foreground/80",
+          "data-[active=true]:text-primary",
+          "data-[active=true]:backdrop-blur-sm",
+        )}>
+        <Icon
+          data-active={isActive}
+          className={cn(
+            "size-5 transition-colors",
+            "text-muted-foreground/60 group-hover:text-foreground/80",
+            "data-[active=true]:text-primary",
+          )}
+        />
+        <span className="text-base font-medium tracking-tight">{label}</span>
+      </Link>
+      <div
+        data-active={isActive}
+        className={cn(
+          "absolute top-1/2 -left-3 h-6 w-1 -translate-y-1/2 rounded-full",
+          "data-[active=true]:bg-primary",
+        )}
+      />
+    </div>
   );
-};
+}

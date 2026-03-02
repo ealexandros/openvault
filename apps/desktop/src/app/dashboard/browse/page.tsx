@@ -102,7 +102,7 @@ const BrowsePage = () => {
                 void handleUploadFile();
               }}
               size="sm"
-              className="h-9 rounded-xl px-4 text-xs font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+              className="h-9 rounded-xl px-4 text-xs font-semibold">
               <PlusIcon className="mr-2 size-3.5" />
               Upload file
             </Button>
