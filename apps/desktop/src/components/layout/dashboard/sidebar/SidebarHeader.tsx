@@ -18,7 +18,7 @@ export const SidebarHeader = ({ vaultName }: SidebarHeaderProps) => (
         </div>
         <div className="flex min-w-0 flex-col leading-tight">
           <span className="text-xs font-semibold text-muted-foreground/60 uppercase">
-            Authenticated
+            Vault Name
           </span>
           <span className="truncate text-base font-semibold text-foreground/80">
             {vaultName}

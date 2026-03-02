@@ -22,8 +22,10 @@ export const DashboardHeader = ({ onToggleSidebar, title }: DashboardHeaderProps
 
     <div className="flex items-center gap-4">
       <Separator orientation="vertical" className="h-6" />
-      {typeof title === "string" && title.length > 0 && (
-        <span className="text-sm font-medium tracking-tight text-foreground/80">{title}</span>
+      {title != null && (
+        <span className="text-base font-medium tracking-tight text-foreground/80">
+          {title}
+        </span>
       )}
     </div>
   </header>
