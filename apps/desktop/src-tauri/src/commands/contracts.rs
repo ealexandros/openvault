@@ -63,12 +63,19 @@ pub struct OpenVaultParams {
     pub path: String,
     pub password: String,
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChangeFolderIconParams {
+    pub id: String,
+    pub icon: String,
+}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FolderItem {
     pub id: String,
     pub name: String,
+    pub icon: String,
     pub item_count: u64,
 }
 

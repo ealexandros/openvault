@@ -17,7 +17,8 @@ pub fn run() {
             crate::commands::filesystem::rename_item,
             crate::commands::filesystem::upload_file,
             crate::commands::filesystem::get_file_content,
-            crate::commands::filesystem::path_is_file
+            crate::commands::filesystem::path_is_file,
+            crate::commands::filesystem::change_folder_icon,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

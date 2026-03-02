@@ -1,6 +1,7 @@
 export type FolderItem = {
   id: string;
   name: string;
+  icon: string;
   itemCount: number;
 };
 

@@ -4,6 +4,7 @@ import { FileDropListener } from "@/components/file-drop/FileDropListener";
 import { Button } from "@/components/ui/shadcn/button";
 import { Spinner } from "@/components/ui/shadcn/spinner";
 import { FileIcon, FolderIcon } from "lucide-react";
+import { useState } from "react";
 import { BrowseDropOverlay } from "./_components_/BrowseDropOverlay";
 import { BrowseHeader } from "./_components_/BrowseHeader";
 import { BrowseSection } from "./_components_/BrowseSection";
@@ -12,6 +13,7 @@ import { FileCard } from "./_components_/files/FileCard";
 import { FileGridSkeleton } from "./_components_/files/FileGridSkeleton";
 import { FileViewerDialog } from "./_components_/files/FileViewerDialog";
 import { BackButton } from "./_components_/folders/BackButton";
+import { ChangeFolderIconDialog } from "./_components_/folders/ChangeFolderIconDialog";
 import { FolderCard } from "./_components_/folders/FolderCard";
 import { FolderGridSkeleton } from "./_components_/folders/FolderGridSkeleton";
 import { RenameItemDialog } from "./_components_/RenameItemDialog";
@@ -39,6 +41,7 @@ const BrowsePage = () => {
     handleDeleteFolder,
     handleDeleteFile,
     handleRequestFolderRename,
+    handleChangeFolderIcon,
     handleRequestFileRename,
     handleRenameDialogOpenChange,
     handleRenameFromDialog,
@@ -47,6 +50,24 @@ const BrowsePage = () => {
   } = useBrowse();
 
   const canGoBack = currentPath.length > 1;
+  const [folderIdForIconChange, setFolderIdForIconChange] = useState<string | null>(null);
+
+  const handleIconDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setFolderIdForIconChange(null);
+    }
+  };
+
+  const handleIconSelect = async (iconName: string) => {
+    const folderId = folderIdForIconChange;
+
+    if (folderId == null) {
+      return;
+    }
+
+    await handleChangeFolderIcon(folderId, iconName);
+    setFolderIdForIconChange(null);
+  };
 
   return (
     <FileDropListener onDropPaths={handleDropPaths}>
@@ -124,6 +145,9 @@ const BrowsePage = () => {
                           void handleDeleteFolder(item.id);
                         }}
                         onRename={() => handleRequestFolderRename(item)}
+                        onChangeIcon={() => {
+                          setFolderIdForIconChange(item.id);
+                        }}
                       />
                     ))}
                   </div>
@@ -158,6 +182,11 @@ const BrowsePage = () => {
             initialName={renamingItem?.name ?? ""}
             itemType={renamingItem?.type ?? "file"}
             onRename={handleRenameFromDialog}
+          />
+          <ChangeFolderIconDialog
+            isOpen={folderIdForIconChange !== null}
+            onOpenChange={handleIconDialogOpenChange}
+            onSelectIcon={handleIconSelect}
           />
           <FileViewerDialog
             isOpen={viewingItem !== null}

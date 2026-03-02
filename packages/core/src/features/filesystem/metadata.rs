@@ -10,6 +10,7 @@ pub struct FolderMetadata {
     pub id: Uuid,
     pub parent_id: Option<Uuid>,
     pub name: String,
+    pub icon: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -21,6 +22,7 @@ impl FolderMetadata {
             id: Uuid::new_v4(),
             parent_id,
             name: name.into(),
+            icon: "folder".to_string(),
             created_at: now,
             updated_at: now,
         }
@@ -32,6 +34,7 @@ impl FolderMetadata {
             id: ROOT_FOLDER_ID,
             parent_id: None,
             name: "/".to_string(),
+            icon: "folder".to_string(),
             created_at: now,
             updated_at: now,
         }
@@ -42,6 +45,7 @@ impl FolderMetadata {
 pub struct FolderMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
+    pub icon: Option<String>,
     pub updated_at: DateTime<Utc>,
 }
 
@@ -50,6 +54,7 @@ impl FolderMetadataPatch {
         Self {
             parent_id: None,
             name: None,
+            icon: None,
             updated_at: Utc::now(),
         }
     }
@@ -64,6 +69,13 @@ impl FolderMetadataPatch {
     pub fn move_to(parent_id: Uuid) -> Self {
         Self {
             parent_id: Some(parent_id),
+            ..Default::default()
+        }
+    }
+
+    pub fn change_icon(icon: impl Into<String>) -> Self {
+        Self {
+            icon: Some(icon.into()),
             ..Default::default()
         }
     }

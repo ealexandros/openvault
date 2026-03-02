@@ -1,8 +1,9 @@
 use uuid::Uuid;
 
 use crate::commands::contracts::{
-    BrowseResult, BrowseVaultParams, CreateFolderParams, DeleteItemParams, FileItem, FolderItem,
-    GetFileContentParams, PathIsFileParams, RenameItemParams, UploadFileParams,
+    BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
+    FileItem, FolderItem, GetFileContentParams, PathIsFileParams, RenameItemParams,
+    UploadFileParams,
 };
 use crate::errors::{Error, Result};
 use crate::state::TauriState;
@@ -35,6 +36,7 @@ pub async fn browse_vault(
         .map(|folder| FolderItem {
             id: folder.id.to_string(),
             name: folder.name.clone(),
+            icon: folder.icon.clone(),
             item_count: vault.filesystem().children_count(&folder.id) as u64,
         })
         .collect();
@@ -131,4 +133,18 @@ pub async fn get_file_content(
     let content = fs.read_file_content(uuid)?;
 
     Ok(content)
+}
+
+#[tauri::command]
+pub async fn change_folder_icon(state: TauriState<'_>, params: ChangeFolderIconParams) -> Result {
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+
+    let mut fs = vault.filesystem();
+
+    let uuid = parse_uuid(&params.id)?;
+    fs.change_folder_icon(uuid, params.icon)?;
+    fs.commit()?;
+
+    Ok(())
 }

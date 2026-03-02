@@ -64,6 +64,12 @@ impl<'a> FilesystemFeature<'a> {
         Ok(file_id)
     }
 
+    pub fn change_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
+        self.store
+            .change_folder_icon(id, new_icon)
+            .map_err(map_fs_error)
+    }
+
     pub fn rename_folder(&mut self, id: Uuid, new_name: String) -> Result {
         self.store.rename_folder(id, new_name).map_err(map_fs_error)
     }

@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export type PathSegment = {
   id: string;
   name: string;
@@ -22,6 +24,11 @@ export type ViewingItem = {
   name: string;
   extension?: string;
   content: number[] | null;
+};
+
+export type FolderIconOption = {
+  name: string;
+  Icon: LucideIcon;
 };
 
 export enum BrowseViewState {

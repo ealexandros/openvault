@@ -1,6 +1,7 @@
 import { tauriApi } from "@/libraries/tauri-api";
 import { type BrowseResult, type FolderItem } from "@/types/filesystem";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { type FolderRenamingItem, type PathSegment } from "../../types";
 
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
@@ -10,7 +11,10 @@ const folderRequests = new Map<string, Promise<BrowseResult | null>>();
 const folderCache = new Map<string, BrowseResult>();
 
 const isSameFolder = (left: FolderItem, right: FolderItem) =>
-  left.id === right.id && left.name === right.name && left.itemCount === right.itemCount;
+  left.id === right.id &&
+  left.name === right.name &&
+  left.icon === right.icon &&
+  left.itemCount === right.itemCount;
 
 const isSameFile = (
   left: BrowseResult["files"][number],
@@ -22,7 +26,10 @@ const isSameFile = (
   left.size === right.size;
 
 const isSameListing = (left: BrowseResult, right: BrowseResult) => {
-  if (left.folders.length !== right.folders.length || left.files.length !== right.files.length) {
+  if (
+    left.folders.length !== right.folders.length ||
+    left.files.length !== right.files.length
+  ) {
     return false;
   }
 
@@ -187,6 +194,17 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     setRenamingItem({ id: item.id, name: item.name, type: "folder" });
   };
 
+  const handleChangeFolderIcon = async (id: string, iconName: string) => {
+    const result = await tauriApi.changeFolderIcon({ id, icon: iconName });
+
+    if (result.success) {
+      await refresh();
+      return;
+    }
+
+    toast.error("Failed to change folder icon");
+  };
+
   const clearRenamingItem = () => {
     setRenamingItem(null);
   };
@@ -254,6 +272,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     handleCreateFolder,
     handleDeleteFolder,
     handleRequestFolderRename,
+    handleChangeFolderIcon,
     clearRenamingItem,
     renameRenamingItem,
   };

@@ -120,6 +120,7 @@ impl FilesystemStore {
             .ok_or(FilesystemError::FolderNotFound(id))?;
         folder.parent_id = Some(target_parent);
         folder.name = target_name;
+        folder.icon = patch.icon.unwrap_or(folder.icon.clone());
         folder.updated_at = patch.updated_at;
         Ok(())
     }

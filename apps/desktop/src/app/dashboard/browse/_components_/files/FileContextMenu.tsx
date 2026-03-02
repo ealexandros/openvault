@@ -4,26 +4,23 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/shadcn/context-menu";
-import { ImageIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { PencilIcon, Trash2Icon } from "lucide-react";
 import { type ReactNode } from "react";
 
-type FolderContextMenuProps = {
+type FileContextMenuProps = {
   children: ReactNode;
   onRename: () => void;
-  onChangeIcon: () => void;
   onDelete: () => void;
 };
 
-export const FolderContextMenu = ({
+export const FileContextMenu = ({
   children,
   onRename,
-  onChangeIcon,
   onDelete,
-}: FolderContextMenuProps) => (
+}: FileContextMenuProps) => (
   <ContextMenu>
     <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-
-    <ContextMenuContent className="w-48 overflow-hidden border-border/50 bg-background/95 backdrop-blur-xl">
+    <ContextMenuContent className="w-48 overflow-hidden rounded-xl border-border/50 bg-background/95 backdrop-blur-xl">
       <ContextMenuItem
         onClick={e => {
           e.stopPropagation();
@@ -31,16 +28,7 @@ export const FolderContextMenu = ({
         }}
         className="gap-2.5 py-2.5">
         <PencilIcon className="size-4 text-muted-foreground" />
-        <span className="font-medium">Rename folder</span>
-      </ContextMenuItem>
-      <ContextMenuItem
-        onClick={e => {
-          e.stopPropagation();
-          onChangeIcon();
-        }}
-        className="gap-2.5 py-2.5">
-        <ImageIcon className="size-4 text-muted-foreground" />
-        <span className="font-medium">Change icon</span>
+        <span className="font-medium">Rename file</span>
       </ContextMenuItem>
       <ContextMenuItem
         variant="destructive"

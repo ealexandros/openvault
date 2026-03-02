@@ -18,6 +18,8 @@ export const safeInvokeTauri = async <T>(
   }
 };
 
+// @todo-now implement refresh vault..
+
 export const tauriApi = {
   createVault: (params: {
     path: string;
@@ -59,5 +61,9 @@ export const tauriApi = {
 
   checkPathIsFile: (params: { path: string }) => {
     return safeInvokeTauri<boolean>("path_is_file", { params });
+  },
+
+  changeFolderIcon: (params: { id: string; icon: string }) => {
+    return safeInvokeTauri<void>("change_folder_icon", { params });
   },
 };

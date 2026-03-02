@@ -27,7 +27,7 @@ export const EmptyState = ({ canGoBack, onGoBack }: EmptyStateProps) => (
       </p>
     </div>
     {canGoBack && (
-      <Button variant="outline" onClick={onGoBack}>
+      <Button variant="outline" onClick={onGoBack} className="p-3">
         Go Back
       </Button>
     )}

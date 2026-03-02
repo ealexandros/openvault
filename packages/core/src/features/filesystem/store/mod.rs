@@ -156,6 +156,11 @@ impl FilesystemStore {
         self.commit_delta(&FilesystemDelta::FolderUpdated { id, patch })
     }
 
+    pub fn change_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
+        let patch = FolderMetadataPatch::change_icon(new_icon);
+        self.commit_delta(&FilesystemDelta::FolderUpdated { id, patch })
+    }
+
     pub fn move_file(&mut self, id: Uuid, new_parent_id: Uuid) -> Result {
         let patch = FileMetadataPatch::move_to(new_parent_id);
         self.commit_delta(&FilesystemDelta::FileUpdated { id, patch })

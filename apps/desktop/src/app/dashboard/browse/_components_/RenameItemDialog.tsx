@@ -54,8 +54,10 @@ export const RenameItemDialog = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename {itemType}</DialogTitle>
-          <DialogDescription>Enter a new name for this {itemType}.</DialogDescription>
+          <DialogTitle className="text-base">Rename {itemType}</DialogTitle>
+          <DialogDescription className="text-sm">
+            Enter a new name for this {itemType}.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -63,17 +65,18 @@ export const RenameItemDialog = ({
             onChange={e => setName(e.target.value)}
             placeholder="New name..."
             autoFocus
-            className="h-9 rounded-lg"
+            className="h-10 rounded-lg"
           />
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isRenaming}>
+              disabled={isRenaming}
+              className="p-4">
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || isRenaming}>
+            <Button type="submit" disabled={!name.trim() || isRenaming} className="p-4">
               {isRenaming ? "Renaming..." : "Rename"}
             </Button>
           </DialogFooter>

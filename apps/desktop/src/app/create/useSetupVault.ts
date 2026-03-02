@@ -12,7 +12,7 @@ const setupVaultSchema = z
   .object({
     path: z.string().min(1, "Please select a location"),
     name: z.string().min(1, "Vault name is required"),
-    encryption: z.enum(["xchacha"]).default("xchacha"),
+    encryption: z.enum(["xchacha20"]).default("xchacha20"),
     compression: z.enum(["zstd"]).default("zstd"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     verifyPassword: z.string().min(1, "Please verify your password"),
@@ -33,7 +33,7 @@ export const useSetupVault = () => {
     initialValues: {
       path: "",
       name: "",
-      encryption: "xchacha",
+      encryption: "xchacha20",
       compression: "zstd",
       password: "",
       verifyPassword: "",

@@ -104,6 +104,7 @@ export const useBrowse = () => {
     handleDeleteFolder: folderState.handleDeleteFolder,
     handleDeleteFile: fileState.handleDeleteFile,
     handleRequestFolderRename: folderState.handleRequestFolderRename,
+    handleChangeFolderIcon: folderState.handleChangeFolderIcon,
     handleRequestFileRename: fileState.handleRequestFileRename,
     handleRenameDialogOpenChange,
     handleRenameFromDialog,
