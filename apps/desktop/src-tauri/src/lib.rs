@@ -19,7 +19,9 @@ pub fn run() {
             crate::commands::filesystem::upload_folder,
             crate::commands::filesystem::get_file_content,
             crate::commands::filesystem::path_is_file,
-            crate::commands::filesystem::change_folder_icon,
+            crate::commands::filesystem::set_folder_icon,
+            crate::commands::filesystem::set_folder_favorite,
+            crate::commands::filesystem::set_file_favorite,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

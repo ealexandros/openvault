@@ -118,10 +118,13 @@ impl FilesystemStore {
             .folders
             .get_mut(&id)
             .ok_or(FilesystemError::FolderNotFound(id))?;
+
         folder.parent_id = Some(target_parent);
         folder.name = target_name;
         folder.icon = patch.icon.unwrap_or(folder.icon.clone());
+        folder.is_favourite = patch.is_favourite.unwrap_or(folder.is_favourite);
         folder.updated_at = patch.updated_at;
+
         Ok(())
     }
 
@@ -208,6 +211,7 @@ impl FilesystemStore {
 
         file.parent_id = target_parent;
         file.name = target_name;
+        file.is_favourite = patch.is_favourite.unwrap_or(file.is_favourite);
         file.updated_at = patch.updated_at;
 
         if let Some(extension) = patch.extension {

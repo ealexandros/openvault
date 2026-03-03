@@ -107,9 +107,9 @@ impl<'a> FilesystemFeature<'a> {
         Ok(parent_id)
     }
 
-    pub fn change_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
+    pub fn set_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
         self.store
-            .change_folder_icon(id, new_icon)
+            .set_folder_icon(id, new_icon)
             .map_err(map_fs_error)
     }
 
@@ -127,6 +127,18 @@ impl<'a> FilesystemFeature<'a> {
 
     pub fn remove_file(&mut self, id: Uuid) -> Result {
         self.store.remove_file(id).map_err(map_fs_error)
+    }
+
+    pub fn set_folder_favorite(&mut self, id: Uuid, is_favourite: bool) -> Result {
+        self.store
+            .set_folder_favorite(id, is_favourite)
+            .map_err(map_fs_error)
+    }
+
+    pub fn set_file_favorite(&mut self, id: Uuid, is_favourite: bool) -> Result {
+        self.store
+            .set_file_favorite(id, is_favourite)
+            .map_err(map_fs_error)
     }
 
     pub fn children_count(&self, parent_id: &Uuid) -> usize {

@@ -11,6 +11,7 @@ pub struct FolderMetadata {
     pub parent_id: Option<Uuid>,
     pub name: String,
     pub icon: String,
+    pub is_favourite: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -23,6 +24,7 @@ impl FolderMetadata {
             parent_id,
             name: name.into(),
             icon: "folder".to_string(),
+            is_favourite: false,
             created_at: now,
             updated_at: now,
         }
@@ -35,6 +37,7 @@ impl FolderMetadata {
             parent_id: None,
             name: "/".to_string(),
             icon: "folder".to_string(),
+            is_favourite: false,
             created_at: now,
             updated_at: now,
         }
@@ -46,6 +49,7 @@ pub struct FolderMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
     pub icon: Option<String>,
+    pub is_favourite: Option<bool>,
     pub updated_at: DateTime<Utc>,
 }
 
@@ -55,6 +59,7 @@ impl FolderMetadataPatch {
             parent_id: None,
             name: None,
             icon: None,
+            is_favourite: None,
             updated_at: Utc::now(),
         }
     }
@@ -73,9 +78,16 @@ impl FolderMetadataPatch {
         }
     }
 
-    pub fn change_icon(icon: impl Into<String>) -> Self {
+    pub fn set_icon(icon: impl Into<String>) -> Self {
         Self {
             icon: Some(icon.into()),
+            ..Default::default()
+        }
+    }
+
+    pub fn set_favourite(favourite: bool) -> Self {
+        Self {
+            is_favourite: Some(favourite),
             ..Default::default()
         }
     }
@@ -88,6 +100,7 @@ pub struct FileMetadata {
     pub name: String,
     pub extension: String,
     pub blob: BlobRef,
+    pub is_favourite: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -106,6 +119,7 @@ impl FileMetadata {
             name: name.into(),
             extension: extension.into(),
             blob,
+            is_favourite: false,
             created_at: now,
             updated_at: now,
         }
@@ -122,6 +136,7 @@ pub struct FileMetadataPatch {
     pub name: Option<String>,
     pub extension: Option<String>,
     pub blob: Option<BlobRef>,
+    pub is_favourite: Option<bool>,
     pub updated_at: DateTime<Utc>,
 }
 
@@ -132,6 +147,7 @@ impl FileMetadataPatch {
             name: None,
             extension: None,
             blob: None,
+            is_favourite: None,
             updated_at: Utc::now(),
         }
     }
@@ -146,6 +162,13 @@ impl FileMetadataPatch {
     pub fn move_to(parent_id: Uuid) -> Self {
         Self {
             parent_id: Some(parent_id),
+            ..Default::default()
+        }
+    }
+
+    pub fn set_favourite(is_favourite: bool) -> Self {
+        Self {
+            is_favourite: Some(is_favourite),
             ..Default::default()
         }
     }

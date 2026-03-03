@@ -114,5 +114,7 @@ export const useBrowse = () => {
     handleIconDialogOpenChange: folderState.handleIconDialogOpenChange,
     handleIconSelect: folderState.handleIconSelect,
     setFolderIdForIconChange: folderState.setFolderIdForIconChange,
+    handleToggleFolderFavourite: folderState.handleToggleFavourite,
+    handleToggleFileFavourite: fileState.handleToggleFavourite,
   };
 };

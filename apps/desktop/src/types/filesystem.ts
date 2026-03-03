@@ -3,6 +3,7 @@ export type FolderItem = {
   name: string;
   icon: string;
   itemCount: number;
+  isFavourite: boolean;
 };
 
 export type FileItem = {
@@ -10,6 +11,7 @@ export type FileItem = {
   name: string;
   size: number;
   extension: string;
+  isFavourite: boolean;
 };
 
 export type BrowseResult = {

@@ -12,6 +12,15 @@ type UseFileOptions = {
   refresh: () => Promise<void>;
 };
 
+const sortFiles = (items: FileItem[]) =>
+  [...items].sort((left, right) => {
+    if (left.isFavourite !== right.isFavourite) {
+      return left.isFavourite ? -1 : 1;
+    }
+
+    return left.name.localeCompare(right.name);
+  });
+
 export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFileOptions) => {
   const [renamingItem, setRenamingItem] = useState<FileRenamingItem | null>(null);
   const [viewingItem, setViewingItem] = useState<ViewingItem | null>(null);
@@ -145,15 +154,24 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     setViewingItem(null);
   };
 
+  const handleToggleFavourite = async (id: string, isFavourite: boolean) => {
+    const result = await tauriApi.setFileFavorite({ id, isFavourite });
+
+    if (result.success) {
+      await refresh();
+    }
+  };
+
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const filteredFiles = normalizedSearch
     ? files.filter(item =>
         `${item.name}.${item.extension}`.toLowerCase().includes(normalizedSearch),
       )
     : files;
+  const sortedFiles = sortFiles(filteredFiles);
 
   return {
-    files: filteredFiles,
+    files: sortedFiles,
     renamingItem,
     viewingItem,
     uploadPaths,
@@ -165,5 +183,6 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     renameRenamingItem,
     handleFileClick,
     handleFileViewerOpenChange,
+    handleToggleFavourite,
   };
 };

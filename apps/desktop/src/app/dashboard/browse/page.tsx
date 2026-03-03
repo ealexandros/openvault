@@ -56,6 +56,8 @@ const BrowsePage = () => {
     handleIconDialogOpenChange,
     handleIconSelect,
     setFolderIdForIconChange,
+    handleToggleFileFavourite,
+    handleToggleFolderFavourite,
   } = useBrowse();
 
   return (
@@ -141,6 +143,9 @@ const BrowsePage = () => {
                           onChangeIcon={() => {
                             setFolderIdForIconChange(item.id);
                           }}
+                          onToggleFavourite={() => {
+                            void handleToggleFolderFavourite(item.id, !item.isFavourite);
+                          }}
                         />
                       ))}
                     </div>
@@ -161,6 +166,9 @@ const BrowsePage = () => {
                             void handleDeleteFile(item.id);
                           }}
                           onRename={() => handleRequestFileRename(item)}
+                          onToggleFavourite={() => {
+                            void handleToggleFileFavourite(item.id, !item.isFavourite);
+                          }}
                         />
                       ))}
                     </div>

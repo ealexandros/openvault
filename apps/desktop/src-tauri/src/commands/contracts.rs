@@ -77,12 +77,27 @@ pub struct ChangeFolderIconParams {
     pub icon: String,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FavoriteFolderParams {
+    pub id: String,
+    pub is_favourite: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FavoriteFileParams {
+    pub id: String,
+    pub is_favourite: bool,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FolderItem {
     pub id: String,
     pub name: String,
     pub icon: String,
+    pub is_favourite: bool,
     pub item_count: u64,
 }
 
@@ -92,6 +107,7 @@ pub struct FileItem {
     pub id: String,
     pub name: String,
     pub size: u64,
+    pub is_favourite: bool,
     pub extension: String,
 }
 

@@ -156,8 +156,8 @@ impl FilesystemStore {
         self.commit_delta(&FilesystemDelta::FolderUpdated { id, patch })
     }
 
-    pub fn change_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
-        let patch = FolderMetadataPatch::change_icon(new_icon);
+    pub fn set_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
+        let patch = FolderMetadataPatch::set_icon(new_icon);
         self.commit_delta(&FilesystemDelta::FolderUpdated { id, patch })
     }
 
@@ -169,6 +169,16 @@ impl FilesystemStore {
     pub fn move_folder(&mut self, id: Uuid, new_parent_id: Uuid) -> Result {
         let patch = FolderMetadataPatch::move_to(new_parent_id);
         self.commit_delta(&FilesystemDelta::FolderUpdated { id, patch })
+    }
+
+    pub fn set_folder_favorite(&mut self, id: Uuid, is_favourite: bool) -> Result {
+        let patch = FolderMetadataPatch::set_favourite(is_favourite);
+        self.commit_delta(&FilesystemDelta::FolderUpdated { id, patch })
+    }
+
+    pub fn set_file_favorite(&mut self, id: Uuid, is_favourite: bool) -> Result {
+        let patch = FileMetadataPatch::set_favourite(is_favourite);
+        self.commit_delta(&FilesystemDelta::FileUpdated { id, patch })
     }
 
     pub fn snapshot(&self) -> FilesystemSnapshot {

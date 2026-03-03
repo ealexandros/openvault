@@ -14,6 +14,7 @@ const isSameFolder = (left: FolderItem, right: FolderItem) =>
   left.id === right.id &&
   left.name === right.name &&
   left.icon === right.icon &&
+  left.isFavourite === right.isFavourite &&
   left.itemCount === right.itemCount;
 
 const isSameFile = (
@@ -23,7 +24,8 @@ const isSameFile = (
   left.id === right.id &&
   left.name === right.name &&
   left.extension === right.extension &&
-  left.size === right.size;
+  left.size === right.size &&
+  left.isFavourite === right.isFavourite;
 
 const isSameListing = (left: BrowseResult, right: BrowseResult) => {
   if (
@@ -79,6 +81,15 @@ const fetchFolderListing = async (
 type UseFolderOptions = {
   searchQuery: string;
 };
+
+const sortFolders = (items: FolderItem[]) =>
+  [...items].sort((left, right) => {
+    if (left.isFavourite !== right.isFavourite) {
+      return left.isFavourite ? -1 : 1;
+    }
+
+    return left.name.localeCompare(right.name);
+  });
 
 export const useFolder = ({ searchQuery }: UseFolderOptions) => {
   const [currentPath, setCurrentPath] = useState<PathSegment[]>([ROOT_FOLDER]);
@@ -198,7 +209,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
   };
 
   const handleChangeFolderIcon = async (id: string, iconName: string) => {
-    const result = await tauriApi.changeFolderIcon({ id, icon: iconName });
+    const result = await tauriApi.setFolderIcon({ id, icon: iconName });
 
     if (result.success) {
       await refresh();
@@ -237,10 +248,19 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     setFolderIdForIconChange(null);
   };
 
+  const handleToggleFavourite = async (id: string, isFavourite: boolean) => {
+    const result = await tauriApi.setFolderFavorite({ id, isFavourite });
+
+    if (result.success) {
+      await refresh();
+    }
+  };
+
   const normalizedSearch = searchQuery.trim().toLowerCase();
-  const folders = normalizedSearch
+  const filteredFolders = normalizedSearch
     ? listing.folders.filter(item => item.name.toLowerCase().includes(normalizedSearch))
     : listing.folders;
+  const folders = sortFolders(filteredFolders);
 
   useEffect(() => {
     let isMounted = true;
@@ -300,5 +320,6 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     handleIconDialogOpenChange,
     handleIconSelect,
     setFolderIdForIconChange,
+    handleToggleFavourite,
   };
 };

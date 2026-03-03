@@ -67,7 +67,15 @@ export const tauriApi = {
     return safeInvokeTauri<boolean>("path_is_file", { params });
   },
 
-  changeFolderIcon: (params: { id: string; icon: string }) => {
-    return safeInvokeTauri<void>("change_folder_icon", { params });
+  setFolderIcon: (params: { id: string; icon: string }) => {
+    return safeInvokeTauri<void>("set_folder_icon", { params });
+  },
+
+  setFolderFavorite: (params: { id: string; isFavourite: boolean }) => {
+    return safeInvokeTauri<void>("set_folder_favorite", { params });
+  },
+
+  setFileFavorite: (params: { id: string; isFavourite: boolean }) => {
+    return safeInvokeTauri<void>("set_file_favorite", { params });
   },
 };
