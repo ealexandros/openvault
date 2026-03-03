@@ -1,5 +1,5 @@
 import { safeJsonParse, safeJsonStringify } from "@/utils/safe-parse";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 type UseLocalStorageProps<T> = {
   key: string;
@@ -15,17 +15,23 @@ export const useLocalStorage = <T>({
   const [storedValue, setStoredValue] = useState<T>(defaultValue);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const setStoredValueEvent = useEffectEvent((value: T) => {
+    setStoredValue(value);
+  });
+
+  const setIsInitializedEvent = useEffectEvent((value: boolean) => {
+    setIsInitialized(value);
+  });
+
   useEffect(() => {
     const item = window.localStorage.getItem(key);
     const value = item != null ? safeJsonParse<T>(item) : null;
 
     if (value !== null) {
-      // @todo-soon fix this..
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStoredValue(value);
+      setStoredValueEvent(value);
     }
 
-    setIsInitialized(true);
+    setIsInitializedEvent(true);
   }, [key]);
 
   useEffect(() => {

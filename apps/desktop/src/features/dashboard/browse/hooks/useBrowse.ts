@@ -56,6 +56,11 @@ export const useBrowse = () => {
     clearSearch();
   };
 
+  const handleBackClick = () => {
+    folderState.handleBreadcrumbClick(folderState.currentPath.length - 2);
+    clearSearch();
+  };
+
   const handleBreadcrumbClick = (index: number) => {
     folderState.handleBreadcrumbClick(index);
     clearSearch();
@@ -96,6 +101,7 @@ export const useBrowse = () => {
     folderIdForIconChange: folderState.folderIdForIconChange,
     setSearchQuery,
     clearSearch,
+    handleBackClick,
     handleDropPaths: fileState.uploadPaths,
     handleFolderClick,
     handleBreadcrumbClick,

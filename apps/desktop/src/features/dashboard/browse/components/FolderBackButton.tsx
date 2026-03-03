@@ -3,14 +3,13 @@
 import { ArrowLeftIcon } from "lucide-react";
 
 type BackButtonProps = {
-  handleBreadcrumbClick: (index: number) => void;
-  currentPath: string[];
+  onBackClick: () => void;
 };
 
-export const FolderBackButton = ({ handleBreadcrumbClick, currentPath }: BackButtonProps) => (
+export const FolderBackButton = ({ onBackClick }: BackButtonProps) => (
   <button
     type="button"
-    onClick={() => handleBreadcrumbClick(currentPath.length - 2)}
+    onClick={() => onBackClick()}
     className="group relative flex cursor-pointer items-center gap-4 overflow-hidden rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-3.5 text-left transition-all duration-300 hover:bg-primary/10">
     <div className="flex size-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
       <ArrowLeftIcon className="size-5" strokeWidth={2.25} />

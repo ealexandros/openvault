@@ -4,26 +4,22 @@ import { FileDropListener } from "@/components/functional/FileDropListener";
 import { FileDropOverlayView } from "@/components/views/FileDropOverlayView";
 import {
   BrowseHeader,
-  BrowseSection,
   BrowseSkeleton,
   BrowseViewState,
   ChangeFolderIconDialog,
   DeleteConfirmationDialog,
+  EmptyFolder,
   EmptySearchResult,
-  EmptyState,
   FilePropertiesDialog,
   FileViewerDialog,
-  FolderBackButton,
-  FolderCard,
   FolderPropertiesDialog,
   RenameItemDialog,
   useBrowse,
 } from "@/features/dashboard/browse";
-import { FileItem } from "@/features/dashboard/browse/components/FileItem";
 import { FolderItemResult, type FileItemResult } from "@/types/filesystem";
-import { cn } from "@/utils/cn";
-import { FileIcon, FolderIcon } from "lucide-react";
 import { useState } from "react";
+import { FilesSection } from "./_components_/FilesSection";
+import { FoldersSection } from "./_components_/FoldersSection";
 
 // @todo-soon refactor useBrowse to use useFolder and useFile
 
@@ -45,6 +41,7 @@ const BrowsePage = () => {
     clearSearch,
     handleDropPaths,
     handleFolderClick,
+    handleBackClick,
     handleBreadcrumbClick,
     handleCreateFolder,
     handleUploadFile,
@@ -125,86 +122,41 @@ const BrowsePage = () => {
 
           {viewState === BrowseViewState.Loading && <BrowseSkeleton />}
 
+          {viewState === BrowseViewState.Results && (
+            <section className="space-y-10 transition-opacity duration-200">
+              <FoldersSection
+                folders={folders}
+                canGoBack={canGoBack}
+                isNavigating={isNavigating}
+                onBackClick={handleBackClick}
+                onFolderClick={handleFolderClick}
+                onFolderRename={handleRequestFolderRename}
+                onFolderToggleFavourite={handleToggleFolderFavourite}
+                onFolderProperties={setFolderForProperties}
+                onFolderDelete={folder =>
+                  setItemForDeletion({ id: folder.id, name: folder.name, type: "folder" })
+                }
+                onFolderChangeIcon={folder => setFolderIdForIconChange(folder.id)}
+              />
+              <FilesSection
+                files={files}
+                onFileClick={handleFileClick}
+                onFileRename={handleRequestFileRename}
+                onFileToggleFavourite={handleToggleFileFavourite}
+                onFileProperties={setFileForProperties}
+                onFileDelete={file =>
+                  setItemForDeletion({ id: file.id, name: file.name, type: "file" })
+                }
+              />
+            </section>
+          )}
+
           {viewState === BrowseViewState.Empty && (
-            <EmptyState
-              canGoBack={canGoBack}
-              onGoBack={() => handleBreadcrumbClick(currentPath.length - 2)}
-            />
+            <EmptyFolder canGoBack={canGoBack} onGoBack={handleBackClick} />
           )}
 
           {viewState === BrowseViewState.NoResults && (
             <EmptySearchResult searchQuery={searchQuery} onClearSearch={clearSearch} />
-          )}
-
-          {viewState === BrowseViewState.Results && (
-            <div
-              className={cn(
-                "space-y-10 transition-opacity duration-200",
-                isNavigating ? "opacity-50" : "opacity-100",
-              )}>
-              {(folders.length > 0 || canGoBack) && (
-                <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {canGoBack && !isNavigating && (
-                      <FolderBackButton
-                        handleBreadcrumbClick={handleBreadcrumbClick}
-                        currentPath={currentPath}
-                      />
-                    )}
-                    {folders.map(item => (
-                      <FolderCard
-                        key={item.id}
-                        folder={item}
-                        onClick={() => handleFolderClick(item)}
-                        onDelete={() => {
-                          setItemForDeletion({
-                            id: item.id,
-                            name: item.name,
-                            type: "folder",
-                          });
-                        }}
-                        onRename={() => handleRequestFolderRename(item)}
-                        onChangeIcon={() => {
-                          setFolderIdForIconChange(item.id);
-                        }}
-                        onToggleFavourite={() => {
-                          void handleToggleFolderFavourite(item.id, !item.isFavourite);
-                        }}
-                        onProperties={() => {
-                          setFolderForProperties(item);
-                        }}
-                      />
-                    ))}
-                  </div>
-                </BrowseSection>
-              )}
-
-              {files.length > 0 && (
-                <BrowseSection title="Files" count={files.length} icon={FileIcon}>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {files.map(file => (
-                      <FileItem
-                        key={file.id}
-                        file={file}
-                        onClick={() => handleFileClick(file)}
-                        onDelete={() => {
-                          setItemForDeletion({
-                            id: file.id,
-                            name: file.name,
-                            type: "file",
-                          });
-                        }}
-                        onRename={() => handleRequestFileRename(file)}
-                        onToggleFavourite={() =>
-                          handleToggleFileFavourite(file.id, !file.isFavourite)
-                        }
-                        onProperties={() => setFileForProperties(file)}
-                      />
-                    ))}
-                  </div>
-                </BrowseSection>
-              )}
-            </div>
           )}
 
           <RenameItemDialog

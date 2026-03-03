@@ -98,8 +98,8 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     }
   };
 
-  const handleRequestFileRename = (item: FileItemResult) => {
-    setRenamingItem({ id: item.id, name: item.name, type: "file" });
+  const handleRequestFileRename = (file: FileItemResult) => {
+    setRenamingItem({ id: file.id, name: file.name, type: "file" });
   };
 
   const clearRenamingItem = () => {
@@ -154,8 +154,11 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     setViewingItem(null);
   };
 
-  const handleToggleFavourite = async (id: string, isFavourite: boolean) => {
-    const result = await tauriApi.setFileFavorite({ id, isFavourite });
+  const handleToggleFavourite = async (file: FileItemResult) => {
+    const result = await tauriApi.setFileFavorite({
+      id: file.id,
+      isFavourite: !file.isFavourite,
+    });
 
     if (result.success) {
       await refresh();

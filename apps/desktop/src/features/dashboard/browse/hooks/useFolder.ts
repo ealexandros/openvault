@@ -281,8 +281,11 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     setFolderIdForIconChange(null);
   };
 
-  const handleToggleFavourite = async (id: string, isFavourite: boolean) => {
-    const result = await tauriApi.setFolderFavorite({ id, isFavourite });
+  const handleToggleFavourite = async (folder: FolderItemResult) => {
+    const result = await tauriApi.setFolderFavorite({
+      id: folder.id,
+      isFavourite: !folder.isFavourite,
+    });
 
     if (result.success) {
       await refresh();
