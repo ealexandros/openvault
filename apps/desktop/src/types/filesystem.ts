@@ -3,6 +3,7 @@ export type FolderItemResult = {
   name: string;
   icon: string;
   itemCount: number;
+  totalSizeBytes: number;
   isFavourite: boolean;
   createdAt: string;
   updatedAt: string;

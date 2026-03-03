@@ -110,8 +110,16 @@ impl FilesystemStore {
             .any(|f| f.name == name)
     }
 
-    pub fn children_count(&self, parent_id: &Uuid) -> usize {
-        self.index.children_count(parent_id)
+    pub fn folder_children_count(&self, folder_id: &Uuid) -> usize {
+        self.index.children_count(folder_id)
+    }
+
+    pub fn folder_total_size_bytes(&self, folder_id: &Uuid) -> u64 {
+        self.index
+            .file_children(folder_id)
+            .iter()
+            .map(|id| self.files.get(id).map(|f| f.size_bytes()).unwrap_or(0))
+            .sum()
     }
 
     pub fn add_folder(&mut self, parent_id: Uuid, name: String) -> Result<Uuid> {

@@ -14,6 +14,7 @@ export const hrefs = {
     decoy: "/dashboard/decoy",
     notes: "/dashboard/notes",
     passwords: "/dashboard/passwords",
+    messages: "/dashboard/messages",
     logs: "/dashboard/logs",
     settings: "/dashboard/settings",
   },

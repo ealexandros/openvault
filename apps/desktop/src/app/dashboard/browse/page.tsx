@@ -43,7 +43,7 @@ const BrowsePage = () => {
           {browseState.viewState === BrowseViewState.Loading && <BrowseSkeleton />}
 
           {browseState.viewState === BrowseViewState.Results && (
-            <section className="space-y-10 transition-opacity duration-200">
+            <section className="space-y-10 pb-20">
               <FoldersSection
                 folders={folderState.folders}
                 canGoBack={browseState.canGoBack}

@@ -15,6 +15,7 @@ const routeTitleMap: Record<string, string> = {
   [hrefs.dashboard.browse]: "Browse Files",
   [hrefs.dashboard.passwords]: "Passwords",
   [hrefs.dashboard.notes]: "Notes",
+  [hrefs.dashboard.messages]: "Messages",
   [hrefs.dashboard.logs]: "Activity Logs",
   [hrefs.dashboard.decoy]: "Decoy Vault",
   [hrefs.dashboard.settings]: "Settings",

@@ -6,6 +6,7 @@ import {
   FolderIcon,
   LockIcon,
   LogOut,
+  MessageCircle,
   NotebookIcon,
   SettingsIcon,
   ShieldAlertIcon,
@@ -21,6 +22,7 @@ type SidebarProps = {
 
 const mainNavItems = [
   { href: hrefs.dashboard.browse, label: "Browse Files", icon: FolderIcon },
+  { href: hrefs.dashboard.messages, label: "Messages", icon: MessageCircle },
   { href: hrefs.dashboard.passwords, label: "Passwords", icon: LockIcon },
   { href: hrefs.dashboard.notes, label: "Notes", icon: NotebookIcon },
   { href: hrefs.dashboard.logs, label: "Activity Logs", icon: ActivityIcon },

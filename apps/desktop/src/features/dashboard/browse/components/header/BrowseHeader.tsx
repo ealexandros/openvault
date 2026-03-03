@@ -16,7 +16,7 @@ type BrowseHeaderProps = {
 };
 
 export const BrowseHeader = (props: BrowseHeaderProps) => (
-  <div className="sticky top-0 z-20 space-y-6 bg-background/80 backdrop-blur-md">
+  <div className="space-y-6">
     <BrowseHeaderToolbar
       onUploadFile={props.onUploadFile}
       onUploadFolder={props.onUploadFolder}

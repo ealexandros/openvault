@@ -141,8 +141,12 @@ impl<'a> FilesystemFeature<'a> {
             .map_err(map_fs_error)
     }
 
-    pub fn children_count(&self, parent_id: &Uuid) -> usize {
-        self.store.children_count(parent_id)
+    pub fn folder_children_count(&self, folder_id: &Uuid) -> usize {
+        self.store.folder_children_count(folder_id)
+    }
+
+    pub fn folder_total_size_bytes(&self, folder_id: &Uuid) -> u64 {
+        self.store.folder_total_size_bytes(folder_id)
     }
 
     pub fn reload(&mut self) -> Result<&FilesystemStore> {
