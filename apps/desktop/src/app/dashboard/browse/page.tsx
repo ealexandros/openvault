@@ -20,7 +20,7 @@ import {
   RenameItemDialog,
   useBrowse,
 } from "@/features/dashboard/browse";
-import { type FileItem, type FolderItem } from "@/types/filesystem";
+import { type FileItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { FileIcon, FolderIcon } from "lucide-react";
 import { useState } from "react";
@@ -64,8 +64,8 @@ const BrowsePage = () => {
     handleToggleFolderFavourite,
   } = useBrowse();
 
-  const [fileForProperties, setFileForProperties] = useState<FileItem | null>(null);
-  const [folderForProperties, setFolderForProperties] = useState<FolderItem | null>(null);
+  const [fileForProperties, setFileForProperties] = useState<FileItemResult | null>(null);
+  const [folderForProperties, setFolderForProperties] = useState<FileItemResult | null>(null);
 
   const [itemForDeletion, setItemForDeletion] = useState<{
     id: string;
@@ -199,7 +199,7 @@ const BrowsePage = () => {
                       {files.map(item => (
                         <FileCard
                           key={item.id}
-                          item={item}
+                          file={item}
                           onClick={() => {
                             void handleFileClick(item);
                           }}

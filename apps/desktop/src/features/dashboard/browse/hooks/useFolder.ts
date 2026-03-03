@@ -1,8 +1,41 @@
 import { tauriApi } from "@/libraries/tauri-api";
-import { type BrowseResult, type FolderItem } from "@/types/filesystem";
+import { FolderItemResult, type BrowseResult, type FileItemResult } from "@/types/filesystem";
+import {
+  ArchiveIcon,
+  BookOpenIcon,
+  BriefcaseIcon,
+  CameraIcon,
+  CodeIcon,
+  FolderIcon,
+  ImageIcon,
+  MusicIcon,
+  ShieldIcon,
+  StarIcon,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { type FolderRenamingItem, type PathSegment } from "../types";
+
+export const ICON_MAP = {
+  folder: FolderIcon,
+  star: StarIcon,
+  briefcase: BriefcaseIcon,
+  archive: ArchiveIcon,
+  "book-open": BookOpenIcon,
+  image: ImageIcon,
+  music: MusicIcon,
+  camera: CameraIcon,
+  code: CodeIcon,
+  shield: ShieldIcon,
+} as const satisfies Record<string, LucideIcon>;
+
+export type FolderIconName = keyof typeof ICON_MAP;
+
+export const FOLDER_ICON_OPTIONS = Object.keys(ICON_MAP).map(name => ({
+  name: name as FolderIconName,
+  Icon: ICON_MAP[name as FolderIconName],
+}));
 
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
 const ROOT_FOLDER: PathSegment = { id: ROOT_FOLDER_ID, name: "Home" };
@@ -10,7 +43,7 @@ const ROOT_FOLDER: PathSegment = { id: ROOT_FOLDER_ID, name: "Home" };
 const folderRequests = new Map<string, Promise<BrowseResult | null>>();
 const folderCache = new Map<string, BrowseResult>();
 
-const isSameFolder = (left: FolderItem, right: FolderItem) =>
+const isSameFolder = (left: FolderItemResult, right: FolderItemResult) =>
   left.id === right.id &&
   left.name === right.name &&
   left.icon === right.icon &&
@@ -82,7 +115,7 @@ type UseFolderOptions = {
   searchQuery: string;
 };
 
-const sortFolders = (items: FolderItem[]) =>
+const sortFolders = (items: FolderItemResult[]) =>
   [...items].sort((left, right) => {
     if (left.isFavourite !== right.isFavourite) {
       return left.isFavourite ? -1 : 1;
@@ -138,7 +171,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     );
   };
 
-  const handleFolderClick = (item: FolderItem) => {
+  const handleFolderClick = (item: FileItemResult) => {
     setCurrentPath(previousPath => {
       const activeItem = previousPath[previousPath.length - 1] ?? ROOT_FOLDER;
 
@@ -204,7 +237,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     }
   };
 
-  const handleRequestFolderRename = (item: FolderItem) => {
+  const handleRequestFolderRename = (item: FileItemResult) => {
     setRenamingItem({ id: item.id, name: item.name, type: "folder" });
   };
 

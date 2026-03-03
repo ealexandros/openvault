@@ -1,4 +1,4 @@
-export type FolderItem = {
+export type FolderItemResult = {
   id: string;
   name: string;
   icon: string;
@@ -8,7 +8,7 @@ export type FolderItem = {
   updatedAt: string;
 };
 
-export type FileItem = {
+export type FileItemResult = {
   id: string;
   name: string;
   size: number;
@@ -19,6 +19,6 @@ export type FileItem = {
 };
 
 export type BrowseResult = {
-  folders: FolderItem[];
-  files: FileItem[];
+  folders: FolderItemResult[];
+  files: FileItemResult[];
 };

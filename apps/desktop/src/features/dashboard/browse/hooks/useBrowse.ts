@@ -1,4 +1,4 @@
-import { type FolderItem } from "@/types/filesystem";
+import { type FileItemResult } from "@/types/filesystem";
 import { useState } from "react";
 import { BrowseViewState, type RenamingItem } from "../types";
 import { useFile } from "./useFile";
@@ -51,7 +51,7 @@ export const useBrowse = () => {
     setSearchQuery("");
   };
 
-  const handleFolderClick = (item: FolderItem) => {
+  const handleFolderClick = (item: FileItemResult) => {
     folderState.handleFolderClick(item);
     clearSearch();
   };

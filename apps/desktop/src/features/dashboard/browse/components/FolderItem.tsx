@@ -1,12 +1,12 @@
 import { Badge } from "@/components/ui/shadcn/badge";
-import { type FolderItem } from "@/types/filesystem";
+import { FolderItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
-import { ChevronRightIcon, StarIcon } from "lucide-react";
+import { ChevronRightIcon, FolderIcon, StarIcon, type LucideProps } from "lucide-react";
+import { FolderIconName, ICON_MAP } from "../hooks/useFolder";
 import { FolderContextMenu } from "./FolderContextMenu";
-import { renderFolderIcon } from "./folderIcons";
 
-type FolderCardProps = {
-  item: FolderItem;
+type FolderItemProps = {
+  item: FolderItemResult;
   onClick: () => void;
   onDelete: () => void;
   onRename: () => void;
@@ -15,7 +15,12 @@ type FolderCardProps = {
   onProperties: () => void;
 };
 
-export const FolderCard = ({
+const renderFolderIcon = (iconName: string, props?: LucideProps) => {
+  const Icon = iconName in ICON_MAP ? ICON_MAP[iconName as FolderIconName] : FolderIcon;
+  return <Icon {...props} />;
+};
+
+export const FolderItem = ({
   item,
   onClick,
   onDelete,
@@ -23,7 +28,7 @@ export const FolderCard = ({
   onChangeIcon,
   onToggleFavourite,
   onProperties,
-}: FolderCardProps) => (
+}: FolderItemProps) => (
   <div className="relative">
     <FolderContextMenu
       isFavourite={item.isFavourite}
@@ -40,12 +45,10 @@ export const FolderCard = ({
         )}>
         <div
           className={cn(
-            "flex size-11 items-center justify-center rounded-xl border transition-all duration-300",
+            "flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-300",
             "border-primary/10 bg-primary/5 text-primary",
           )}>
-          {renderFolderIcon(item.icon, {
-            className: "size-5.5 fill-current/10",
-          })}
+          {renderFolderIcon(item.icon, { className: "size-5.5 fill-current/10" })}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -62,15 +65,15 @@ export const FolderCard = ({
         </div>
 
         <div className="mr-1 text-muted-foreground/30 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary/50">
-          <ChevronRightIcon className="size-4" />
+          <ChevronRightIcon className="h-4 w-4" />
         </div>
 
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </div>
     </FolderContextMenu>
 
     {item.isFavourite && (
-      <Badge variant="outline" className="absolute -top-1 -right-1 size-7 bg-white p-0">
+      <Badge variant="outline" className="absolute -top-1 -right-1 size-7 bg-card p-0">
         <StarIcon className="text-yellow-500" fill="currentColor" />
       </Badge>
     )}

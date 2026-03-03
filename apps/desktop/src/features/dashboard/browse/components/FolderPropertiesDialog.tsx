@@ -5,12 +5,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
-import { type FolderItem } from "@/types/filesystem";
+import { type FileItemResult } from "@/types/filesystem";
 
 type FolderPropertiesDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  item: FolderItem | null;
+  item: FileItemResult | null;
 };
 
 const formatDateTime = (value: string) => {

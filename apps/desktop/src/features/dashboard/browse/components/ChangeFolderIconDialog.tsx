@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
-import { FOLDER_ICON_OPTIONS } from "./folderIcons";
+import { FOLDER_ICON_OPTIONS } from "../hooks/useFolder";
 
 type ChangeFolderIconDialogProps = {
   isOpen: boolean;

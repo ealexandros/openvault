@@ -1,9 +1,4 @@
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/shadcn/context-menu";
+import { ContextMenu } from "@/components/ui/shadcn-ext/ContextMenu";
 import { EllipsisVertical, ImageIcon, PencilIcon, StarIcon, Trash2Icon } from "lucide-react";
 import { type ReactNode } from "react";
 
@@ -25,57 +20,35 @@ export const FolderContextMenu = ({
   onDelete,
   onToggleFavourite,
   onProperties,
-}: FolderContextMenuProps) => (
-  <ContextMenu>
-    <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+}: FolderContextMenuProps) => {
+  const items = [
+    {
+      label: isFavourite ? "Unfavourite" : "Favourite",
+      icon: StarIcon,
+      onClick: onToggleFavourite,
+    },
+    {
+      label: "Rename folder",
+      icon: PencilIcon,
+      onClick: onRename,
+    },
+    {
+      label: "Change icon",
+      icon: ImageIcon,
+      onClick: onChangeIcon,
+    },
+    {
+      label: "Properties",
+      icon: EllipsisVertical,
+      onClick: onProperties,
+    },
+    {
+      label: "Move to Trash",
+      icon: Trash2Icon,
+      onClick: onDelete,
+      variant: "destructive" as const,
+    },
+  ];
 
-    <ContextMenuContent className="w-48 overflow-hidden border-border/50 bg-background/95 backdrop-blur-xl">
-      <ContextMenuItem
-        onClick={e => {
-          e.stopPropagation();
-          onToggleFavourite();
-        }}
-        className="gap-2.5 py-2.5">
-        <StarIcon className="size-4" />
-        <span className="font-medium">{isFavourite ? "Unfavourite" : "Favourite"}</span>
-      </ContextMenuItem>
-      <ContextMenuItem
-        onClick={e => {
-          e.stopPropagation();
-          onRename();
-        }}
-        className="gap-2.5 py-2.5">
-        <PencilIcon className="size-4 text-muted-foreground" />
-        <span className="font-medium">Rename folder</span>
-      </ContextMenuItem>
-      <ContextMenuItem
-        onClick={e => {
-          e.stopPropagation();
-          onChangeIcon();
-        }}
-        className="gap-2.5 py-2.5">
-        <ImageIcon className="size-4 text-muted-foreground" />
-        <span className="font-medium">Change icon</span>
-      </ContextMenuItem>
-      <ContextMenuItem
-        onClick={e => {
-          e.stopPropagation();
-          onProperties();
-        }}
-        className="gap-2.5 py-2.5">
-        <EllipsisVertical className="size-4 text-muted-foreground" />
-        <span className="font-medium">Properties</span>
-      </ContextMenuItem>
-      <ContextMenuItem
-        variant="destructive"
-        onClick={e => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="gap-2.5 py-2.5">
-        <Trash2Icon className="size-4" />
-        <span className="font-medium">Move to Trash</span>
-      </ContextMenuItem>
-    </ContextMenuContent>
-  </ContextMenu>
-);
+  return <ContextMenu items={items}>{children}</ContextMenu>;
+};

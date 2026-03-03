@@ -5,7 +5,8 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { cn } from "@/utils/cn";
-import { FileAudioIcon, FileIcon, FileTextIcon, FileVideoIcon, ImageIcon } from "lucide-react";
+import { FileType } from "@/utils/mime-types";
+import { FileAudioIcon, FileTextIcon, FileVideoIcon, ImageIcon } from "lucide-react";
 import { useFileViewerDialog } from "./useFileViewerDialog";
 import {
   AudioViewer,
@@ -24,11 +25,13 @@ type FileViewerDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const IconMap: Record<string, React.ElementType> = {
+const IconMap: Record<NonNullable<FileType>, React.ElementType> = {
   image: ImageIcon,
   video: FileVideoIcon,
   audio: FileAudioIcon,
+  pdf: FileTextIcon,
   text: FileTextIcon,
+  code: FileTextIcon,
 };
 
 export const FileViewerDialog = ({
@@ -40,20 +43,21 @@ export const FileViewerDialog = ({
 }: FileViewerDialogProps) => {
   const { fileType, fileUrl, text } = useFileViewerDialog(content, extension);
 
-  const viewers: Record<string, React.ReactNode> = {
+  const viewers: Record<NonNullable<FileType>, React.ReactNode> = {
     image: <ImageViewer url={fileUrl} alt={fileName} />,
     pdf: <PdfViewer url={fileUrl} />,
     audio: <AudioViewer url={fileUrl} fileName={fileName} />,
     video: <VideoViewer url={fileUrl} fileName={fileName} />,
     text: <TextViewer text={text} />,
+    code: <TextViewer text={text} />,
   };
 
-  const Icon = IconMap[fileType] ?? FileIcon;
+  const Icon = IconMap[fileType];
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden p-0 sm:max-w-5xl">
-        <DialogHeader className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-6 py-4">
+        <DialogHeader className="flex items-start justify-between border-b border-border/40 bg-muted/20 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl border border-border/50 bg-background shadow-xs">
               <Icon className="size-5 text-muted-foreground" />
