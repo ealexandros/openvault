@@ -1,22 +1,21 @@
 "use client";
 
-import { FileDropListener } from "@/components/functional/file-drop/FileDropListener";
-import { BrowseDropOverlay } from "@/components/views/BrowseDropOverlay";
+import { FileDropListener } from "@/components/functional/FileDropListener";
 import { Button } from "@/components/ui/shadcn/button";
+import { FileDropOverlayView } from "@/components/views/FileDropOverlayView";
 import {
   BrowseHeader,
   BrowseSection,
+  BrowseSkeleton,
   BrowseViewState,
   ChangeFolderIconDialog,
   DeleteConfirmationDialog,
   EmptyState,
   FileCard,
-  FileGridSkeleton,
   FilePropertiesDialog,
   FileViewerDialog,
   FolderBackButton,
   FolderCard,
-  FolderGridSkeleton,
   FolderPropertiesDialog,
   RenameItemDialog,
   useBrowse,
@@ -107,8 +106,8 @@ const BrowsePage = () => {
   return (
     <FileDropListener onDropPaths={handleDropPaths}>
       {({ isDragging }) => (
-        <div className="relative mx-auto h-full max-w-7xl space-y-16 px-4 py-8">
-          <BrowseDropOverlay isVisible={isDragging} />
+        <main className="relative mx-auto h-full max-w-7xl space-y-16 px-4 py-8">
+          <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
             currentPath={currentPath}
@@ -123,16 +122,7 @@ const BrowsePage = () => {
           />
 
           <section className="h-4/5">
-            {viewState === BrowseViewState.Loading && (
-              <div className="space-y-10">
-                <BrowseSection title="Folders" count={0} icon={FolderIcon}>
-                  <FolderGridSkeleton />
-                </BrowseSection>
-                <BrowseSection title="Files" count={0} icon={FileIcon}>
-                  <FileGridSkeleton />
-                </BrowseSection>
-              </div>
-            )}
+            {viewState === BrowseViewState.Loading && <BrowseSkeleton />}
 
             {viewState === BrowseViewState.Empty && (
               <div
@@ -272,7 +262,7 @@ const BrowsePage = () => {
             itemType={itemForDeletion?.type ?? "file"}
             onConfirm={handleDeleteConfirm}
           />
-        </div>
+        </main>
       )}
     </FileDropListener>
   );

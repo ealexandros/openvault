@@ -21,3 +21,14 @@ export const safeJsonStringify = <T>(value?: T) => {
     return null;
   }
 };
+
+export const safeUint8ArrayParse = (value?: Uint8Array | null) => {
+  if (value == null) return null;
+
+  try {
+    return new TextDecoder().decode(value);
+  } catch (error) {
+    logger.warn(`⚠️ Error parsing value:`, value, "Error:", error);
+    return null;
+  }
+};

@@ -1,5 +1,7 @@
 import { Skeleton } from "@/components/ui/shadcn/skeleton";
 import { cn } from "@/utils/cn";
+import { FileIcon, FolderIcon } from "lucide-react";
+import { BrowseSection } from "./BrowseSection";
 
 type GridSkeletonProps = {
   count: number;
@@ -14,6 +16,13 @@ const GridSkeleton = ({ count, itemHeight }: GridSkeletonProps) => (
   </div>
 );
 
-export const FileGridSkeleton = () => <GridSkeleton count={8} itemHeight="h-32" />;
-
-export const FolderGridSkeleton = () => <GridSkeleton count={2} itemHeight="h-24" />;
+export const BrowseSkeleton = () => (
+  <div className="space-y-10">
+    <BrowseSection title="Folders" count={0} icon={FolderIcon}>
+      <GridSkeleton count={2} itemHeight="h-24" />
+    </BrowseSection>
+    <BrowseSection title="Files" count={0} icon={FileIcon}>
+      <GridSkeleton count={8} itemHeight="h-32" />
+    </BrowseSection>
+  </div>
+);

@@ -2,11 +2,11 @@
 
 import { UploadCloudIcon } from "lucide-react";
 
-type BrowseDropOverlayProps = {
+type FileDropOverlayViewProps = {
   isVisible: boolean;
 };
 
-export const BrowseDropOverlay = ({ isVisible }: BrowseDropOverlayProps) => {
+export const FileDropOverlayView = ({ isVisible }: FileDropOverlayViewProps) => {
   if (!isVisible) return null;
 
   return (
