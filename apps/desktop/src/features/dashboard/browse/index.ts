@@ -4,6 +4,7 @@ export { BrowseDropOverlay } from "./components/BrowseDropOverlay";
 export { BrowseHeader } from "./components/BrowseHeader";
 export { BrowseSection } from "./components/BrowseSection";
 export { ChangeFolderIconDialog } from "./components/ChangeFolderIconDialog";
+export { DeleteConfirmationDialog } from "./components/DeleteConfirmationDialog";
 export { EmptyState } from "./components/EmptyState";
 export { FileViewerDialog } from "./components/file-viewer";
 export { FileCard } from "./components/FileCard";

@@ -8,6 +8,7 @@ import {
   BrowseSection,
   BrowseViewState,
   ChangeFolderIconDialog,
+  DeleteConfirmationDialog,
   EmptyState,
   FileCard,
   FileGridSkeleton,
@@ -63,8 +64,15 @@ const BrowsePage = () => {
     handleToggleFileFavourite,
     handleToggleFolderFavourite,
   } = useBrowse();
+
   const [fileForProperties, setFileForProperties] = useState<FileItem | null>(null);
   const [folderForProperties, setFolderForProperties] = useState<FolderItem | null>(null);
+
+  const [itemForDeletion, setItemForDeletion] = useState<{
+    id: string;
+    name: string;
+    type: "file" | "folder";
+  } | null>(null);
 
   const handleFilePropertiesOpenChange = (open: boolean) => {
     if (!open) {
@@ -75,6 +83,24 @@ const BrowsePage = () => {
   const handleFolderPropertiesOpenChange = (open: boolean) => {
     if (!open) {
       setFolderForProperties(null);
+    }
+  };
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setItemForDeletion(null);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (itemForDeletion == null) {
+      return;
+    }
+
+    if (itemForDeletion.type === "folder") {
+      await handleDeleteFolder(itemForDeletion.id);
+    } else {
+      await handleDeleteFile(itemForDeletion.id);
     }
   };
 
@@ -155,7 +181,11 @@ const BrowsePage = () => {
                           item={item}
                           onClick={() => handleFolderClick(item)}
                           onDelete={() => {
-                            void handleDeleteFolder(item.id);
+                            setItemForDeletion({
+                              id: item.id,
+                              name: item.name,
+                              type: "folder",
+                            });
                           }}
                           onRename={() => handleRequestFolderRename(item)}
                           onChangeIcon={() => {
@@ -184,7 +214,11 @@ const BrowsePage = () => {
                             void handleFileClick(item);
                           }}
                           onDelete={() => {
-                            void handleDeleteFile(item.id);
+                            setItemForDeletion({
+                              id: item.id,
+                              name: item.name,
+                              type: "file",
+                            });
                           }}
                           onRename={() => handleRequestFileRename(item)}
                           onToggleFavourite={() => {
@@ -230,6 +264,13 @@ const BrowsePage = () => {
             isOpen={folderForProperties !== null}
             onOpenChange={handleFolderPropertiesOpenChange}
             item={folderForProperties}
+          />
+          <DeleteConfirmationDialog
+            isOpen={itemForDeletion !== null}
+            onOpenChange={handleDeleteDialogOpenChange}
+            itemName={itemForDeletion?.name ?? ""}
+            itemType={itemForDeletion?.type ?? "file"}
+            onConfirm={handleDeleteConfirm}
           />
         </div>
       )}
