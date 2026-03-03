@@ -12,7 +12,6 @@ export const ImageViewer = ({ url, alt }: ImageViewerProps) => {
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={url}
         alt={alt}

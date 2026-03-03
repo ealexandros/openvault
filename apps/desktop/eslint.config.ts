@@ -4,6 +4,11 @@ import { defineConfig } from "eslint/config";
 export default defineConfig([
   ...nextJsConfig,
   {
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
+  {
     ignores: [
       "src/styles/**",
       "src/components/ui/shadcn/**",

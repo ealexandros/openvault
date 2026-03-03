@@ -1,6 +1,5 @@
 export { useBrowse } from "./hooks/useBrowse";
 
-export { BrowseDropOverlay } from "./components/BrowseDropOverlay";
 export { BrowseHeader } from "./components/BrowseHeader";
 export { BrowseSection } from "./components/BrowseSection";
 export { ChangeFolderIconDialog } from "./components/ChangeFolderIconDialog";

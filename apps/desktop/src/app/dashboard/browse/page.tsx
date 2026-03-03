@@ -1,9 +1,9 @@
 "use client";
 
-import { FileDropListener } from "@/components/file-drop/FileDropListener";
+import { FileDropListener } from "@/components/functional/file-drop/FileDropListener";
+import { BrowseDropOverlay } from "@/components/views/BrowseDropOverlay";
 import { Button } from "@/components/ui/shadcn/button";
 import {
-  BrowseDropOverlay,
   BrowseHeader,
   BrowseSection,
   BrowseViewState,

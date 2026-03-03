@@ -51,7 +51,7 @@ export const DeleteConfirmationDialog = ({
         <DialogHeader>
           <DialogTitle className="text-base">Delete {itemType}</DialogTitle>
           <DialogDescription className="text-sm">
-            Are you sure you want to delete &ldquo;{itemName}&rdquo;? If you delete it,
+            Are you sure you want to delete <b>&ldquo;{itemName}&rdquo;</b>? If you delete it,
             there is nothing to undo this operation.
           </DialogDescription>
         </DialogHeader>

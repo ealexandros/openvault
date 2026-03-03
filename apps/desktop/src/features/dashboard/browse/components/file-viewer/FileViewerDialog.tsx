@@ -6,12 +6,14 @@ import {
 } from "@/components/ui/shadcn/dialog";
 import { cn } from "@/utils/cn";
 import { FileAudioIcon, FileIcon, FileTextIcon, FileVideoIcon, ImageIcon } from "lucide-react";
-import { AudioViewer } from "./AudioViewer";
-import { ImageViewer } from "./ImageViewer";
-import { PdfViewer } from "./PdfViewer";
-import { TextViewer } from "./TextViewer";
-import { VideoViewer } from "./VideoViewer";
-import { ViewerLoading } from "./ViewerLoading";
+import {
+  AudioViewer,
+  ImageViewer,
+  PdfViewer,
+  TextViewer,
+  VideoViewer,
+  ViewerLoading,
+} from "./viewer";
 import { useFileViewerDialog } from "./useFileViewerDialog";
 
 type FileViewerDialogProps = {

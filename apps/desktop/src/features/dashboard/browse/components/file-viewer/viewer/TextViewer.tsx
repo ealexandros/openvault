@@ -13,7 +13,7 @@ export const TextViewer = ({ text }: TextViewerProps) => {
   return (
     <ScrollArea className="h-full w-full bg-zinc-950">
       <div className="min-w-max p-6">
-        <pre className="font-mono text-[13px] leading-relaxed text-zinc-300">
+        <pre className="font-mono text-sm leading-relaxed text-zinc-300">
           <code>{text}</code>
         </pre>
       </div>
