@@ -15,8 +15,6 @@ type FoldersSectionProps = {
   onFolderProperties: (folder: FolderItemResult) => void;
 };
 
-// @todo-now fix this onBreadcrumbClick
-
 export const FoldersSection = ({
   folders,
   canGoBack,

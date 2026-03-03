@@ -14,17 +14,18 @@ import { Input } from "@/components/ui/shadcn/input";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 
-type NewFolderDialogProps = {
+type CreateFolderDialogProps = {
   onCreate: (name: string) => Promise<void>;
 };
 
-export const NewFolderDialog = ({ onCreate }: NewFolderDialogProps) => {
+export const CreateFolderDialog = ({ onCreate }: CreateFolderDialogProps) => {
   const [name, setName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!name.trim()) return;
 
     setIsCreating(true);

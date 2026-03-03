@@ -159,6 +159,13 @@ const BrowsePage = () => {
             <EmptySearchResult searchQuery={searchQuery} onClearSearch={clearSearch} />
           )}
 
+          <FileViewerDialog
+            isOpen={viewingItem !== null}
+            onOpenChange={handleFileViewerOpenChange}
+            fileName={viewingItem?.name ?? ""}
+            extension={viewingItem?.extension}
+            content={viewingItem?.content ?? null}
+          />
           <RenameItemDialog
             isOpen={renamingItem !== null}
             onOpenChange={handleRenameDialogOpenChange}
@@ -170,13 +177,6 @@ const BrowsePage = () => {
             isOpen={folderIdForIconChange !== null}
             onOpenChange={handleIconDialogOpenChange}
             onSelectIcon={handleIconSelect}
-          />
-          <FileViewerDialog
-            isOpen={viewingItem !== null}
-            onOpenChange={handleFileViewerOpenChange}
-            fileName={viewingItem?.name ?? ""}
-            extension={viewingItem?.extension}
-            content={viewingItem?.content ?? null}
           />
           <FilePropertiesDialog
             isOpen={fileForProperties !== null}

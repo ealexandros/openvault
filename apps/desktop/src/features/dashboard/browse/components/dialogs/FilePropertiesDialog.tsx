@@ -5,13 +5,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
-import { type FileItem } from "@/types/filesystem";
+import { type FileItemResult } from "@/types/filesystem";
 import { formatBytes } from "@/utils/format";
 
 type FilePropertiesDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  item: FileItem | null;
+  item: FileItemResult | null;
 };
 
 const formatDateTime = (value: string) => {
@@ -48,18 +48,18 @@ export const FilePropertiesDialog = ({
 
         <div className="space-y-2">
           <PropertyRow label="name" value={item?.name ?? "-"} />
-          <PropertyRow label="size" value={item ? formatBytes(item.size) : "-"} />
+          <PropertyRow label="size" value={item != null ? formatBytes(item.size) : "-"} />
           <PropertyRow
             label="extension"
             value={extension != null && extension.length > 0 ? extension : "-"}
           />
           <PropertyRow
             label="created_at"
-            value={item ? formatDateTime(item.createdAt) : "-"}
+            value={item != null ? formatDateTime(item.createdAt) : "-"}
           />
           <PropertyRow
             label="updated_at"
-            value={item ? formatDateTime(item.updatedAt) : "-"}
+            value={item != null ? formatDateTime(item.updatedAt) : "-"}
           />
         </div>
       </DialogContent>
