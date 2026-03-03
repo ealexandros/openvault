@@ -1,4 +1,4 @@
-import { FolderItemResult } from "@/types/filesystem";
+import { type FileItemResult, type FolderItemResult } from "@/types/filesystem";
 import { useState } from "react";
 import { BrowseViewState, type RenamingItem } from "../types";
 import { useFile } from "./useFile";
@@ -24,103 +24,232 @@ const resolveBrowseViewState = (options: {
   return BrowseViewState.Results;
 };
 
-export { BrowseViewState };
+type PendingDeletionItem = {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+};
 
 export const useBrowse = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const folderState = useFolder({ searchQuery });
-  const fileState = useFile({
-    currentFolderId: folderState.currentFolderId,
-    files: folderState.files,
+  const [selectedFileForProperties, setSelectedFileForProperties] =
+    useState<FileItemResult | null>(null);
+  const [selectedFolderForProperties, setSelectedFolderForProperties] =
+    useState<FolderItemResult | null>(null);
+  const [selectedFolderForIconChange, setSelectedFolderForIconChange] =
+    useState<FolderItemResult | null>(null);
+  const [pendingDeletionItem, setPendingDeletionItem] = useState<PendingDeletionItem | null>(
+    null,
+  );
+
+  const folderStore = useFolder({ searchQuery });
+
+  const fileStore = useFile({
+    currentFolderId: folderStore.currentFolderId,
+    files: folderStore.files,
     searchQuery,
-    refresh: folderState.refresh,
+    refresh: folderStore.refresh,
   });
 
-  const hasSearchResults = folderState.folders.length > 0 || fileState.files.length > 0;
+  const hasSearchResults = folderStore.folders.length > 0 || fileStore.files.length > 0;
 
   const viewState = resolveBrowseViewState({
-    isLoading: folderState.isLoading,
-    hasAnyItems: folderState.hasAnyItems,
+    isLoading: folderStore.isLoading,
+    hasAnyItems: folderStore.hasAnyItems,
     hasSearchResults,
   });
 
-  const renamingItem: RenamingItem | null = folderState.renamingItem ?? fileState.renamingItem;
+  const renamingItem: RenamingItem | null = folderStore.renamingItem ?? fileStore.renamingItem;
 
   const clearSearch = () => {
     setSearchQuery("");
   };
 
-  const handleFolderClick = (item: FolderItemResult) => {
-    folderState.handleFolderClick(item);
+  const openFolder = (folder: FolderItemResult) => {
+    folderStore.handleFolderClick(folder);
     clearSearch();
   };
 
-  const handleBackClick = () => {
-    folderState.handleBreadcrumbClick(folderState.currentPath.length - 2);
+  const goBack = () => {
+    folderStore.handleBreadcrumbClick(folderStore.currentPath.length - 2);
     clearSearch();
   };
 
-  const handleBreadcrumbClick = (index: number) => {
-    folderState.handleBreadcrumbClick(index);
+  const openBreadcrumb = (index: number) => {
+    folderStore.handleBreadcrumbClick(index);
     clearSearch();
   };
 
-  const handleRenameDialogOpenChange = (open: boolean) => {
-    if (open) {
+  const isRenameVisible = renamingItem !== null;
+
+  const toggleRenameVisibility = (isVisible: boolean) => {
+    if (isVisible) {
       return;
     }
 
-    folderState.clearRenamingItem();
-    fileState.clearRenamingItem();
+    folderStore.clearRenamingItem();
+    fileStore.clearRenamingItem();
   };
 
-  const handleRenameFromDialog = async (newName: string) => {
-    if (folderState.renamingItem) {
-      await folderState.renameRenamingItem(newName);
+  const submitRename = async (newName: string) => {
+    if (folderStore.renamingItem) {
+      await folderStore.renameRenamingItem(newName);
       return;
     }
 
-    if (fileState.renamingItem) {
-      await fileState.renameRenamingItem(newName);
+    if (fileStore.renamingItem) {
+      await fileStore.renameRenamingItem(newName);
     }
+  };
+
+  const viewingItem = fileStore.viewingItem;
+  const isFileViewerVisible = viewingItem !== null;
+
+  const toggleFileViewerVisibility = (isVisible: boolean) => {
+    fileStore.handleFileViewerOpenChange(isVisible);
+  };
+
+  const isFolderIconPickerVisible = selectedFolderForIconChange !== null;
+
+  const requestFolderIconChange = (folder: FolderItemResult) => {
+    setSelectedFolderForIconChange(folder);
+  };
+
+  const toggleFolderIconPickerVisibility = (isVisible: boolean) => {
+    if (!isVisible) {
+      setSelectedFolderForIconChange(null);
+    }
+  };
+
+  const selectFolderIcon = async (iconName: string) => {
+    if (selectedFolderForIconChange == null) {
+      return;
+    }
+
+    await folderStore.handleChangeFolderIcon(selectedFolderForIconChange.id, iconName);
+    setSelectedFolderForIconChange(null);
+  };
+
+  const isFilePropertiesVisible = selectedFileForProperties !== null;
+
+  const toggleFilePropertiesVisibility = (isVisible: boolean) => {
+    if (!isVisible) {
+      setSelectedFileForProperties(null);
+    }
+  };
+
+  const showFileProperties = (file: FileItemResult) => {
+    setSelectedFileForProperties(file);
+  };
+
+  const isFolderPropertiesVisible = selectedFolderForProperties !== null;
+
+  const toggleFolderPropertiesVisibility = (isVisible: boolean) => {
+    if (!isVisible) {
+      setSelectedFolderForProperties(null);
+    }
+  };
+
+  const showFolderProperties = (folder: FolderItemResult) => {
+    setSelectedFolderForProperties(folder);
+  };
+
+  const isDeleteConfirmationVisible = pendingDeletionItem !== null;
+
+  const toggleDeleteConfirmationVisibility = (isVisible: boolean) => {
+    if (!isVisible) {
+      setPendingDeletionItem(null);
+    }
+  };
+
+  const requestFileDeletion = (file: FileItemResult) => {
+    setPendingDeletionItem({ id: file.id, name: file.name, type: "file" });
+  };
+
+  const requestFolderDeletion = (folder: FolderItemResult) => {
+    setPendingDeletionItem({ id: folder.id, name: folder.name, type: "folder" });
+  };
+
+  const confirmDeleteSelection = async () => {
+    if (pendingDeletionItem == null) {
+      return;
+    }
+
+    if (pendingDeletionItem.type === "folder") {
+      await folderStore.handleDeleteFolder(pendingDeletionItem.id);
+      return;
+    }
+
+    await fileStore.handleDeleteFile(pendingDeletionItem.id);
+  };
+
+  const browseState = {
+    currentPath: folderStore.currentPath,
+    folderCount: folderStore.folderCount,
+    fileCount: folderStore.fileCount,
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    viewState,
+    isNavigating: folderStore.isNavigating,
+    canGoBack: folderStore.canGoBack,
+  };
+
+  const folderState = {
+    folders: folderStore.folders,
+    openFolder,
+    goBack,
+    openBreadcrumb,
+    createFolder: folderStore.handleCreateFolder,
+    requestRename: folderStore.handleRequestFolderRename,
+    requestDelete: requestFolderDeletion,
+    requestProperties: showFolderProperties,
+    requestIconChange: requestFolderIconChange,
+    toggleFavourite: folderStore.handleToggleFavourite,
+  };
+
+  const fileState = {
+    files: fileStore.files,
+    handleDropPaths: fileStore.uploadPaths,
+    openFile: fileStore.handleFileClick,
+    uploadFile: fileStore.handleUploadFile,
+    uploadFolder: fileStore.handleUploadFolder,
+    requestRename: fileStore.handleRequestFileRename,
+    requestDelete: requestFileDeletion,
+    requestProperties: showFileProperties,
+    toggleFavourite: fileStore.handleToggleFavourite,
+  };
+
+  const dialogState = {
+    isRenameVisible,
+    isFileViewerVisible,
+    isFolderIconPickerVisible,
+    isFilePropertiesVisible,
+    isFolderPropertiesVisible,
+    isDeleteConfirmationVisible,
+    renameInitialName: renamingItem?.name ?? "",
+    renameItemType: renamingItem?.type ?? "file",
+    viewingItem,
+    fileForProperties: selectedFileForProperties,
+    folderForProperties: selectedFolderForProperties,
+    deleteItemName: pendingDeletionItem?.name ?? "",
+    deleteItemType: pendingDeletionItem?.type ?? "file",
+    toggleFolderPropertiesVisibility,
+    toggleFilePropertiesVisibility,
+    toggleFolderIconPickerVisibility,
+    toggleDeleteConfirmationVisibility,
+    toggleFileViewerVisibility,
+    toggleRenameVisibility,
+    selectFolderIcon,
+    submitRename,
+    confirmDeleteSelection,
   };
 
   return {
-    currentPath: folderState.currentPath,
-    folders: folderState.folders,
-    files: fileState.files,
-    folderCount: folderState.folderCount,
-    fileCount: folderState.fileCount,
-    searchQuery,
-    viewState,
-    isNavigating: folderState.isNavigating,
-    renamingItem,
-    viewingItem: fileState.viewingItem,
-    canGoBack: folderState.canGoBack,
-    folderIdForIconChange: folderState.folderIdForIconChange,
-    setSearchQuery,
-    clearSearch,
-    handleBackClick,
-    handleDropPaths: fileState.uploadPaths,
-    handleFolderClick,
-    handleBreadcrumbClick,
-    handleCreateFolder: folderState.handleCreateFolder,
-    handleUploadFile: fileState.handleUploadFile,
-    handleUploadFolder: fileState.handleUploadFolder,
-    handleDeleteFolder: folderState.handleDeleteFolder,
-    handleDeleteFile: fileState.handleDeleteFile,
-    handleRequestFolderRename: folderState.handleRequestFolderRename,
-    handleChangeFolderIcon: folderState.handleChangeFolderIcon,
-    handleRequestFileRename: fileState.handleRequestFileRename,
-    handleRenameDialogOpenChange,
-    handleRenameFromDialog,
-    handleFileClick: fileState.handleFileClick,
-    handleFileViewerOpenChange: fileState.handleFileViewerOpenChange,
-    handleIconDialogOpenChange: folderState.handleIconDialogOpenChange,
-    handleIconSelect: folderState.handleIconSelect,
-    setFolderIdForIconChange: folderState.setFolderIdForIconChange,
-    handleToggleFolderFavourite: folderState.handleToggleFavourite,
-    handleToggleFileFavourite: fileState.handleToggleFavourite,
+    browseState,
+    folderState,
+    fileState,
+    dialogState,
   };
 };

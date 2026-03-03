@@ -16,184 +16,103 @@ import {
   RenameItemDialog,
   useBrowse,
 } from "@/features/dashboard/browse";
-import { FolderItemResult, type FileItemResult } from "@/types/filesystem";
-import { useState } from "react";
 import { FilesSection } from "./_components_/FilesSection";
 import { FoldersSection } from "./_components_/FoldersSection";
 
-// @todo-soon refactor useBrowse to use useFolder and useFile
-
 const BrowsePage = () => {
-  const {
-    currentPath,
-    folders,
-    files,
-    folderCount,
-    fileCount,
-    searchQuery,
-    viewState,
-    isNavigating,
-    renamingItem,
-    viewingItem,
-    canGoBack,
-    folderIdForIconChange,
-    setSearchQuery,
-    clearSearch,
-    handleDropPaths,
-    handleFolderClick,
-    handleBackClick,
-    handleBreadcrumbClick,
-    handleCreateFolder,
-    handleUploadFile,
-    handleUploadFolder,
-    handleDeleteFolder,
-    handleDeleteFile,
-    handleRequestFolderRename,
-    handleRequestFileRename,
-    handleRenameDialogOpenChange,
-    handleRenameFromDialog,
-    handleFileClick,
-    handleFileViewerOpenChange,
-    handleIconDialogOpenChange,
-    handleIconSelect,
-    setFolderIdForIconChange,
-    handleToggleFileFavourite,
-    handleToggleFolderFavourite,
-  } = useBrowse();
-
-  const [fileForProperties, setFileForProperties] = useState<FileItemResult | null>(null);
-  const [folderForProperties, setFolderForProperties] = useState<FolderItemResult | null>(
-    null,
-  );
-
-  const [itemForDeletion, setItemForDeletion] = useState<{
-    id: string;
-    name: string;
-    type: "file" | "folder";
-  } | null>(null);
-
-  const handleFilePropertiesOpenChange = (open: boolean) => {
-    if (!open) {
-      setFileForProperties(null);
-    }
-  };
-
-  const handleFolderPropertiesOpenChange = (open: boolean) => {
-    if (!open) {
-      setFolderForProperties(null);
-    }
-  };
-
-  const handleDeleteDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setItemForDeletion(null);
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (itemForDeletion == null) {
-      return;
-    }
-
-    if (itemForDeletion.type === "folder") {
-      await handleDeleteFolder(itemForDeletion.id);
-    } else {
-      await handleDeleteFile(itemForDeletion.id);
-    }
-  };
+  const { browseState, folderState, fileState, dialogState } = useBrowse();
 
   return (
-    <FileDropListener onDropPaths={handleDropPaths}>
+    <FileDropListener onDropPaths={fileState.handleDropPaths}>
       {({ isDragging }) => (
         <main className="relative mx-auto h-full max-w-7xl space-y-16 py-8">
           <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
-            currentPath={currentPath}
-            folderCount={folderCount}
-            fileCount={fileCount}
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-            onBreadcrumbClick={handleBreadcrumbClick}
-            onUploadFile={handleUploadFile}
-            onUploadFolder={handleUploadFolder}
-            onCreateFolder={handleCreateFolder}
+            currentPath={browseState.currentPath}
+            folderCount={browseState.folderCount}
+            fileCount={browseState.fileCount}
+            searchQuery={browseState.searchQuery}
+            onSearchQueryChange={browseState.setSearchQuery}
+            onBreadcrumbClick={folderState.openBreadcrumb}
+            onUploadFile={fileState.uploadFile}
+            onUploadFolder={fileState.uploadFolder}
+            onCreateFolder={folderState.createFolder}
           />
 
-          {viewState === BrowseViewState.Loading && <BrowseSkeleton />}
+          {browseState.viewState === BrowseViewState.Loading && <BrowseSkeleton />}
 
-          {viewState === BrowseViewState.Results && (
+          {browseState.viewState === BrowseViewState.Results && (
             <section className="space-y-10 transition-opacity duration-200">
               <FoldersSection
-                folders={folders}
-                canGoBack={canGoBack}
-                isNavigating={isNavigating}
-                onBackClick={handleBackClick}
-                onFolderClick={handleFolderClick}
-                onFolderRename={handleRequestFolderRename}
-                onFolderToggleFavourite={handleToggleFolderFavourite}
-                onFolderProperties={setFolderForProperties}
-                onFolderDelete={folder =>
-                  setItemForDeletion({ id: folder.id, name: folder.name, type: "folder" })
-                }
-                onFolderChangeIcon={folder => setFolderIdForIconChange(folder.id)}
+                folders={folderState.folders}
+                canGoBack={browseState.canGoBack}
+                isNavigating={browseState.isNavigating}
+                onBackClick={folderState.goBack}
+                onFolderClick={folderState.openFolder}
+                onFolderRename={folderState.requestRename}
+                onFolderToggleFavourite={folderState.toggleFavourite}
+                onFolderProperties={folderState.requestProperties}
+                onFolderDelete={folderState.requestDelete}
+                onFolderChangeIcon={folderState.requestIconChange}
               />
               <FilesSection
-                files={files}
-                onFileClick={handleFileClick}
-                onFileRename={handleRequestFileRename}
-                onFileToggleFavourite={handleToggleFileFavourite}
-                onFileProperties={setFileForProperties}
-                onFileDelete={file =>
-                  setItemForDeletion({ id: file.id, name: file.name, type: "file" })
-                }
+                files={fileState.files}
+                onFileClick={fileState.openFile}
+                onFileRename={fileState.requestRename}
+                onFileToggleFavourite={fileState.toggleFavourite}
+                onFileProperties={fileState.requestProperties}
+                onFileDelete={fileState.requestDelete}
               />
             </section>
           )}
 
-          {viewState === BrowseViewState.Empty && (
-            <EmptyFolder canGoBack={canGoBack} onGoBack={handleBackClick} />
+          {browseState.viewState === BrowseViewState.Empty && (
+            <EmptyFolder canGoBack={browseState.canGoBack} onGoBack={folderState.goBack} />
           )}
 
-          {viewState === BrowseViewState.NoResults && (
-            <EmptySearchResult searchQuery={searchQuery} onClearSearch={clearSearch} />
+          {browseState.viewState === BrowseViewState.NoResults && (
+            <EmptySearchResult
+              searchQuery={browseState.searchQuery}
+              onClearSearch={browseState.clearSearch}
+            />
           )}
 
           <FileViewerDialog
-            isOpen={viewingItem !== null}
-            onOpenChange={handleFileViewerOpenChange}
-            fileName={viewingItem?.name ?? ""}
-            extension={viewingItem?.extension}
-            content={viewingItem?.content ?? null}
+            isOpen={dialogState.isFileViewerVisible}
+            onOpenChange={dialogState.toggleFileViewerVisibility}
+            fileName={dialogState.viewingItem?.name ?? ""}
+            extension={dialogState.viewingItem?.extension}
+            content={dialogState.viewingItem?.content ?? null}
           />
           <RenameItemDialog
-            isOpen={renamingItem !== null}
-            onOpenChange={handleRenameDialogOpenChange}
-            initialName={renamingItem?.name ?? ""}
-            itemType={renamingItem?.type ?? "file"}
-            onRename={handleRenameFromDialog}
+            isOpen={dialogState.isRenameVisible}
+            onOpenChange={dialogState.toggleRenameVisibility}
+            initialName={dialogState.renameInitialName}
+            itemType={dialogState.renameItemType}
+            onRename={dialogState.submitRename}
           />
           <ChangeFolderIconDialog
-            isOpen={folderIdForIconChange !== null}
-            onOpenChange={handleIconDialogOpenChange}
-            onSelectIcon={handleIconSelect}
+            isOpen={dialogState.isFolderIconPickerVisible}
+            onOpenChange={dialogState.toggleFolderIconPickerVisibility}
+            onSelectIcon={dialogState.selectFolderIcon}
           />
           <FilePropertiesDialog
-            isOpen={fileForProperties !== null}
-            onOpenChange={handleFilePropertiesOpenChange}
-            item={fileForProperties}
+            isOpen={dialogState.isFilePropertiesVisible}
+            onOpenChange={dialogState.toggleFilePropertiesVisibility}
+            item={dialogState.fileForProperties}
           />
           <FolderPropertiesDialog
-            isOpen={folderForProperties !== null}
-            onOpenChange={handleFolderPropertiesOpenChange}
-            item={folderForProperties}
+            isOpen={dialogState.isFolderPropertiesVisible}
+            onOpenChange={dialogState.toggleFolderPropertiesVisibility}
+            item={dialogState.folderForProperties}
           />
           <DeleteConfirmationDialog
-            isOpen={itemForDeletion !== null}
-            onOpenChange={handleDeleteDialogOpenChange}
-            itemName={itemForDeletion?.name ?? ""}
-            itemType={itemForDeletion?.type ?? "file"}
-            onConfirm={handleDeleteConfirm}
+            isOpen={dialogState.isDeleteConfirmationVisible}
+            onOpenChange={dialogState.toggleDeleteConfirmationVisibility}
+            itemName={dialogState.deleteItemName}
+            itemType={dialogState.deleteItemType}
+            onConfirm={dialogState.confirmDeleteSelection}
           />
         </main>
       )}

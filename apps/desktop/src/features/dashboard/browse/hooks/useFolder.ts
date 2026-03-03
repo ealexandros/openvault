@@ -129,7 +129,6 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
   const [listing, setListing] = useState<BrowseResult>({ folders: [], files: [] });
   const [loadedFolderId, setLoadedFolderId] = useState<string | null>(null);
   const [renamingItem, setRenamingItem] = useState<FolderRenamingItem | null>(null);
-  const [folderIdForIconChange, setFolderIdForIconChange] = useState<string | null>(null);
 
   const canGoBack = currentPath.length > 1;
 
@@ -264,23 +263,6 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     await handleRenameFolder(renamingItem.id, newName);
   };
 
-  const handleIconDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setFolderIdForIconChange(null);
-    }
-  };
-
-  const handleIconSelect = async (iconName: string) => {
-    const folderId = folderIdForIconChange;
-
-    if (folderId == null) {
-      return;
-    }
-
-    await handleChangeFolderIcon(folderId, iconName);
-    setFolderIdForIconChange(null);
-  };
-
   const handleToggleFavourite = async (folder: FolderItemResult) => {
     const result = await tauriApi.setFolderFavorite({
       id: folder.id,
@@ -343,7 +325,6 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     isNavigating,
     renamingItem,
     canGoBack,
-    folderIdForIconChange,
     refresh,
     handleFolderClick,
     handleBreadcrumbClick,
@@ -353,9 +334,6 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     handleChangeFolderIcon,
     clearRenamingItem,
     renameRenamingItem,
-    handleIconDialogOpenChange,
-    handleIconSelect,
-    setFolderIdForIconChange,
     handleToggleFavourite,
   };
 };

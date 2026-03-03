@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/shadcn/breadcrumb";
 import { HomeIcon } from "lucide-react";
+import React from "react";
 
 type BrowseBreadcrumbsProps = {
   currentPath: string[];
@@ -26,8 +27,8 @@ export const BrowseBreadcrumbs = ({ currentPath, onPathClick }: BrowseBreadcrumb
     <Breadcrumb>
       <BreadcrumbList className="text-sm">
         {clickableSegments.map((segment, index) => (
-          <>
-            <BreadcrumbItem key={`${segment}-${index}`}>
+          <React.Fragment key={`${segment}-${index}`}>
+            <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <button
                   onClick={() => onPathClick(index)}
@@ -38,7 +39,7 @@ export const BrowseBreadcrumbs = ({ currentPath, onPathClick }: BrowseBreadcrumb
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-          </>
+          </React.Fragment>
         ))}
         <BreadcrumbItem>
           <BreadcrumbPage className="flex items-center gap-1.5 font-semibold text-foreground">
