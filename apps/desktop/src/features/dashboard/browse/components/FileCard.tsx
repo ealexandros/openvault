@@ -21,6 +21,7 @@ type FileCardProps = {
   onDelete: () => void;
   onRename: () => void;
   onToggleFavourite: () => void;
+  onProperties: () => void;
 };
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -48,6 +49,7 @@ export const FileCard = ({
   onDelete,
   onRename,
   onToggleFavourite,
+  onProperties,
 }: FileCardProps) => {
   const fileType = getFileType(item.extension);
   const IconComponent = ICON_MAP[fileType] ?? ICON_MAP.default ?? X;
@@ -58,7 +60,8 @@ export const FileCard = ({
         isFavourite={item.isFavourite}
         onRename={onRename}
         onToggleFavourite={onToggleFavourite}
-        onDelete={onDelete}>
+        onDelete={onDelete}
+        onProperties={onProperties}>
         <div
           onClick={onClick}
           className={cn(
@@ -76,7 +79,9 @@ export const FileCard = ({
           </div>
 
           <div className="space-y-1">
-            <p className="truncate text-sm font-semibold tracking-tight text-foreground/90 transition-colors group-hover:text-foreground">
+            <p
+              title={item.name}
+              className="truncate text-sm font-semibold tracking-tight text-foreground/90 transition-colors group-hover:text-foreground">
               {item.name}
             </p>
             <div className="flex items-center gap-1.5 opacity-70">

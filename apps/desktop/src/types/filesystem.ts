@@ -4,6 +4,8 @@ export type FolderItem = {
   icon: string;
   itemCount: number;
   isFavourite: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type FileItem = {
@@ -12,6 +14,8 @@ export type FileItem = {
   size: number;
   extension: string;
   isFavourite: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type BrowseResult = {

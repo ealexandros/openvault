@@ -11,15 +11,19 @@ import {
   EmptyState,
   FileCard,
   FileGridSkeleton,
+  FilePropertiesDialog,
   FileViewerDialog,
   FolderBackButton,
   FolderCard,
   FolderGridSkeleton,
+  FolderPropertiesDialog,
   RenameItemDialog,
   useBrowse,
 } from "@/features/dashboard/browse";
+import { type FileItem, type FolderItem } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { FileIcon, FolderIcon } from "lucide-react";
+import { useState } from "react";
 
 // @todo-soon refactor useBrowse to use useFolder and useFile
 
@@ -59,6 +63,20 @@ const BrowsePage = () => {
     handleToggleFileFavourite,
     handleToggleFolderFavourite,
   } = useBrowse();
+  const [fileForProperties, setFileForProperties] = useState<FileItem | null>(null);
+  const [folderForProperties, setFolderForProperties] = useState<FolderItem | null>(null);
+
+  const handleFilePropertiesOpenChange = (open: boolean) => {
+    if (!open) {
+      setFileForProperties(null);
+    }
+  };
+
+  const handleFolderPropertiesOpenChange = (open: boolean) => {
+    if (!open) {
+      setFolderForProperties(null);
+    }
+  };
 
   return (
     <FileDropListener onDropPaths={handleDropPaths}>
@@ -146,6 +164,9 @@ const BrowsePage = () => {
                           onToggleFavourite={() => {
                             void handleToggleFolderFavourite(item.id, !item.isFavourite);
                           }}
+                          onProperties={() => {
+                            setFolderForProperties(item);
+                          }}
                         />
                       ))}
                     </div>
@@ -168,6 +189,9 @@ const BrowsePage = () => {
                           onRename={() => handleRequestFileRename(item)}
                           onToggleFavourite={() => {
                             void handleToggleFileFavourite(item.id, !item.isFavourite);
+                          }}
+                          onProperties={() => {
+                            setFileForProperties(item);
                           }}
                         />
                       ))}
@@ -196,6 +220,16 @@ const BrowsePage = () => {
             fileName={viewingItem?.name ?? ""}
             extension={viewingItem?.extension}
             content={viewingItem?.content ?? null}
+          />
+          <FilePropertiesDialog
+            isOpen={fileForProperties !== null}
+            onOpenChange={handleFilePropertiesOpenChange}
+            item={fileForProperties}
+          />
+          <FolderPropertiesDialog
+            isOpen={folderForProperties !== null}
+            onOpenChange={handleFolderPropertiesOpenChange}
+            item={folderForProperties}
           />
         </div>
       )}

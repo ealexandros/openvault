@@ -39,6 +39,8 @@ pub async fn browse_vault(
             icon: folder.icon.clone(),
             is_favourite: folder.is_favourite,
             item_count: vault.filesystem().children_count(&folder.id) as u64,
+            created_at: folder.created_at.to_string(),
+            updated_at: folder.updated_at.to_string(),
         })
         .collect();
 
@@ -50,6 +52,8 @@ pub async fn browse_vault(
             size: file.blob.size_bytes,
             is_favourite: file.is_favourite,
             extension: file.extension.clone(),
+            created_at: file.created_at.to_string(),
+            updated_at: file.updated_at.to_string(),
         })
         .collect();
 

@@ -99,6 +99,8 @@ pub struct FolderItem {
     pub icon: String,
     pub is_favourite: bool,
     pub item_count: u64,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(Serialize)]
@@ -109,6 +111,8 @@ pub struct FileItem {
     pub size: u64,
     pub is_favourite: bool,
     pub extension: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(Serialize)]

@@ -12,6 +12,7 @@ type FolderCardProps = {
   onRename: () => void;
   onChangeIcon: () => void;
   onToggleFavourite: () => void;
+  onProperties: () => void;
 };
 
 export const FolderCard = ({
@@ -21,6 +22,7 @@ export const FolderCard = ({
   onRename,
   onChangeIcon,
   onToggleFavourite,
+  onProperties,
 }: FolderCardProps) => (
   <div className="relative">
     <FolderContextMenu
@@ -28,7 +30,8 @@ export const FolderCard = ({
       onRename={onRename}
       onChangeIcon={onChangeIcon}
       onDelete={onDelete}
-      onToggleFavourite={onToggleFavourite}>
+      onToggleFavourite={onToggleFavourite}
+      onProperties={onProperties}>
       <div
         onClick={onClick}
         className={cn(
@@ -46,7 +49,9 @@ export const FolderCard = ({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold tracking-tight text-foreground/90 transition-colors group-hover:text-foreground">
+          <p
+            title={item.name}
+            className="truncate text-sm font-semibold tracking-tight text-foreground/90 transition-colors group-hover:text-foreground">
             {item.name}
           </p>
           <div className="flex items-center gap-1.5 opacity-70">

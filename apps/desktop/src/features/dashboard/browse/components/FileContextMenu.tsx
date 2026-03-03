@@ -4,7 +4,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/shadcn/context-menu";
-import { PencilIcon, StarIcon, Trash2Icon } from "lucide-react";
+import { EllipsisVertical, PencilIcon, StarIcon, Trash2Icon } from "lucide-react";
 import { type ReactNode } from "react";
 
 type FileContextMenuProps = {
@@ -13,6 +13,7 @@ type FileContextMenuProps = {
   onRename: () => void;
   onToggleFavourite: () => void;
   onDelete: () => void;
+  onProperties: () => void;
 };
 
 export const FileContextMenu = ({
@@ -21,10 +22,20 @@ export const FileContextMenu = ({
   onRename,
   onToggleFavourite,
   onDelete,
+  onProperties,
 }: FileContextMenuProps) => (
   <ContextMenu>
     <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
     <ContextMenuContent className="w-48 overflow-hidden rounded-xl border-border/50 bg-background/95 backdrop-blur-xl">
+      <ContextMenuItem
+        onClick={e => {
+          e.stopPropagation();
+          onToggleFavourite();
+        }}
+        className="gap-2.5 py-2.5">
+        <StarIcon className="size-4" />
+        <span className="font-medium">{isFavourite ? "Unfavourite" : "Favourite"}</span>
+      </ContextMenuItem>
       <ContextMenuItem
         onClick={e => {
           e.stopPropagation();
@@ -37,11 +48,11 @@ export const FileContextMenu = ({
       <ContextMenuItem
         onClick={e => {
           e.stopPropagation();
-          onToggleFavourite();
+          onProperties();
         }}
         className="gap-2.5 py-2.5">
-        <StarIcon className="size-4" />
-        <span className="font-medium">{isFavourite ? "Unfavourite" : "Favourite"}</span>
+        <EllipsisVertical className="size-4 text-muted-foreground" />
+        <span className="font-medium">Properties</span>
       </ContextMenuItem>
       <ContextMenuItem
         variant="destructive"
