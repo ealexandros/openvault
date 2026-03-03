@@ -27,7 +27,7 @@ export const FoldersSection = ({
   onFolderChangeIcon,
   onFolderProperties,
 }: FoldersSectionProps) => {
-  if (folders.length === 0) {
+  if (folders.length === 0 && !canGoBack) {
     return null;
   }
 
