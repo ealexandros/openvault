@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/shadcn/button";
 import { FolderIcon, PlusIcon } from "lucide-react";
 
-type EmptyStateProps = {
+type EmptyFolderProps = {
   canGoBack: boolean;
   onGoBack: () => void;
 };
 
-export const EmptyState = ({ canGoBack, onGoBack }: EmptyStateProps) => (
+export const EmptyFolder = ({ canGoBack, onGoBack }: EmptyFolderProps) => (
   <div className="col-span-full flex animate-in flex-col items-center justify-center space-y-6 py-32 text-center duration-500 fade-in slide-in-from-bottom-4">
     <div className="relative">
       <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-3xl" />

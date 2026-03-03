@@ -1,7 +1,6 @@
 "use client";
 
 import { FileDropListener } from "@/components/functional/FileDropListener";
-import { Button } from "@/components/ui/shadcn/button";
 import { FileDropOverlayView } from "@/components/views/FileDropOverlayView";
 import {
   BrowseHeader,
@@ -10,8 +9,8 @@ import {
   BrowseViewState,
   ChangeFolderIconDialog,
   DeleteConfirmationDialog,
+  EmptySearchResult,
   EmptyState,
-  FileCard,
   FilePropertiesDialog,
   FileViewerDialog,
   FolderBackButton,
@@ -20,7 +19,8 @@ import {
   RenameItemDialog,
   useBrowse,
 } from "@/features/dashboard/browse";
-import { type FileItemResult } from "@/types/filesystem";
+import { FileItem } from "@/features/dashboard/browse/components/FileItem";
+import { FolderItemResult, type FileItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { FileIcon, FolderIcon } from "lucide-react";
 import { useState } from "react";
@@ -65,7 +65,9 @@ const BrowsePage = () => {
   } = useBrowse();
 
   const [fileForProperties, setFileForProperties] = useState<FileItemResult | null>(null);
-  const [folderForProperties, setFolderForProperties] = useState<FileItemResult | null>(null);
+  const [folderForProperties, setFolderForProperties] = useState<FolderItemResult | null>(
+    null,
+  );
 
   const [itemForDeletion, setItemForDeletion] = useState<{
     id: string;
@@ -106,7 +108,7 @@ const BrowsePage = () => {
   return (
     <FileDropListener onDropPaths={handleDropPaths}>
       {({ isDragging }) => (
-        <main className="relative mx-auto h-full max-w-7xl space-y-16 px-4 py-8">
+        <main className="relative mx-auto h-full max-w-7xl space-y-16 py-8">
           <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
@@ -121,110 +123,89 @@ const BrowsePage = () => {
             onCreateFolder={handleCreateFolder}
           />
 
-          <section className="h-4/5">
-            {viewState === BrowseViewState.Loading && <BrowseSkeleton />}
+          {viewState === BrowseViewState.Loading && <BrowseSkeleton />}
 
-            {viewState === BrowseViewState.Empty && (
-              <div
-                className={cn(
-                  "transition-opacity duration-200",
-                  isNavigating ? "opacity-50" : "opacity-100",
-                )}>
-                <EmptyState
-                  canGoBack={canGoBack}
-                  onGoBack={() => handleBreadcrumbClick(currentPath.length - 2)}
-                />
-              </div>
-            )}
+          {viewState === BrowseViewState.Empty && (
+            <EmptyState
+              canGoBack={canGoBack}
+              onGoBack={() => handleBreadcrumbClick(currentPath.length - 2)}
+            />
+          )}
 
-            {viewState === BrowseViewState.NoResults && (
-              <div className="flex animate-in flex-col items-center gap-3 rounded-2xl border border-dashed px-8 py-16 text-center duration-300 fade-in slide-in-from-bottom-2">
-                <p className="text-base font-medium">No matches found</p>
-                <p className="max-w-md text-sm text-muted-foreground">
-                  Nothing matches <span>&ldquo;{searchQuery}&rdquo;</span>. Try another
-                  keyword.
-                </p>
-                <Button variant="outline" onClick={clearSearch}>
-                  Clear search
-                </Button>
-              </div>
-            )}
+          {viewState === BrowseViewState.NoResults && (
+            <EmptySearchResult searchQuery={searchQuery} onClearSearch={clearSearch} />
+          )}
 
-            {viewState === BrowseViewState.Results && (
-              <div
-                className={cn(
-                  "space-y-10 transition-opacity duration-200",
-                  isNavigating ? "opacity-50" : "opacity-100",
-                )}>
-                {(folders.length > 0 || canGoBack) && (
-                  <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {canGoBack && (
-                        <FolderBackButton
-                          handleBreadcrumbClick={handleBreadcrumbClick}
-                          currentPath={currentPath}
-                        />
-                      )}
-                      {folders.map(item => (
-                        <FolderCard
-                          key={item.id}
-                          item={item}
-                          onClick={() => handleFolderClick(item)}
-                          onDelete={() => {
-                            setItemForDeletion({
-                              id: item.id,
-                              name: item.name,
-                              type: "folder",
-                            });
-                          }}
-                          onRename={() => handleRequestFolderRename(item)}
-                          onChangeIcon={() => {
-                            setFolderIdForIconChange(item.id);
-                          }}
-                          onToggleFavourite={() => {
-                            void handleToggleFolderFavourite(item.id, !item.isFavourite);
-                          }}
-                          onProperties={() => {
-                            setFolderForProperties(item);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </BrowseSection>
-                )}
+          {viewState === BrowseViewState.Results && (
+            <div
+              className={cn(
+                "space-y-10 transition-opacity duration-200",
+                isNavigating ? "opacity-50" : "opacity-100",
+              )}>
+              {(folders.length > 0 || canGoBack) && (
+                <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {canGoBack && !isNavigating && (
+                      <FolderBackButton
+                        handleBreadcrumbClick={handleBreadcrumbClick}
+                        currentPath={currentPath}
+                      />
+                    )}
+                    {folders.map(item => (
+                      <FolderCard
+                        key={item.id}
+                        folder={item}
+                        onClick={() => handleFolderClick(item)}
+                        onDelete={() => {
+                          setItemForDeletion({
+                            id: item.id,
+                            name: item.name,
+                            type: "folder",
+                          });
+                        }}
+                        onRename={() => handleRequestFolderRename(item)}
+                        onChangeIcon={() => {
+                          setFolderIdForIconChange(item.id);
+                        }}
+                        onToggleFavourite={() => {
+                          void handleToggleFolderFavourite(item.id, !item.isFavourite);
+                        }}
+                        onProperties={() => {
+                          setFolderForProperties(item);
+                        }}
+                      />
+                    ))}
+                  </div>
+                </BrowseSection>
+              )}
 
-                {files.length > 0 && (
-                  <BrowseSection title="Files" count={files.length} icon={FileIcon}>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {files.map(item => (
-                        <FileCard
-                          key={item.id}
-                          file={item}
-                          onClick={() => {
-                            void handleFileClick(item);
-                          }}
-                          onDelete={() => {
-                            setItemForDeletion({
-                              id: item.id,
-                              name: item.name,
-                              type: "file",
-                            });
-                          }}
-                          onRename={() => handleRequestFileRename(item)}
-                          onToggleFavourite={() => {
-                            void handleToggleFileFavourite(item.id, !item.isFavourite);
-                          }}
-                          onProperties={() => {
-                            setFileForProperties(item);
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </BrowseSection>
-                )}
-              </div>
-            )}
-          </section>
+              {files.length > 0 && (
+                <BrowseSection title="Files" count={files.length} icon={FileIcon}>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {files.map(file => (
+                      <FileItem
+                        key={file.id}
+                        file={file}
+                        onClick={() => handleFileClick(file)}
+                        onDelete={() => {
+                          setItemForDeletion({
+                            id: file.id,
+                            name: file.name,
+                            type: "file",
+                          });
+                        }}
+                        onRename={() => handleRequestFileRename(file)}
+                        onToggleFavourite={() =>
+                          handleToggleFileFavourite(file.id, !file.isFavourite)
+                        }
+                        onProperties={() => setFileForProperties(file)}
+                      />
+                    ))}
+                  </div>
+                </BrowseSection>
+              )}
+            </div>
+          )}
 
           <RenameItemDialog
             isOpen={renamingItem !== null}

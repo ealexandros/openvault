@@ -1,5 +1,5 @@
 import { tauriApi } from "@/libraries/tauri-api";
-import { type FileItem } from "@/types/filesystem";
+import { type FileItemResult } from "@/types/filesystem";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -7,12 +7,12 @@ import { type FileRenamingItem, type ViewingItem } from "../types";
 
 type UseFileOptions = {
   currentFolderId: string;
-  files: FileItem[];
+  files: FileItemResult[];
   searchQuery: string;
   refresh: () => Promise<void>;
 };
 
-const sortFiles = (items: FileItem[]) =>
+const sortFiles = (items: FileItemResult[]) =>
   [...items].sort((left, right) => {
     if (left.isFavourite !== right.isFavourite) {
       return left.isFavourite ? -1 : 1;
@@ -98,7 +98,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     }
   };
 
-  const handleRequestFileRename = (item: FileItem) => {
+  const handleRequestFileRename = (item: FileItemResult) => {
     setRenamingItem({ id: item.id, name: item.name, type: "file" });
   };
 
@@ -124,7 +124,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     return result.data;
   };
 
-  const handleFileClick = async (item: Pick<FileItem, "id" | "name" | "extension">) => {
+  const handleFileClick = async (item: Pick<FileItemResult, "id" | "name" | "extension">) => {
     const previewSequence = ++previewSequenceRef.current;
 
     setViewingItem({

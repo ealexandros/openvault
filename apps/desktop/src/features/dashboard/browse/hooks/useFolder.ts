@@ -1,5 +1,5 @@
 import { tauriApi } from "@/libraries/tauri-api";
-import { FolderItemResult, type BrowseResult, type FileItemResult } from "@/types/filesystem";
+import { FolderItemResult, type BrowseResult } from "@/types/filesystem";
 import {
   ArchiveIcon,
   BookOpenIcon,
@@ -171,7 +171,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     );
   };
 
-  const handleFolderClick = (item: FileItemResult) => {
+  const handleFolderClick = (item: FolderItemResult) => {
     setCurrentPath(previousPath => {
       const activeItem = previousPath[previousPath.length - 1] ?? ROOT_FOLDER;
 
@@ -237,7 +237,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     }
   };
 
-  const handleRequestFolderRename = (item: FileItemResult) => {
+  const handleRequestFolderRename = (item: FolderItemResult) => {
     setRenamingItem({ id: item.id, name: item.name, type: "folder" });
   };
 
