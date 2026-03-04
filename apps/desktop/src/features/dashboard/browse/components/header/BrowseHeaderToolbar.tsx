@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
-import { FilePlus, FolderPlus, LayoutGridIcon, UploadCloudIcon } from "lucide-react";
+import { FileUp, FolderUp, LayoutGridIcon, UploadIcon } from "lucide-react";
 import { NewFolderDialog } from "../dialogs";
 
 type BrowseHeaderToolbarProps = {
@@ -38,23 +38,18 @@ export const BrowseHeaderToolbar = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="h-10 gap-2 px-5 text-sm font-medium">
-            <UploadCloudIcon className="size-4" />
+            <UploadIcon className="size-4" />
             Upload
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-48 p-2">
-          <DropdownMenuItem
-            onClick={onUploadFile}
-            className="cursor-pointer gap-2 rounded-sm py-2">
-            <FilePlus className="size-4" />
+          <DropdownMenuItem onClick={onUploadFile} className="cursor-pointer text-[13px]">
+            <FolderUp className="size-4 text-foreground/80" />
             Upload Files
           </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={onUploadFolder}
-            className="cursor-pointer gap-2 rounded-sm py-2">
-            <FolderPlus className="size-4" />
+          <DropdownMenuItem onClick={onUploadFolder} className="cursor-pointer text-[13px]">
+            <FileUp className="size-4 text-foreground/80" />
             Upload Folder
           </DropdownMenuItem>
         </DropdownMenuContent>

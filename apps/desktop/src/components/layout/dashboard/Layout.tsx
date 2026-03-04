@@ -45,7 +45,7 @@ export const DashboardLayout = ({
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto h-full max-w-7xl">{children}</div>
+          <div className="mx-auto h-full">{children}</div>
         </div>
       </main>
     </div>
