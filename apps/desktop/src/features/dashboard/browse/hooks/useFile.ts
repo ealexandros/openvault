@@ -1,5 +1,5 @@
 import { tauriApi } from "@/libraries/tauri-api";
-import { type FileItemResult } from "@/types/filesystem";
+import { ItemType, type FileItemResult } from "@/types/filesystem";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -155,9 +155,10 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
   };
 
   const handleToggleFavourite = async (file: FileItemResult) => {
-    const result = await tauriApi.setFileFavorite({
+    const result = await tauriApi.setFavourtieItem({
       id: file.id,
       isFavourite: !file.isFavourite,
+      itemType: ItemType.FILE,
     });
 
     if (result.success) {

@@ -6,9 +6,8 @@ pub enum Error {
     #[error(transparent)]
     Sdk(#[from] openvault_sdk::Error),
 
-    #[error("Internal error: {0}")]
-    Internal(String),
-
+    // #[error("Internal error: {0}")]
+    // Internal(String),
     #[error("Invalid UUID: {0}")]
     InvalidUuid(String),
 

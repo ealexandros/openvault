@@ -1,5 +1,5 @@
 import { tauriApi } from "@/libraries/tauri-api";
-import { FolderItemResult, type BrowseResult } from "@/types/filesystem";
+import { FolderItemResult, ItemType, type BrowseResult } from "@/types/filesystem";
 import {
   ArchiveIcon,
   BookOpenIcon,
@@ -264,9 +264,10 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
   };
 
   const handleToggleFavourite = async (folder: FolderItemResult) => {
-    const result = await tauriApi.setFolderFavorite({
+    const result = await tauriApi.setFavourtieItem({
       id: folder.id,
       isFavourite: !folder.isFavourite,
+      itemType: ItemType.FOLDER,
     });
 
     if (result.success) {

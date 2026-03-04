@@ -1,5 +1,5 @@
 import { logger } from "@/libraries/logger";
-import { type BrowseResult } from "@/types/filesystem";
+import { ItemType, type BrowseResult } from "@/types/filesystem";
 import { invoke } from "@tauri-apps/api/core";
 
 export type Result<T> = { success: true; data: T } | { success: false; error: unknown };
@@ -41,11 +41,11 @@ export const tauriApi = {
     return safeInvokeTauri<string>("create_folder", { params });
   },
 
-  deleteItem: (params: { id: string; itemType: "file" | "folder" }) => {
+  deleteItem: (params: { id: string; itemType: ItemType }) => {
     return safeInvokeTauri<void>("delete_item", { params });
   },
 
-  renameItem: (params: { id: string; itemType: "file" | "folder"; newName: string }) => {
+  renameItem: (params: { id: string; itemType: ItemType; newName: string }) => {
     return safeInvokeTauri<void>("rename_item", { params });
   },
 
@@ -69,11 +69,7 @@ export const tauriApi = {
     return safeInvokeTauri<void>("set_folder_icon", { params });
   },
 
-  setFolderFavorite: (params: { id: string; isFavourite: boolean }) => {
-    return safeInvokeTauri<void>("set_folder_favorite", { params });
-  },
-
-  setFileFavorite: (params: { id: string; isFavourite: boolean }) => {
-    return safeInvokeTauri<void>("set_file_favorite", { params });
+  setFavourtieItem: (params: { id: string; itemType: ItemType; isFavourite: boolean }) => {
+    return safeInvokeTauri<void>("set_favorite_item", { params });
   },
 };

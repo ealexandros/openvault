@@ -2,8 +2,8 @@ use uuid::Uuid;
 
 use crate::commands::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
-    FavoriteFileParams, FavoriteFolderParams, FileItem, FolderItem, GetFileContentParams,
-    PathIsFileParams, RenameItemParams, UploadFileParams, UploadFolderParams,
+    FileItem, FolderItem, GetFileContentParams, ItemType, PathIsFileParams, RenameItemParams,
+    SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
 };
 use crate::errors::{Error, Result};
 use crate::state::TauriState;
@@ -81,10 +81,9 @@ pub async fn delete_item(state: TauriState<'_>, params: DeleteItemParams) -> Res
 
     let uuid = parse_uuid(&params.id)?;
 
-    match params.item_type.as_str() {
-        "file" => vault.filesystem().remove_file(uuid)?,
-        "folder" => vault.filesystem().remove_folder(uuid)?,
-        _ => return Err(Error::Internal("Invalid item type".into())),
+    match params.item_type {
+        ItemType::File => vault.filesystem().remove_file(uuid)?,
+        ItemType::Folder => vault.filesystem().remove_folder(uuid)?,
     }
 
     vault.commit_all()?;
@@ -99,10 +98,9 @@ pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Res
     let uuid = parse_uuid(&params.id)?;
     let mut fs = vault.filesystem();
 
-    match params.item_type.as_str() {
-        "file" => fs.rename_file(uuid, params.new_name)?,
-        "folder" => fs.rename_folder(uuid, params.new_name)?,
-        _ => return Err(Error::Internal("Invalid item type".into())),
+    match params.item_type {
+        ItemType::File => fs.rename_file(uuid, params.new_name)?,
+        ItemType::Folder => fs.rename_folder(uuid, params.new_name)?,
     }
 
     fs.commit()?;
@@ -173,28 +171,19 @@ pub async fn set_folder_icon(state: TauriState<'_>, params: ChangeFolderIconPara
 }
 
 #[tauri::command]
-pub async fn set_folder_favorite(state: TauriState<'_>, params: FavoriteFolderParams) -> Result {
+pub async fn set_favorite_item(state: TauriState<'_>, params: SetFavoriteItemParams) -> Result {
     let mut vault_state = state.vault.lock().unwrap();
     let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
     let mut fs = vault.filesystem();
 
     let uuid = parse_uuid(&params.id)?;
-    fs.set_folder_favorite(uuid, params.is_favourite)?;
-    fs.commit()?;
 
-    Ok(())
-}
+    match params.item_type {
+        ItemType::File => fs.set_file_favorite(uuid, params.is_favourite)?,
+        ItemType::Folder => fs.set_folder_favorite(uuid, params.is_favourite)?,
+    }
 
-#[tauri::command]
-pub async fn set_file_favorite(state: TauriState<'_>, params: FavoriteFileParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
-
-    let mut fs = vault.filesystem();
-
-    let uuid = parse_uuid(&params.id)?;
-    fs.set_file_favorite(uuid, params.is_favourite)?;
     fs.commit()?;
 
     Ok(())

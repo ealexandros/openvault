@@ -11,17 +11,16 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             crate::commands::vault::create_vault,
             crate::commands::vault::open_vault,
+            crate::commands::filesystem::path_is_file,
             crate::commands::filesystem::browse_vault,
             crate::commands::filesystem::create_folder,
-            crate::commands::filesystem::delete_item,
-            crate::commands::filesystem::rename_item,
             crate::commands::filesystem::upload_file,
             crate::commands::filesystem::upload_folder,
             crate::commands::filesystem::get_file_content,
-            crate::commands::filesystem::path_is_file,
             crate::commands::filesystem::set_folder_icon,
-            crate::commands::filesystem::set_folder_favorite,
-            crate::commands::filesystem::set_file_favorite,
+            crate::commands::filesystem::set_favorite_item,
+            crate::commands::filesystem::delete_item,
+            crate::commands::filesystem::rename_item,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

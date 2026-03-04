@@ -1,5 +1,12 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ItemType {
+    File,
+    Folder,
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowseVaultParams {
@@ -17,14 +24,14 @@ pub struct CreateFolderParams {
 #[serde(rename_all = "camelCase")]
 pub struct DeleteItemParams {
     pub id: String,
-    pub item_type: String,
+    pub item_type: ItemType,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenameItemParams {
     pub id: String,
-    pub item_type: String,
+    pub item_type: ItemType,
     pub new_name: String,
 }
 
@@ -79,16 +86,10 @@ pub struct ChangeFolderIconParams {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FavoriteFolderParams {
+pub struct SetFavoriteItemParams {
     pub id: String,
     pub is_favourite: bool,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct FavoriteFileParams {
-    pub id: String,
-    pub is_favourite: bool,
+    pub item_type: ItemType,
 }
 
 #[derive(Serialize)]
