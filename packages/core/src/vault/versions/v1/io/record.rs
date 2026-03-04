@@ -19,7 +19,7 @@ pub fn append_record(
     record.header.sequence = subheader.last_sequence + 1;
     record.header.prev_record_offset = subheader.tail_record_offset;
 
-    let record_bytes = encode_record(&record)?;
+    let record_bytes = encode_record(record)?;
     let record_offset = seal_frame(rw, AadDomain::Record, &record_bytes, context)?;
 
     subheader.tail_record_offset = record_offset;

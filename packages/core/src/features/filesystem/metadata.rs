@@ -44,7 +44,7 @@ impl FolderMetadata {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FolderMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
@@ -53,8 +53,8 @@ pub struct FolderMetadataPatch {
     pub updated_at: DateTime<Utc>,
 }
 
-impl FolderMetadataPatch {
-    pub fn default() -> Self {
+impl Default for FolderMetadataPatch {
+    fn default() -> Self {
         Self {
             parent_id: None,
             name: None,
@@ -63,7 +63,9 @@ impl FolderMetadataPatch {
             updated_at: Utc::now(),
         }
     }
+}
 
+impl FolderMetadataPatch {
     pub fn rename(name: impl Into<String>) -> Self {
         Self {
             name: Some(name.into()),
@@ -130,7 +132,7 @@ impl FileMetadata {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Default, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FileMetadataPatch {
     pub parent_id: Option<Uuid>,
     pub name: Option<String>,
@@ -140,8 +142,8 @@ pub struct FileMetadataPatch {
     pub updated_at: DateTime<Utc>,
 }
 
-impl FileMetadataPatch {
-    pub fn default() -> Self {
+impl Default for FileMetadataPatch {
+    fn default() -> Self {
         Self {
             parent_id: None,
             name: None,
@@ -151,7 +153,9 @@ impl FileMetadataPatch {
             updated_at: Utc::now(),
         }
     }
+}
 
+impl FileMetadataPatch {
     pub fn rename(name: impl Into<String>) -> Self {
         Self {
             name: Some(name.into()),
