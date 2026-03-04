@@ -18,8 +18,6 @@ export const safeInvokeTauri = async <T>(
   }
 };
 
-// @todo-now implement refresh vault..
-
 export const tauriApi = {
   createVault: (params: {
     path: string;

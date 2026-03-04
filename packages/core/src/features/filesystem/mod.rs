@@ -13,6 +13,5 @@ pub use metadata::{
 pub use records::{
     FILESYSTEM_WIRE_VERSION_V1, FilesystemChange, FilesystemDelta, FilesystemSnapshot,
 };
+pub use scanner::{ScannedFolder, scan_directory};
 pub use store::FilesystemStore;
-
-pub use scanner::scan_directory;

@@ -5,7 +5,7 @@ use openvault_core::operations::filesystem::FilesystemOps;
 use uuid::Uuid;
 
 use openvault_core::features::filesystem::{
-    FileMetadata, FilesystemStore, FolderMetadata, scan_directory,
+    FileMetadata, FilesystemStore, FolderMetadata, ScannedFolder, scan_directory,
 };
 use openvault_core::operations::blob::{self, get_blob};
 use openvault_core::vault::runtime::VaultSession;
@@ -66,45 +66,9 @@ impl<'a> FilesystemFeature<'a> {
         Ok(file_id)
     }
 
-    // @todo-now refactor this..
-
     pub fn upload_folder(&mut self, parent_id: Uuid, source_path: &Path) -> Result<Uuid> {
-        let name = source_path
-            .file_name()
-            .and_then(|n| n.to_str())
-            .ok_or(Error::InvalidPath)?
-            .to_owned();
-
-        let root_folder_id = self.add_folder(parent_id, name)?;
-        let (folders, files_by_folder) = scan_directory(source_path, Some(root_folder_id))?;
-
-        let mut id_map = std::collections::HashMap::new();
-        id_map.insert(root_folder_id, root_folder_id);
-
-        for folder in folders {
-            if let Some(scan_parent_id) = folder.parent_id {
-                let actual_parent_id = id_map
-                    .get(&scan_parent_id)
-                    .copied()
-                    .ok_or_else(|| Error::InvalidPath)?;
-
-                let actual_id = self.add_folder(actual_parent_id, folder.name)?;
-                id_map.insert(folder.id, actual_id);
-            }
-        }
-
-        for (scan_folder_id, files) in files_by_folder {
-            let actual_folder_id = id_map
-                .get(&scan_folder_id)
-                .copied()
-                .ok_or_else(|| Error::InvalidPath)?;
-
-            for file in files {
-                self.add_file(actual_folder_id, &file)?;
-            }
-        }
-
-        Ok(parent_id)
+        let scanned = scan_directory(source_path)?;
+        self.upload_scanned_folder(parent_id, &scanned)
     }
 
     pub fn set_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
@@ -156,6 +120,19 @@ impl<'a> FilesystemFeature<'a> {
 
     pub fn commit(&mut self) -> Result<bool> {
         FilesystemOps::commit(self.session, self.store).map_err(Into::into)
+    }
+
+    fn upload_scanned_folder(&mut self, parent_id: Uuid, folder: &ScannedFolder) -> Result<Uuid> {
+        let folder_id = self.add_folder(parent_id, folder.name.clone())?;
+
+        for file_path in &folder.files {
+            self.add_file(folder_id, file_path)?;
+        }
+        for child in &folder.children {
+            self.upload_scanned_folder(folder_id, child)?;
+        }
+
+        Ok(folder_id)
     }
 }
 

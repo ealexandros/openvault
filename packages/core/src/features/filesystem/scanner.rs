@@ -1,61 +1,80 @@
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use uuid::Uuid;
 use walkdir::WalkDir;
 
-use super::metadata::{FolderMetadata, ROOT_FOLDER_ID};
 use crate::errors::{Error, Result};
 
 pub const EXCLUDED_FILES: [&str; 1] = [".DS_Store"];
 
-pub fn scan_directory(
-    root: &Path,
-    parent_id: Option<Uuid>,
-) -> Result<(Vec<FolderMetadata>, HashMap<Uuid, Vec<PathBuf>>)> {
-    let mut folders = Vec::new();
-    let mut id_map: HashMap<PathBuf, Uuid> = HashMap::new();
-    let mut files_by_folder: HashMap<Uuid, Vec<PathBuf>> = HashMap::new();
+#[derive(Debug)]
+pub struct ScannedFolder {
+    pub name: String,
+    pub path: PathBuf,
+    pub files: Vec<PathBuf>,
+    pub children: Vec<ScannedFolder>,
+}
 
-    let root_id = parent_id.unwrap_or(ROOT_FOLDER_ID);
+impl ScannedFolder {
+    pub fn new(name: String, path: PathBuf) -> Self {
+        Self {
+            name,
+            path,
+            files: Vec::new(),
+            children: Vec::new(),
+        }
+    }
+}
 
-    id_map.insert(PathBuf::from(""), root_id);
+pub fn scan_directory(root: &Path) -> Result<ScannedFolder> {
+    if !root.is_dir() {
+        return Err(Error::InvalidPath);
+    }
 
-    for entry in WalkDir::new(root).sort_by_file_name().min_depth(1) {
+    let root_name = root
+        .file_name()
+        .map(|s| s.to_string_lossy().into_owned())
+        .ok_or(Error::InvalidPath)?;
+
+    let mut root_node = ScannedFolder {
+        name: root_name,
+        path: root.to_path_buf(),
+        files: Vec::new(),
+        children: Vec::new(),
+    };
+
+    scan_directory_tree(&mut root_node)?;
+
+    Ok(root_node)
+}
+
+fn scan_directory_tree(node: &mut ScannedFolder) -> Result<()> {
+    for entry in WalkDir::new(&node.path)
+        .min_depth(1)
+        .max_depth(1)
+        .sort_by_file_name()
+    {
         let entry = entry?;
-        let absolute = entry.path();
+        let path = entry.path();
 
-        let relative = absolute
-            .strip_prefix(root)
-            .map_err(|_| Error::InvalidPath)?;
+        let Some(name) = path.file_name().map(|n| n.to_string_lossy()) else {
+            continue;
+        };
 
-        if relative.file_name().map_or(false, |name| {
-            EXCLUDED_FILES.contains(&name.to_str().unwrap_or(""))
-        }) {
+        if EXCLUDED_FILES.contains(&name.as_ref()) {
             continue;
         }
 
-        let parent_path = relative.parent().unwrap_or(Path::new(""));
-        let parent_id = id_map.get(parent_path).copied().ok_or(Error::InvalidPath)?;
-
-        if entry.file_type().is_dir() {
-            let folder = FolderMetadata::new(Some(parent_id), file_name(relative)?);
-
-            id_map.insert(relative.to_path_buf(), folder.id);
-            folders.push(folder);
-        } else {
-            files_by_folder
-                .entry(parent_id)
-                .or_default()
-                .push(entry.path().to_path_buf());
+        if !entry.file_type().is_dir() {
+            node.files.push(path.to_path_buf());
+            continue;
         }
+
+        let mut child_node = ScannedFolder::new(name.into_owned(), path.to_path_buf());
+
+        scan_directory_tree(&mut child_node)?;
+
+        node.children.push(child_node);
     }
 
-    Ok((folders, files_by_folder))
-}
-
-fn file_name(path: &Path) -> Result<String> {
-    path.file_name()
-        .map(|s| s.to_string_lossy().into_owned())
-        .ok_or(Error::InvalidPath)
+    Ok(())
 }
