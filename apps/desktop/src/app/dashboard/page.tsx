@@ -8,7 +8,7 @@ import { useEffect } from "react";
 const DashboardPage = () => {
   const router = useRouter();
 
-  useEffect(() => router.replace(hrefs.dashboard.browse), [router]);
+  useEffect(() => router.replace(hrefs.dashboard.browse.get()), [router]);
 
   return (
     <div className="flex h-full w-full items-center justify-center">
