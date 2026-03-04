@@ -99,6 +99,7 @@ pub struct FolderItem {
     pub icon: String,
     pub is_favourite: bool,
     pub item_count: u64,
+    pub total_size_bytes: u64,
     pub created_at: String,
     pub updated_at: String,
 }
