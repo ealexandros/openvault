@@ -44,7 +44,7 @@ export const DashboardLayout = ({
           title={title}
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
-        <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/10 hover:scrollbar-thumb-muted-foreground/20 flex-1 overflow-y-auto px-10 py-8">
+        <div className="flex-1 overflow-y-auto">
           <div className="mx-auto h-full max-w-7xl">{children}</div>
         </div>
       </main>

@@ -25,7 +25,7 @@ const BrowsePage = () => {
   return (
     <FileDropListener onDropPaths={fileState.handleDropPaths}>
       {({ isDragging }) => (
-        <main className="relative mx-auto h-full max-w-7xl space-y-16 py-8">
+        <main className="relative mx-auto h-full max-w-7xl space-y-16 py-16">
           <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
