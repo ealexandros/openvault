@@ -115,7 +115,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
   };
 
   const getFileContent = async (id: string) => {
-    const result = await tauriApi.getFileContent({ id });
+    const result = await tauriApi.readFileBytes({ id });
 
     if (!result.success) {
       return null;

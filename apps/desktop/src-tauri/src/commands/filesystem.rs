@@ -1,15 +1,18 @@
-use uuid::Uuid;
-
 use crate::commands::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
-    FileItem, FolderItem, GetFileContentParams, ItemType, PathIsFileParams, RenameItemParams,
+    FileItem, FolderItem, ItemType, PathIsFileParams, ReadFileParams, RenameItemParams,
     SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
 };
 use crate::errors::{Error, Result};
+use crate::internal::parser::parse_uuid;
 use crate::state::TauriState;
 
-fn parse_uuid(id: &str) -> Result<Uuid> {
-    Uuid::parse_str(id).map_err(|_| Error::InvalidUuid(id.to_string()))
+macro_rules! vault_fs {
+    ($state:expr, $fs:ident) => {
+        let mut vault_guard = $state.vault.lock().unwrap();
+        let vault = vault_guard.as_mut().ok_or(Error::VaultNotOpened)?;
+        let mut $fs = vault.filesystem();
+    };
 }
 
 #[tauri::command]
@@ -18,16 +21,10 @@ pub async fn path_is_file(params: PathIsFileParams) -> Result<bool> {
 }
 
 #[tauri::command]
-pub async fn browse_vault(
-    state: TauriState<'_>,
-    params: BrowseVaultParams,
-) -> Result<BrowseResult> {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+pub async fn browse_fs(state: TauriState<'_>, params: BrowseVaultParams) -> Result<BrowseResult> {
+    vault_fs!(state, fs);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
-
-    let mut fs = vault.filesystem();
 
     let (folders, files) = fs.browse(&parent_uuid)?;
 
@@ -63,40 +60,37 @@ pub async fn browse_vault(
 
 #[tauri::command]
 pub async fn create_folder(state: TauriState<'_>, params: CreateFolderParams) -> Result<String> {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+    vault_fs!(state, fs);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
-    let new_folder_id = vault.filesystem().add_folder(parent_uuid, params.name)?;
+    let new_folder_id = fs.add_folder(parent_uuid, params.name)?;
 
-    vault.commit_all()?;
+    fs.commit()?;
 
     Ok(new_folder_id.to_string())
 }
 
 #[tauri::command]
 pub async fn delete_item(state: TauriState<'_>, params: DeleteItemParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+    vault_fs!(state, fs);
 
     let uuid = parse_uuid(&params.id)?;
 
     match params.item_type {
-        ItemType::File => vault.filesystem().remove_file(uuid)?,
-        ItemType::Folder => vault.filesystem().remove_folder(uuid)?,
+        ItemType::File => fs.remove_file(uuid)?,
+        ItemType::Folder => fs.remove_folder(uuid)?,
     }
 
-    vault.commit_all()?;
+    fs.commit()?;
+
     Ok(())
 }
 
 #[tauri::command]
 pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+    vault_fs!(state, fs);
 
     let uuid = parse_uuid(&params.id)?;
-    let mut fs = vault.filesystem();
 
     match params.item_type {
         ItemType::File => fs.rename_file(uuid, params.new_name)?,
@@ -110,10 +104,7 @@ pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Res
 
 #[tauri::command]
 pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
-
-    let mut fs = vault.filesystem();
+    vault_fs!(state, fs);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
     let source_path = std::path::PathBuf::from(params.source_path);
@@ -126,10 +117,7 @@ pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Res
 
 #[tauri::command]
 pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
-
-    let mut fs = vault.filesystem();
+    vault_fs!(state, fs);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
     let source_path = std::path::PathBuf::from(params.source_path);
@@ -141,27 +129,18 @@ pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) ->
 }
 
 #[tauri::command]
-pub async fn get_file_content(
-    state: TauriState<'_>,
-    params: GetFileContentParams,
-) -> Result<Option<Vec<u8>>> {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
-
-    let mut fs = vault.filesystem();
+pub async fn read_file_bytes(state: TauriState<'_>, params: ReadFileParams) -> Result<Vec<u8>> {
+    vault_fs!(state, fs);
 
     let uuid = parse_uuid(&params.id)?;
-    let content = fs.read_file_content(uuid)?;
+    let content = fs.read_file_bytes(uuid)?;
 
     Ok(content)
 }
 
 #[tauri::command]
 pub async fn set_folder_icon(state: TauriState<'_>, params: ChangeFolderIconParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
-
-    let mut fs = vault.filesystem();
+    vault_fs!(state, fs);
 
     let uuid = parse_uuid(&params.id)?;
     fs.set_folder_icon(uuid, params.icon)?;
@@ -172,10 +151,7 @@ pub async fn set_folder_icon(state: TauriState<'_>, params: ChangeFolderIconPara
 
 #[tauri::command]
 pub async fn set_favorite_item(state: TauriState<'_>, params: SetFavoriteItemParams) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
-    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
-
-    let mut fs = vault.filesystem();
+    vault_fs!(state, fs);
 
     let uuid = parse_uuid(&params.id)?;
 

@@ -96,7 +96,7 @@ const fetchFolderListing = async (
   }
 
   const request = tauriApi
-    .browseVault({ parentId: folderId })
+    .browseFs({ parentId: folderId })
     .then(result => (result.success ? result.data : null));
 
   if (!options.dedupeRequest) {

@@ -1,5 +1,6 @@
 mod commands;
 mod errors;
+mod internal;
 mod state;
 
 use crate::state::AppState;
@@ -12,11 +13,11 @@ pub fn run() {
             crate::commands::vault::create_vault,
             crate::commands::vault::open_vault,
             crate::commands::filesystem::path_is_file,
-            crate::commands::filesystem::browse_vault,
+            crate::commands::filesystem::browse_fs,
             crate::commands::filesystem::create_folder,
             crate::commands::filesystem::upload_file,
             crate::commands::filesystem::upload_folder,
-            crate::commands::filesystem::get_file_content,
+            crate::commands::filesystem::read_file_bytes,
             crate::commands::filesystem::set_folder_icon,
             crate::commands::filesystem::set_favorite_item,
             crate::commands::filesystem::delete_item,

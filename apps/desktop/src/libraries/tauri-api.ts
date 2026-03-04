@@ -33,8 +33,8 @@ export const tauriApi = {
     return safeInvokeTauri<void>("open_vault", { params });
   },
 
-  browseVault: (params: { parentId: string }) => {
-    return safeInvokeTauri<BrowseResult>("browse_vault", { params });
+  browseFs: (params: { parentId: string }) => {
+    return safeInvokeTauri<BrowseResult>("browse_fs", { params });
   },
 
   createFolder: (params: { parentId: string; name: string }) => {
@@ -57,8 +57,8 @@ export const tauriApi = {
     return safeInvokeTauri<void>("upload_folder", { params });
   },
 
-  getFileContent: (params: { id: string }) => {
-    return safeInvokeTauri<number[] | null>("get_file_content", { params });
+  readFileBytes: (params: { id: string }) => {
+    return safeInvokeTauri<number[]>("read_file_bytes", { params });
   },
 
   checkPathIsFile: (params: { path: string }) => {

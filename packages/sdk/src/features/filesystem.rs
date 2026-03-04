@@ -22,12 +22,13 @@ impl<'a> FilesystemFeature<'a> {
         Self { session, store }
     }
 
-    pub fn read_file_content(&mut self, id: Uuid) -> Result<Option<Vec<u8>>> {
-        let Some(file) = self.store.file(&id) else {
-            return Ok(None);
-        };
+    pub fn read_file_bytes(&mut self, id: Uuid) -> Result<Vec<u8>> {
+        let file = self
+            .store
+            .file(&id)
+            .ok_or(Error::ItemNotFound(id.to_string()))?;
 
-        Ok(Some(get_blob(&mut self.session, &file.blob)?))
+        Ok(get_blob(&mut self.session, &file.blob)?)
     }
 
     pub fn browse(&mut self, parent_id: &Uuid) -> Result<(Vec<FolderMetadata>, Vec<FileMetadata>)> {

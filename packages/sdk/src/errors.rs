@@ -13,6 +13,9 @@ pub enum Error {
 
     #[error("Item already exists: {0}")]
     ItemAlreadyExists(String),
+
+    #[error("Item not found: {0}")]
+    ItemNotFound(String),
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
