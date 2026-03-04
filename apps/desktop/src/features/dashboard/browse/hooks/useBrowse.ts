@@ -101,13 +101,14 @@ export const useBrowse = () => {
 
   const submitRename = async (newName: string) => {
     if (folderStore.renamingItem) {
-      await folderStore.renameRenamingItem(newName);
-      return;
+      return await folderStore.renameRenamingItem(newName);
     }
 
     if (fileStore.renamingItem) {
-      await fileStore.renameRenamingItem(newName);
+      return await fileStore.renameRenamingItem(newName);
     }
+
+    return false;
   };
 
   const viewingItem = fileStore.viewingItem;
@@ -268,6 +269,7 @@ export const useBrowse = () => {
     isFolderPropertiesVisible,
     isDeleteConfirmationVisible,
     isExportVisible,
+    renameItemId: renamingItem?.id ?? null,
     renameInitialName: renamingItem?.name ?? "",
     renameItemType: renamingItem?.type ?? ItemType.FILE,
     viewingItem,

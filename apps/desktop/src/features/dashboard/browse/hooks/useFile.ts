@@ -85,7 +85,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
   const handleRenameFile = async (id: string, newName: string) => {
     const trimmedName = newName.trim();
     if (!trimmedName) {
-      return;
+      return false;
     }
 
     const result = await tauriApi.renameItem({
@@ -96,7 +96,10 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
 
     if (result.success) {
       await refresh();
+      return true;
     }
+
+    return false;
   };
 
   const handleRequestFileRename = (file: FileItemResult) => {
@@ -109,10 +112,10 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
 
   const renameRenamingItem = async (newName: string) => {
     if (!renamingItem) {
-      return;
+      return false;
     }
 
-    await handleRenameFile(renamingItem.id, newName);
+    return await handleRenameFile(renamingItem.id, newName);
   };
 
   const getFileContent = async (id: string) => {

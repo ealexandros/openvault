@@ -101,8 +101,12 @@ impl FilesystemStore {
             )));
         }
 
-        if let Some(name) = patch.name {
-            let target_name = normalize_entry_name(&name)?;
+        let target_name = match patch.name {
+            Some(name) => normalize_entry_name(&name)?,
+            None => current.name.clone(),
+        };
+
+        if target_parent != current_parent || target_name != current.name {
             self.validate_name_available(target_parent, &target_name, ConflictTarget::Folder)?;
         }
 
@@ -117,6 +121,7 @@ impl FilesystemStore {
             .ok_or(FilesystemError::FolderNotFound(id))?;
 
         folder.parent_id = Some(target_parent);
+        folder.name = target_name;
         folder.icon = patch.icon.unwrap_or(folder.icon.clone());
         folder.is_favourite = patch.is_favourite.unwrap_or(folder.is_favourite);
         folder.updated_at = patch.updated_at;
@@ -181,18 +186,24 @@ impl FilesystemStore {
             .cloned()
             .ok_or(FilesystemError::FileNotFound(id))?;
 
-        let target_parent = patch.parent_id.unwrap_or(current.parent_id);
+        let current_parent = current.parent_id;
+        let target_parent = patch.parent_id.unwrap_or(current_parent);
+
         if !self.folders.contains_key(&target_parent) {
             return Err(FilesystemError::ParentFolderNotFound(target_parent));
         }
 
-        if let Some(name) = patch.name {
-            let target_name = normalize_entry_name(&name)?;
+        let target_name = match patch.name {
+            Some(name) => normalize_entry_name(&name)?,
+            None => current.name.clone(),
+        };
+
+        if target_parent != current_parent || target_name != current.name {
             self.validate_name_available(target_parent, &target_name, ConflictTarget::File)?;
         }
 
-        if current.parent_id != target_parent {
-            self.index.remove_file(current.parent_id, id);
+        if current_parent != target_parent {
+            self.index.remove_file(current_parent, id);
             self.index.insert_file(target_parent, id);
         }
 
@@ -201,6 +212,7 @@ impl FilesystemStore {
             .get_mut(&id)
             .ok_or(FilesystemError::FileNotFound(id))?;
 
+        file.name = target_name;
         file.parent_id = target_parent;
         file.is_favourite = patch.is_favourite.unwrap_or(file.is_favourite);
         file.updated_at = patch.updated_at;

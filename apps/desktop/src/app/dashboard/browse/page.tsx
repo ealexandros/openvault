@@ -106,6 +106,7 @@ const BrowsePage = () => {
             item={dialogState.folderForProperties}
           />
           <RenameItemDialog
+            key={dialogState.renameItemId}
             isOpen={dialogState.isRenameVisible}
             onOpenChange={dialogState.toggleRenameVisibility}
             initialName={dialogState.renameInitialName}

@@ -222,7 +222,7 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
   const handleRenameFolder = async (id: string, newName: string) => {
     const trimmedName = newName.trim();
     if (!trimmedName) {
-      return;
+      return false;
     }
 
     const result = await tauriApi.renameItem({
@@ -233,7 +233,10 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
 
     if (result.success) {
       await refresh();
+      return true;
     }
+
+    return false;
   };
 
   const handleRequestFolderRename = (item: FolderItemResult) => {
@@ -257,10 +260,10 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
 
   const renameRenamingItem = async (newName: string) => {
     if (!renamingItem) {
-      return;
+      return false;
     }
 
-    await handleRenameFolder(renamingItem.id, newName);
+    return await handleRenameFolder(renamingItem.id, newName);
   };
 
   const handleToggleFavourite = async (folder: FolderItemResult) => {
