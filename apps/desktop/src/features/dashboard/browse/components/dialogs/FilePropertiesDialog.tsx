@@ -6,22 +6,12 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { type FileItemResult } from "@/types/filesystem";
-import { formatBytes } from "@/utils/format";
+import { formatBytes, formatFromIsoString } from "@/utils/format";
 
 type FilePropertiesDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   item: FileItemResult | null;
-};
-
-const formatDateTime = (value: string) => {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString();
 };
 
 const PropertyRow = ({ label, value }: { label: string; value: string }) => (
@@ -55,11 +45,11 @@ export const FilePropertiesDialog = ({
           />
           <PropertyRow
             label="created_at"
-            value={item != null ? formatDateTime(item.createdAt) : "-"}
+            value={item != null ? formatFromIsoString(item.createdAt) : "-"}
           />
           <PropertyRow
             label="updated_at"
-            value={item != null ? formatDateTime(item.updatedAt) : "-"}
+            value={item != null ? formatFromIsoString(item.updatedAt) : "-"}
           />
         </div>
       </DialogContent>

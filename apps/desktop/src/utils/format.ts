@@ -1,11 +1,15 @@
-export const formatDateTime = (value: string) => {
-  const date = new Date(value);
+import { format } from "date-fns";
+
+export const formatFromIsoString = (value: string) => {
+  const isoValue = value.replace(/\.\d+ UTC$/, "Z").replace(" ", "T");
+
+  const date = new Date(isoValue);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return date.toLocaleString();
+  return format(date, "d MMMM yyyy HH:mm:ss");
 };
 
 export const formatBytes = (bytes: number, decimals: number = 2): string => {

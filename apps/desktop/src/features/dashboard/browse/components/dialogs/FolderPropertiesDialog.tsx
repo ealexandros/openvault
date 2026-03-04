@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { type FolderItemResult } from "@/types/filesystem";
-import { formatBytes, formatDateTime } from "@/utils/format";
+import { formatBytes, formatFromIsoString } from "@/utils/format";
 
 type FolderPropertiesDialogProps = {
   isOpen: boolean;
@@ -37,8 +37,14 @@ export const FolderPropertiesDialog = ({
         <PropertyRow label="name" value={item?.name ?? "-"} />
         <PropertyRow label="size" value={item ? formatBytes(item.totalSizeBytes) : "-"} />
         <PropertyRow label="children" value={item ? String(item.itemCount) : "-"} />
-        <PropertyRow label="created_at" value={item ? formatDateTime(item.createdAt) : "-"} />
-        <PropertyRow label="updated_at" value={item ? formatDateTime(item.updatedAt) : "-"} />
+        <PropertyRow
+          label="created_at"
+          value={item ? formatFromIsoString(item.createdAt) : "-"}
+        />
+        <PropertyRow
+          label="updated_at"
+          value={item ? formatFromIsoString(item.updatedAt) : "-"}
+        />
       </div>
     </DialogContent>
   </Dialog>
