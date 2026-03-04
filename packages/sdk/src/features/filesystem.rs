@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use openvault_core::operations::filesystem::FilesystemOps;
 use uuid::Uuid;
@@ -72,6 +72,44 @@ impl<'a> FilesystemFeature<'a> {
         self.upload_scanned_folder(parent_id, &scanned)
     }
 
+    pub fn export_file(&mut self, id: Uuid, destination_path: &Path) -> Result {
+        let file = self
+            .store
+            .file(&id)
+            .ok_or(Error::ItemNotFound(id.to_string()))?;
+
+        let destination = Self::resolve_file_destination(destination_path, &file.name)?;
+
+        if let Some(parent) = destination.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+
+        let content = self.read_file_bytes(id)?;
+        std::fs::write(destination, content)?;
+
+        Ok(())
+    }
+
+    pub fn export_folder(&mut self, id: Uuid, destination_path: &Path) -> Result {
+        let folder = self
+            .store
+            .folder(&id)
+            .ok_or(Error::ItemNotFound(id.to_string()))?;
+
+        let destination = if folder.parent_id.is_none() {
+            if destination_path.exists() && destination_path.is_dir() {
+                destination_path.to_path_buf()
+            } else {
+                Self::available_path(destination_path, false)?
+            }
+        } else {
+            Self::resolve_folder_destination(destination_path, &folder.name)?
+        };
+
+        std::fs::create_dir_all(&destination)?;
+        self.export_folder_contents(id, &destination)
+    }
+
     pub fn set_folder_icon(&mut self, id: Uuid, new_icon: String) -> Result {
         self.store
             .set_folder_icon(id, new_icon)
@@ -134,6 +172,87 @@ impl<'a> FilesystemFeature<'a> {
         }
 
         Ok(folder_id)
+    }
+
+    // @todo-now refactor these..
+
+    fn export_folder_contents(&mut self, folder_id: Uuid, destination_path: &Path) -> Result {
+        let (folders, files) = self.store.browse(&folder_id).map_err(map_fs_error)?;
+
+        for file in files {
+            let file_path = Self::available_path(&destination_path.join(&file.name), true)?;
+            let content = get_blob(&mut self.session, &file.blob)?;
+            std::fs::write(file_path, content)?;
+        }
+
+        for folder in folders {
+            let folder_path = Self::available_path(&destination_path.join(&folder.name), false)?;
+            std::fs::create_dir_all(&folder_path)?;
+            self.export_folder_contents(folder.id, &folder_path)?;
+        }
+
+        Ok(())
+    }
+
+    fn resolve_file_destination(destination_path: &Path, file_name: &str) -> Result<PathBuf> {
+        let target = if destination_path.is_dir() {
+            destination_path.join(file_name)
+        } else {
+            destination_path.to_path_buf()
+        };
+
+        Self::available_path(&target, true)
+    }
+
+    fn resolve_folder_destination(destination_path: &Path, folder_name: &str) -> Result<PathBuf> {
+        let target = if destination_path.is_dir() {
+            destination_path.join(folder_name)
+        } else {
+            destination_path.to_path_buf()
+        };
+
+        Self::available_path(&target, false)
+    }
+
+    fn available_path(path: &Path, is_file: bool) -> Result<PathBuf> {
+        if !path.exists() {
+            return Ok(path.to_path_buf());
+        }
+
+        let parent = path.parent().ok_or(Error::InvalidPath)?;
+        let file_name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .ok_or(Error::InvalidPath)?;
+
+        for i in 1.. {
+            let candidate_name = if is_file {
+                Self::file_name_with_suffix(file_name, i)
+            } else {
+                format!("{file_name} ({i})")
+            };
+            let candidate = parent.join(candidate_name);
+
+            if !candidate.exists() {
+                return Ok(candidate);
+            }
+        }
+
+        unreachable!()
+    }
+
+    fn file_name_with_suffix(file_name: &str, n: u32) -> String {
+        let path = Path::new(file_name);
+        let stem = path.file_stem().and_then(|name| name.to_str());
+        let extension = path.extension().and_then(|ext| ext.to_str());
+
+        match (stem, extension) {
+            (Some(stem), Some(extension)) if !extension.is_empty() => {
+                format!("{stem} ({n}).{extension}")
+            }
+            (Some(stem), _) => format!("{stem} ({n})"),
+            _ => format!("{file_name} ({n})"),
+        }
     }
 }
 

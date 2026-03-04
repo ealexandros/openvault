@@ -275,6 +275,16 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     }
   };
 
+  const handleExportFolder = async (id: string, destinationPath: string) => {
+    const result = await tauriApi.exportFolder({ id, destinationPath });
+
+    if (result.success) {
+      toast.success("Folder exported successfully");
+    } else {
+      toast.error("Failed to export folder");
+    }
+  };
+
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const filteredFolders = normalizedSearch
     ? listing.folders.filter(item => item.name.toLowerCase().includes(normalizedSearch))
@@ -336,5 +346,6 @@ export const useFolder = ({ searchQuery }: UseFolderOptions) => {
     clearRenamingItem,
     renameRenamingItem,
     handleToggleFavourite,
+    handleExportFolder,
   };
 };

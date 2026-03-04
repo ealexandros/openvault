@@ -7,13 +7,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
+import { ItemType } from "@/types/filesystem";
 import { useState } from "react";
 
 type DeleteConfirmationDialogProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   itemName: string;
-  itemType: "file" | "folder";
+  itemType: ItemType;
   onConfirm: () => Promise<void>;
 };
 

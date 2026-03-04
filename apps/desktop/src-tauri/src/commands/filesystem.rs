@@ -1,7 +1,7 @@
 use crate::commands::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
-    FileItem, FolderItem, ItemType, PathIsFileParams, ReadFileParams, RenameItemParams,
-    SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
+    ExportFileParams, ExportFolderParams, FileItem, FolderItem, ItemType, PathIsFileParams,
+    ReadFileParams, RenameItemParams, SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
 };
 use crate::errors::{Error, Result};
 use crate::internal::parser::parse_uuid;
@@ -161,6 +161,30 @@ pub async fn set_favorite_item(state: TauriState<'_>, params: SetFavoriteItemPar
     }
 
     fs.commit()?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn export_file(state: TauriState<'_>, params: ExportFileParams) -> Result {
+    vault_fs!(state, fs);
+
+    let uuid = parse_uuid(&params.id)?;
+    let destination_path = std::path::PathBuf::from(params.destination_path);
+
+    fs.export_file(uuid, &destination_path)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn export_folder(state: TauriState<'_>, params: ExportFolderParams) -> Result {
+    vault_fs!(state, fs);
+
+    let uuid = parse_uuid(&params.id)?;
+    let destination_path = std::path::PathBuf::from(params.destination_path);
+
+    fs.export_folder(uuid, &destination_path)?;
 
     Ok(())
 }

@@ -92,6 +92,20 @@ pub struct SetFavoriteItemParams {
     pub item_type: ItemType,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExportFileParams {
+    pub id: String,
+    pub destination_path: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExportFolderParams {
+    pub id: String,
+    pub destination_path: String,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FolderItem {

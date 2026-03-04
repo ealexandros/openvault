@@ -22,6 +22,7 @@ type FileItemProps = {
   onRename: () => void;
   onToggleFavourite: () => void;
   onProperties: () => void;
+  onExport: () => void;
 };
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -40,6 +41,7 @@ export const FileItem = ({
   onRename,
   onToggleFavourite,
   onProperties,
+  onExport,
 }: FileItemProps) => {
   const fileType = getFileTypeOrDefault(file.extension);
   const FileIconComponent = ICON_MAP[fileType] ?? FileTextIcon;
@@ -51,6 +53,7 @@ export const FileItem = ({
         onDelete={onDelete}
         onToggleFavourite={onToggleFavourite}
         onProperties={onProperties}
+        onExport={onExport}
         isFavourite={file.isFavourite}>
         <div
           onClick={onClick}

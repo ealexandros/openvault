@@ -22,7 +22,7 @@ export type ContextMenuProps = {
 export const ContextMenu = ({ children, items }: ContextMenuProps) => (
   <BaseContextMenu>
     <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-    <ContextMenuContent className="w-48 overflow-hidden rounded-xl border-border/50 bg-background/95 backdrop-blur-xl">
+    <ContextMenuContent className="w-48 overflow-hidden rounded-lg border-border/50 bg-background/95 backdrop-blur-xl">
       {items.map(({ label, icon: Icon, onClick, variant, disabled }, idx) => (
         <ContextMenuItem
           key={idx}
@@ -32,8 +32,8 @@ export const ContextMenu = ({ children, items }: ContextMenuProps) => (
             e.stopPropagation();
             onClick();
           }}
-          className="gap-2.5 py-2.5">
-          {Icon != null && <Icon className="size-4 text-muted-foreground" />}
+          className="gap-2.5 px-3 py-2">
+          {Icon != null && <Icon className="size-3.5 text-muted-foreground" />}
           <span className="font-medium">{label}</span>
         </ContextMenuItem>
       ))}

@@ -9,6 +9,7 @@ type FilesSectionProps = {
   onFileRename: (file: FileItemResult) => void;
   onFileToggleFavourite: (file: FileItemResult) => void;
   onFileProperties: (file: FileItemResult) => void;
+  onFileExport: (file: FileItemResult) => void;
 };
 
 export const FilesSection = ({
@@ -18,6 +19,7 @@ export const FilesSection = ({
   onFileRename,
   onFileToggleFavourite,
   onFileProperties,
+  onFileExport,
 }: FilesSectionProps) => {
   if (files.length === 0) {
     return null;
@@ -35,6 +37,7 @@ export const FilesSection = ({
             onRename={() => onFileRename(file)}
             onToggleFavourite={() => onFileToggleFavourite(file)}
             onProperties={() => onFileProperties(file)}
+            onExport={() => onFileExport(file)}
           />
         ))}
       </div>

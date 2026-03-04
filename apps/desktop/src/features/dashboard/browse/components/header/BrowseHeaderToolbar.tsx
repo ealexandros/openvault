@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
 import { FileUp, FolderUp, LayoutGridIcon, UploadIcon } from "lucide-react";
-import { NewFolderDialog } from "../dialogs";
+import { CreateFolderDialog } from "../dialogs";
 
 type BrowseHeaderToolbarProps = {
   onUploadFile: () => void;
@@ -33,7 +33,7 @@ export const BrowseHeaderToolbar = ({
     </div>
 
     <div className="flex items-center gap-3">
-      <NewFolderDialog onCreate={onCreateFolder} />
+      <CreateFolderDialog onCreate={onCreateFolder} />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

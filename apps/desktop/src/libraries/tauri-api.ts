@@ -72,4 +72,12 @@ export const tauriApi = {
   setFavourtieItem: (params: { id: string; itemType: ItemType; isFavourite: boolean }) => {
     return safeInvokeTauri<void>("set_favorite_item", { params });
   },
+
+  exportFile: (params: { id: string; destinationPath: string }) => {
+    return safeInvokeTauri<void>("export_file", { params });
+  },
+
+  exportFolder: (params: { id: string; destinationPath: string }) => {
+    return safeInvokeTauri<void>("export_folder", { params });
+  },
 };

@@ -13,6 +13,7 @@ type FoldersSectionProps = {
   onFolderToggleFavourite: (folder: FolderItemResult) => void;
   onFolderChangeIcon: (folder: FolderItemResult) => void;
   onFolderProperties: (folder: FolderItemResult) => void;
+  onFolderExport: (folder: FolderItemResult) => void;
 };
 
 export const FoldersSection = ({
@@ -26,6 +27,7 @@ export const FoldersSection = ({
   onFolderToggleFavourite,
   onFolderChangeIcon,
   onFolderProperties,
+  onFolderExport,
 }: FoldersSectionProps) => {
   if (folders.length === 0 && !canGoBack) {
     return null;
@@ -45,6 +47,7 @@ export const FoldersSection = ({
             onChangeIcon={() => onFolderChangeIcon(item)}
             onToggleFavourite={() => onFolderToggleFavourite(item)}
             onProperties={() => onFolderProperties(item)}
+            onExport={() => onFolderExport(item)}
           />
         ))}
       </div>

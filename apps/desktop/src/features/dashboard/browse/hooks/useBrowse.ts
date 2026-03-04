@@ -1,4 +1,4 @@
-import { type FileItemResult, type FolderItemResult } from "@/types/filesystem";
+import { ItemType, type FileItemResult, type FolderItemResult } from "@/types/filesystem";
 import { useState } from "react";
 import { BrowseViewState, type RenamingItem } from "../types";
 import { useFile } from "./useFile";
@@ -27,7 +27,13 @@ const resolveBrowseViewState = (options: {
 type PendingDeletionItem = {
   id: string;
   name: string;
-  type: "file" | "folder";
+  type: ItemType;
+};
+
+type PendingExportingItem = {
+  id: string;
+  name: string;
+  type: ItemType;
 };
 
 export const useBrowse = () => {
@@ -42,6 +48,7 @@ export const useBrowse = () => {
   const [pendingDeletionItem, setPendingDeletionItem] = useState<PendingDeletionItem | null>(
     null,
   );
+  const [exportingItem, setExportingItem] = useState<PendingExportingItem | null>(null);
 
   const folderStore = useFolder({ searchQuery });
 
@@ -184,6 +191,36 @@ export const useBrowse = () => {
     await fileStore.handleDeleteFile(pendingDeletionItem.id);
   };
 
+  const isExportVisible = exportingItem !== null;
+
+  const toggleExportVisibility = (isVisible: boolean) => {
+    if (!isVisible) {
+      setExportingItem(null);
+    }
+  };
+
+  const requestFileExport = (file: FileItemResult) => {
+    setExportingItem({ id: file.id, name: file.name, type: "file" });
+  };
+
+  const requestFolderExport = (folder: FolderItemResult) => {
+    setExportingItem({ id: folder.id, name: folder.name, type: "folder" });
+  };
+
+  const confirmExportSelection = async (destinationPath: string) => {
+    if (exportingItem == null) {
+      return;
+    }
+
+    if (exportingItem.type === "folder") {
+      await folderStore.handleExportFolder(exportingItem.id, destinationPath);
+    } else {
+      await fileStore.handleExportFile(exportingItem.id, destinationPath);
+    }
+
+    setExportingItem(null);
+  };
+
   const browseState = {
     currentPath: folderStore.currentPath,
     folderCount: folderStore.folderCount,
@@ -206,6 +243,7 @@ export const useBrowse = () => {
     requestDelete: requestFolderDeletion,
     requestProperties: showFolderProperties,
     requestIconChange: requestFolderIconChange,
+    requestExport: requestFolderExport,
     toggleFavourite: folderStore.handleToggleFavourite,
   };
 
@@ -218,6 +256,7 @@ export const useBrowse = () => {
     requestRename: fileStore.handleRequestFileRename,
     requestDelete: requestFileDeletion,
     requestProperties: showFileProperties,
+    requestExport: requestFileExport,
     toggleFavourite: fileStore.handleToggleFavourite,
   };
 
@@ -228,13 +267,16 @@ export const useBrowse = () => {
     isFilePropertiesVisible,
     isFolderPropertiesVisible,
     isDeleteConfirmationVisible,
+    isExportVisible,
     renameInitialName: renamingItem?.name ?? "",
-    renameItemType: renamingItem?.type ?? "file",
+    renameItemType: renamingItem?.type ?? ItemType.FILE,
     viewingItem,
     fileForProperties: selectedFileForProperties,
     folderForProperties: selectedFolderForProperties,
     deleteItemName: pendingDeletionItem?.name ?? "",
-    deleteItemType: pendingDeletionItem?.type ?? "file",
+    deleteItemType: pendingDeletionItem?.type ?? ItemType.FILE,
+    exportItemName: exportingItem?.name ?? "",
+    exportItemType: exportingItem?.type ?? ItemType.FILE,
     toggleFolderPropertiesVisibility,
     toggleFilePropertiesVisibility,
     toggleFolderIconPickerVisibility,
@@ -244,6 +286,8 @@ export const useBrowse = () => {
     selectFolderIcon,
     submitRename,
     confirmDeleteSelection,
+    toggleExportVisibility,
+    confirmExportSelection,
   };
 
   return {

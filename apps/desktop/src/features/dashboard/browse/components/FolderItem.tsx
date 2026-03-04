@@ -13,6 +13,7 @@ type FolderItemProps = {
   onChangeIcon: () => void;
   onToggleFavourite: () => void;
   onProperties: () => void;
+  onExport: () => void;
 };
 
 const renderFolderIcon = (iconName: string, props?: LucideProps) => {
@@ -28,6 +29,7 @@ export const FolderItem = ({
   onChangeIcon,
   onToggleFavourite,
   onProperties,
+  onExport,
 }: FolderItemProps) => (
   <div className="relative">
     <FolderContextMenu
@@ -36,7 +38,8 @@ export const FolderItem = ({
       onChangeIcon={onChangeIcon}
       onDelete={onDelete}
       onToggleFavourite={onToggleFavourite}
-      onProperties={onProperties}>
+      onProperties={onProperties}
+      onExport={onExport}>
       <div
         onClick={onClick}
         className={cn(

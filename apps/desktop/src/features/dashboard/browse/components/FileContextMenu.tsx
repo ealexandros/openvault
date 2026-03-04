@@ -1,5 +1,5 @@
 import { ContextMenu } from "@/components/ui/shadcn-ext/ContextMenu";
-import { EllipsisVertical, PencilIcon, StarIcon, Trash2Icon } from "lucide-react";
+import { EllipsisVertical, PencilIcon, StarIcon, Trash2Icon, UploadIcon } from "lucide-react";
 import { type ReactNode } from "react";
 
 type FileContextMenuProps = {
@@ -9,6 +9,7 @@ type FileContextMenuProps = {
   onToggleFavourite: () => void;
   onDelete: () => void;
   onProperties: () => void;
+  onExport: () => void;
 };
 
 export const FileContextMenu = ({
@@ -18,6 +19,7 @@ export const FileContextMenu = ({
   onToggleFavourite,
   onDelete,
   onProperties,
+  onExport,
 }: FileContextMenuProps) => {
   const menuItems = [
     {
@@ -29,6 +31,11 @@ export const FileContextMenu = ({
       label: "Rename file",
       icon: PencilIcon,
       onClick: onRename,
+    },
+    {
+      label: "Export",
+      icon: UploadIcon,
+      onClick: onExport,
     },
     {
       label: "Properties",

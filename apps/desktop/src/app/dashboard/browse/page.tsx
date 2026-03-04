@@ -10,6 +10,7 @@ import {
   DeleteConfirmationDialog,
   EmptyFolder,
   EmptySearchResult,
+  ExportItemDialog,
   FilePropertiesDialog,
   FileViewerDialog,
   FolderPropertiesDialog,
@@ -19,7 +20,7 @@ import {
 import { FilesSection } from "./_components_/FilesSection";
 import { FoldersSection } from "./_components_/FoldersSection";
 
-// @todo-now implement the move functionality
+// @todo-soon implement the move functionality
 
 const BrowsePage = () => {
   const { browseState, folderState, fileState, dialogState } = useBrowse();
@@ -57,6 +58,7 @@ const BrowsePage = () => {
                 onFolderProperties={folderState.requestProperties}
                 onFolderDelete={folderState.requestDelete}
                 onFolderChangeIcon={folderState.requestIconChange}
+                onFolderExport={folderState.requestExport}
               />
               <FilesSection
                 files={fileState.files}
@@ -65,6 +67,7 @@ const BrowsePage = () => {
                 onFileToggleFavourite={fileState.toggleFavourite}
                 onFileProperties={fileState.requestProperties}
                 onFileDelete={fileState.requestDelete}
+                onFileExport={fileState.requestExport}
               />
             </section>
           )}
@@ -87,13 +90,6 @@ const BrowsePage = () => {
             extension={dialogState.viewingItem?.extension}
             content={dialogState.viewingItem?.content ?? null}
           />
-          <RenameItemDialog
-            isOpen={dialogState.isRenameVisible}
-            onOpenChange={dialogState.toggleRenameVisibility}
-            initialName={dialogState.renameInitialName}
-            itemType={dialogState.renameItemType}
-            onRename={dialogState.submitRename}
-          />
           <ChangeFolderIconDialog
             isOpen={dialogState.isFolderIconPickerVisible}
             onOpenChange={dialogState.toggleFolderIconPickerVisibility}
@@ -109,12 +105,26 @@ const BrowsePage = () => {
             onOpenChange={dialogState.toggleFolderPropertiesVisibility}
             item={dialogState.folderForProperties}
           />
+          <RenameItemDialog
+            isOpen={dialogState.isRenameVisible}
+            onOpenChange={dialogState.toggleRenameVisibility}
+            initialName={dialogState.renameInitialName}
+            itemType={dialogState.renameItemType}
+            onRename={dialogState.submitRename}
+          />
           <DeleteConfirmationDialog
             isOpen={dialogState.isDeleteConfirmationVisible}
             onOpenChange={dialogState.toggleDeleteConfirmationVisibility}
             itemName={dialogState.deleteItemName}
             itemType={dialogState.deleteItemType}
             onConfirm={dialogState.confirmDeleteSelection}
+          />
+          <ExportItemDialog
+            isOpen={dialogState.isExportVisible}
+            onOpenChange={dialogState.toggleExportVisibility}
+            itemName={dialogState.exportItemName}
+            itemType={dialogState.exportItemType}
+            onExport={dialogState.confirmExportSelection}
           />
         </main>
       )}

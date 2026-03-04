@@ -22,6 +22,8 @@ pub fn run() {
             crate::commands::filesystem::set_favorite_item,
             crate::commands::filesystem::delete_item,
             crate::commands::filesystem::rename_item,
+            crate::commands::filesystem::export_file,
+            crate::commands::filesystem::export_folder,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

@@ -3,11 +3,12 @@ export { useBrowse } from "./hooks/useBrowse";
 export { BrowseSection } from "./components/BrowseSection";
 export {
   ChangeFolderIconDialog,
+  CreateFolderDialog,
   DeleteConfirmationDialog,
+  ExportItemDialog,
   FilePropertiesDialog,
   FileViewerDialog,
   FolderPropertiesDialog,
-  NewFolderDialog,
   RenameItemDialog,
 } from "./components/dialogs";
 export { EmptyFolder } from "./components/EmptyFolder";

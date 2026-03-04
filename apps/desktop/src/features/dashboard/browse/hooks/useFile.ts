@@ -166,6 +166,16 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     }
   };
 
+  const handleExportFile = async (id: string, destinationPath: string) => {
+    const result = await tauriApi.exportFile({ id, destinationPath });
+
+    if (result.success) {
+      toast.success("File exported successfully");
+    } else {
+      toast.error("Failed to export file");
+    }
+  };
+
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const filteredFiles = normalizedSearch
     ? files.filter(item =>
@@ -188,5 +198,6 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     handleFileClick,
     handleFileViewerOpenChange,
     handleToggleFavourite,
+    handleExportFile,
   };
 };

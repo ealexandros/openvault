@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { Input } from "@/components/ui/shadcn/input";
+import { ItemType } from "@/types/filesystem";
 import { useState } from "react";
 
 type RenameItemDialogProps = {
@@ -17,7 +18,7 @@ type RenameItemDialogProps = {
   onOpenChange: (open: boolean) => void;
   onRename: (newName: string) => Promise<void>;
   initialName: string;
-  itemType: "file" | "folder";
+  itemType: ItemType;
 };
 
 export const RenameItemDialog = ({
