@@ -12,13 +12,13 @@ type DashboardLayoutProps = {
 };
 
 const routeTitleMap: Record<string, string> = {
-  [hrefs.dashboard.browse]: "Browse Files",
-  [hrefs.dashboard.passwords]: "Passwords",
-  [hrefs.dashboard.notes]: "Notes",
-  [hrefs.dashboard.messages]: "Messages",
-  [hrefs.dashboard.logs]: "Activity Logs",
-  [hrefs.dashboard.decoy]: "Decoy Vault",
-  [hrefs.dashboard.settings]: "Settings",
+  [hrefs.dashboard.browse.get()]: "Browse Files",
+  [hrefs.dashboard.passwords.get()]: "Passwords",
+  [hrefs.dashboard.notes.get()]: "Notes",
+  [hrefs.dashboard.messages.get()]: "Messages",
+  [hrefs.dashboard.logs.get()]: "Activity Logs",
+  [hrefs.dashboard.decoy.get()]: "Decoy Vault",
+  [hrefs.dashboard.settings.get()]: "Settings",
 };
 
 export const DashboardLayout = ({

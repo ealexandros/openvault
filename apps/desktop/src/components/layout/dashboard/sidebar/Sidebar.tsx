@@ -21,16 +21,16 @@ type SidebarProps = {
 };
 
 const mainNavItems = [
-  { href: hrefs.dashboard.browse, label: "Browse Files", icon: FolderIcon },
-  { href: hrefs.dashboard.messages, label: "Messages", icon: MessageCircle },
-  { href: hrefs.dashboard.passwords, label: "Passwords", icon: LockIcon },
-  { href: hrefs.dashboard.notes, label: "Notes", icon: NotebookIcon },
-  { href: hrefs.dashboard.logs, label: "Activity Logs", icon: ActivityIcon },
-  { href: hrefs.dashboard.decoy, label: "Decoy Vault", icon: ShieldAlertIcon },
+  { href: hrefs.dashboard.browse.get(), label: "Browse Files", icon: FolderIcon },
+  { href: hrefs.dashboard.messages.get(), label: "Messages", icon: MessageCircle },
+  { href: hrefs.dashboard.passwords.get(), label: "Passwords", icon: LockIcon },
+  { href: hrefs.dashboard.notes.get(), label: "Notes", icon: NotebookIcon },
+  { href: hrefs.dashboard.logs.get(), label: "Activity Logs", icon: ActivityIcon },
+  { href: hrefs.dashboard.decoy.get(), label: "Decoy Vault", icon: ShieldAlertIcon },
 ] as const;
 
 const bottomNavItems = [
-  { href: hrefs.dashboard.settings, label: "Settings", icon: SettingsIcon },
+  { href: hrefs.dashboard.settings.get(), label: "Settings", icon: SettingsIcon },
 ] as const;
 
 export const DashboardSidebar = ({ onLogout, vaultName, isCollapsed }: SidebarProps) => (

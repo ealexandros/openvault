@@ -10,12 +10,27 @@ export const hrefs = {
   },
   dashboard: {
     get: () => "/dashboard",
-    browse: "/dashboard/browse",
-    decoy: "/dashboard/decoy",
-    notes: "/dashboard/notes",
-    passwords: "/dashboard/passwords",
-    messages: "/dashboard/messages",
-    logs: "/dashboard/logs",
-    settings: "/dashboard/settings",
+
+    browse: {
+      get: () => "/dashboard/browse",
+    },
+    decoy: {
+      get: () => "/dashboard/decoy",
+    },
+    notes: {
+      get: () => "/dashboard/notes",
+    },
+    passwords: {
+      get: () => "/dashboard/passwords",
+    },
+    messages: {
+      get: () => "/dashboard/messages",
+    },
+    logs: {
+      get: () => "/dashboard/logs",
+    },
+    settings: {
+      get: () => "/dashboard/settings",
+    },
   },
 };
