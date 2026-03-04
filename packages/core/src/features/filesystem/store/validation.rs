@@ -1,4 +1,6 @@
 use std::collections::{HashMap, HashSet};
+use std::path::Path;
+
 use uuid::Uuid;
 
 use super::FilesystemStore;
@@ -7,6 +9,16 @@ use crate::features::filesystem::FolderMetadata;
 use crate::features::filesystem::error::{FilesystemError, Result};
 use crate::features::filesystem::metadata::FileMetadata;
 use crate::features::filesystem::metadata::ROOT_FOLDER_ID;
+
+// @todo-now refactor this..
+
+#[derive(Debug, PartialEq, Clone, Default)]
+pub enum ConflictTarget {
+    #[default]
+    All,
+    Folder,
+    File,
+}
 
 impl FilesystemStore {
     pub(super) fn validate_snapshot(&self) -> Result {
@@ -25,23 +37,19 @@ impl FilesystemStore {
         Ok(())
     }
 
-    pub(super) fn ensure_name_available(
+    pub(super) fn validate_name_available(
         &self,
         parent_id: Uuid,
         name: &str,
-        ignore_folder_id: Option<Uuid>,
-        ignore_file_id: Option<Uuid>,
+        target: ConflictTarget,
     ) -> Result {
-        let is_name_not_available = name_conflict(
-            parent_id,
-            name,
-            &self.folders,
-            &self.files,
-            ignore_folder_id,
-            ignore_file_id,
-        );
+        let folder_taken = matches!(target, ConflictTarget::Folder | ConflictTarget::All)
+            && is_folder_name_taken(parent_id, name, &self.folders);
 
-        if is_name_not_available {
+        let file_taken = matches!(target, ConflictTarget::File | ConflictTarget::All)
+            && is_file_name_taken(parent_id, name, &self.files);
+
+        if folder_taken || file_taken {
             return Err(FilesystemError::NameConflict {
                 parent_id,
                 name: name.to_string(),
@@ -49,6 +57,61 @@ impl FilesystemStore {
         }
 
         Ok(())
+    }
+
+    pub(super) fn get_available_file_name(&self, parent_id: Uuid, name: &str) -> Result<String> {
+        let normalized_name = normalize_entry_name(name)?;
+        self.get_available_name(parent_id, &normalized_name, ConflictTarget::File)
+    }
+
+    pub(super) fn get_available_folder_name(&self, parent_id: Uuid, name: &str) -> Result<String> {
+        let normalized_name = normalize_entry_name(name)?;
+        self.get_available_name(parent_id, &normalized_name, ConflictTarget::Folder)
+    }
+
+    fn get_available_name(
+        &self,
+        parent_id: Uuid,
+        name: &str,
+        target: ConflictTarget,
+    ) -> Result<String> {
+        if !self.folders.contains_key(&parent_id) {
+            return Err(FilesystemError::ParentFolderNotFound(parent_id));
+        }
+
+        let normalized_name = normalize_entry_name(name)?;
+
+        if self
+            .validate_name_available(parent_id, &normalized_name, target.clone())
+            .is_ok()
+        {
+            return Ok(normalized_name);
+        }
+
+        let generate_candidate = |i: u32| match target {
+            ConflictTarget::File => add_suffix_to_file(&normalized_name, i),
+            ConflictTarget::Folder | ConflictTarget::All => format!("{normalized_name} ({i})"),
+        };
+
+        for i in 1.. {
+            let candidate = generate_candidate(i);
+
+            if self
+                .validate_name_available(parent_id, &candidate, target.clone())
+                .is_ok()
+            {
+                return Ok(candidate);
+            }
+
+            if i == u32::MAX {
+                return Err(FilesystemError::NameExhausted {
+                    parent_id,
+                    name: normalized_name.clone(),
+                });
+            }
+        }
+
+        unreachable!()
     }
 
     pub(super) fn would_create_cycle(&self, folder_id: Uuid, target_parent_id: Uuid) -> bool {
@@ -168,20 +231,34 @@ fn would_create_cycle(
     false
 }
 
-fn name_conflict(
+fn is_file_name_taken(parent_id: Uuid, name: &str, files: &HashMap<Uuid, FileMetadata>) -> bool {
+    files
+        .values()
+        .any(|file| file.parent_id == parent_id && file.name == name)
+}
+
+fn is_folder_name_taken(
     parent_id: Uuid,
     name: &str,
     folders: &HashMap<Uuid, FolderMetadata>,
-    files: &HashMap<Uuid, FileMetadata>,
-    ignore_folder_id: Option<Uuid>,
-    ignore_file_id: Option<Uuid>,
 ) -> bool {
     folders.values().any(|folder| {
-        folder.id != ROOT_FOLDER_ID
-            && folder.parent_id == Some(parent_id)
-            && folder.name == name
-            && Some(folder.id) != ignore_folder_id
-    }) || files.values().any(|file| {
-        file.parent_id == parent_id && file.name == name && Some(file.id) != ignore_file_id
+        folder.id != ROOT_FOLDER_ID && folder.parent_id == Some(parent_id) && folder.name == name
     })
+}
+
+fn add_suffix_to_file(file_name: &str, n: u32) -> String {
+    let path = Path::new(file_name);
+
+    let stem = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or(file_name);
+
+    let extension = path.extension().and_then(|e| e.to_str());
+
+    match extension {
+        Some(ext) if !ext.is_empty() => format!("{stem} ({n}).{ext}"),
+        _ => format!("{stem} ({n})"),
+    }
 }

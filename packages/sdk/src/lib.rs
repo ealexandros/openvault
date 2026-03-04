@@ -1,6 +1,7 @@
 mod client;
 mod errors;
 mod features;
+mod internal;
 mod vault;
 
 use std::path::Path;

@@ -41,6 +41,9 @@ pub enum FilesystemError {
 
     #[error("Item already exists: {0}")]
     ItemAlreadyExists(String),
+
+    #[error("Name exhausted under folder {parent_id} for entry {name}")]
+    NameExhausted { parent_id: Uuid, name: String },
 }
 
 pub type Result<T = ()> = std::result::Result<T, FilesystemError>;

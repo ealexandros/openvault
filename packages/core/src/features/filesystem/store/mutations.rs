@@ -6,6 +6,7 @@ use crate::features::filesystem::metadata::{
     FileMetadata, FileMetadataPatch, FolderMetadata, FolderMetadataPatch, ROOT_FOLDER_ID,
 };
 use crate::features::filesystem::records::FilesystemDelta;
+use crate::features::filesystem::store::validation::ConflictTarget;
 
 impl FilesystemStore {
     pub(super) fn replay_delta(&mut self, delta: &FilesystemDelta) -> Result {
@@ -48,16 +49,16 @@ impl FilesystemStore {
             return Err(FilesystemError::DuplicateId(folder.id));
         }
 
-        let parent_id = folder.parent_id.ok_or_else(|| {
-            FilesystemError::InvalidMove(format!("folder {} must have a parent", folder.id))
-        })?;
+        let parent_id = folder
+            .parent_id
+            .ok_or_else(|| FilesystemError::InvalidMove("folder must have a parent".to_string()))?;
 
         if !self.folders.contains_key(&parent_id) {
             return Err(FilesystemError::ParentFolderNotFound(parent_id));
         }
 
         let normalized_name = normalize_entry_name(&folder.name)?;
-        self.ensure_name_available(parent_id, &normalized_name, None, None)?;
+        self.validate_name_available(parent_id, &normalized_name, ConflictTarget::Folder)?;
 
         let mut folder = folder;
         folder.name = normalized_name;
@@ -100,14 +101,10 @@ impl FilesystemStore {
             )));
         }
 
-        let target_name = patch
-            .name
-            .as_deref()
-            .map(normalize_entry_name)
-            .transpose()?
-            .unwrap_or(current.name);
-
-        self.ensure_name_available(target_parent, &target_name, Some(id), None)?;
+        if let Some(name) = patch.name {
+            let target_name = normalize_entry_name(&name)?;
+            self.validate_name_available(target_parent, &target_name, ConflictTarget::Folder)?;
+        }
 
         if current_parent != target_parent {
             self.index.remove_folder(current_parent, id);
@@ -120,7 +117,6 @@ impl FilesystemStore {
             .ok_or(FilesystemError::FolderNotFound(id))?;
 
         folder.parent_id = Some(target_parent);
-        folder.name = target_name;
         folder.icon = patch.icon.unwrap_or(folder.icon.clone());
         folder.is_favourite = patch.is_favourite.unwrap_or(folder.is_favourite);
         folder.updated_at = patch.updated_at;
@@ -168,7 +164,7 @@ impl FilesystemStore {
         }
 
         let normalized_name = normalize_entry_name(&file.name)?;
-        self.ensure_name_available(file.parent_id, &normalized_name, None, None)?;
+        self.validate_name_available(file.parent_id, &normalized_name, ConflictTarget::File)?;
 
         let mut file = file;
         file.name = normalized_name;
@@ -190,14 +186,10 @@ impl FilesystemStore {
             return Err(FilesystemError::ParentFolderNotFound(target_parent));
         }
 
-        let target_name = patch
-            .name
-            .as_deref()
-            .map(normalize_entry_name)
-            .transpose()?
-            .unwrap_or(current.name);
-
-        self.ensure_name_available(target_parent, &target_name, None, Some(id))?;
+        if let Some(name) = patch.name {
+            let target_name = normalize_entry_name(&name)?;
+            self.validate_name_available(target_parent, &target_name, ConflictTarget::File)?;
+        }
 
         if current.parent_id != target_parent {
             self.index.remove_file(current.parent_id, id);
@@ -210,7 +202,6 @@ impl FilesystemStore {
             .ok_or(FilesystemError::FileNotFound(id))?;
 
         file.parent_id = target_parent;
-        file.name = target_name;
         file.is_favourite = patch.is_favourite.unwrap_or(file.is_favourite);
         file.updated_at = patch.updated_at;
 
@@ -240,6 +231,7 @@ impl FilesystemStore {
 
 pub(crate) fn normalize_entry_name(name: &str) -> Result<String> {
     let trimmed = name.trim();
+
     if trimmed.is_empty()
         || trimmed == "."
         || trimmed == ".."

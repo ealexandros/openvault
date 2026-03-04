@@ -123,10 +123,12 @@ impl FilesystemStore {
     }
 
     pub fn add_folder(&mut self, parent_id: Uuid, name: String) -> Result<Uuid> {
-        let folder = FolderMetadata::new(Some(parent_id), name);
+        let folder_name = self.get_available_folder_name(parent_id, name.as_str())?;
+        let folder = FolderMetadata::new(Some(parent_id), folder_name);
+
         let id = folder.id;
 
-        self.commit_delta(&mut FilesystemDelta::FolderAdded(folder))?;
+        self.commit_delta(&FilesystemDelta::FolderAdded(folder))?;
 
         Ok(id)
     }
@@ -138,7 +140,9 @@ impl FilesystemStore {
         extension: String,
         blob: BlobRef,
     ) -> Result<Uuid> {
-        let file = FileMetadata::new(parent_id, name, extension, blob);
+        let file_name = self.get_available_file_name(parent_id, name.as_str())?;
+        let file = FileMetadata::new(parent_id, file_name, extension, blob);
+
         let id = file.id;
 
         self.commit_delta(&FilesystemDelta::FileAdded(file))?;

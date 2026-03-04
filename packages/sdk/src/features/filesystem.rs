@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use openvault_core::operations::filesystem::FilesystemOps;
 use uuid::Uuid;
@@ -11,6 +11,10 @@ use openvault_core::operations::blob::{self, get_blob};
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::{Error, Result};
+use crate::internal::file::{
+    find_available_path, resolve_export_file_destination, resolve_export_folder_destination,
+    resolve_export_root_destination,
+};
 
 pub struct FilesystemFeature<'a> {
     session: &'a mut VaultSession,
@@ -28,7 +32,7 @@ impl<'a> FilesystemFeature<'a> {
             .file(&id)
             .ok_or(Error::ItemNotFound(id.to_string()))?;
 
-        Ok(get_blob(&mut self.session, &file.blob)?)
+        Ok(get_blob(self.session, &file.blob)?)
     }
 
     pub fn browse(&mut self, parent_id: &Uuid) -> Result<(Vec<FolderMetadata>, Vec<FileMetadata>)> {
@@ -52,10 +56,6 @@ impl<'a> FilesystemFeature<'a> {
             .unwrap_or_default()
             .to_owned();
 
-        if self.store.file_exists_in_folder(&parent_id, &name) {
-            return Err(Error::ItemAlreadyExists(name));
-        }
-
         let mut file = File::open(source_path)?;
         let blob_ref = blob::put_blob(self.session, &mut file)?;
 
@@ -78,7 +78,7 @@ impl<'a> FilesystemFeature<'a> {
             .file(&id)
             .ok_or(Error::ItemNotFound(id.to_string()))?;
 
-        let destination = Self::resolve_file_destination(destination_path, &file.name)?;
+        let destination = resolve_export_file_destination(destination_path, &file.name)?;
 
         if let Some(parent) = destination.parent() {
             std::fs::create_dir_all(parent)?;
@@ -97,13 +97,9 @@ impl<'a> FilesystemFeature<'a> {
             .ok_or(Error::ItemNotFound(id.to_string()))?;
 
         let destination = if folder.parent_id.is_none() {
-            if destination_path.exists() && destination_path.is_dir() {
-                destination_path.to_path_buf()
-            } else {
-                Self::available_path(destination_path, false)?
-            }
+            resolve_export_root_destination(destination_path)?
         } else {
-            Self::resolve_folder_destination(destination_path, &folder.name)?
+            resolve_export_folder_destination(destination_path, &folder.name)?
         };
 
         std::fs::create_dir_all(&destination)?;
@@ -154,7 +150,7 @@ impl<'a> FilesystemFeature<'a> {
 
     pub fn reload(&mut self) -> Result<&FilesystemStore> {
         *self.store = FilesystemOps::load(self.session)?;
-        Ok(&self.store)
+        Ok(self.store)
     }
 
     pub fn commit(&mut self) -> Result<bool> {
@@ -174,85 +170,22 @@ impl<'a> FilesystemFeature<'a> {
         Ok(folder_id)
     }
 
-    // @todo-now refactor these..
-
     fn export_folder_contents(&mut self, folder_id: Uuid, destination_path: &Path) -> Result {
         let (folders, files) = self.store.browse(&folder_id).map_err(map_fs_error)?;
 
         for file in files {
-            let file_path = Self::available_path(&destination_path.join(&file.name), true)?;
-            let content = get_blob(&mut self.session, &file.blob)?;
+            let file_path = find_available_path(&destination_path.join(&file.name), true)?;
+            let content = get_blob(self.session, &file.blob)?;
             std::fs::write(file_path, content)?;
         }
 
         for folder in folders {
-            let folder_path = Self::available_path(&destination_path.join(&folder.name), false)?;
+            let folder_path = find_available_path(&destination_path.join(&folder.name), false)?;
             std::fs::create_dir_all(&folder_path)?;
             self.export_folder_contents(folder.id, &folder_path)?;
         }
 
         Ok(())
-    }
-
-    fn resolve_file_destination(destination_path: &Path, file_name: &str) -> Result<PathBuf> {
-        let target = if destination_path.is_dir() {
-            destination_path.join(file_name)
-        } else {
-            destination_path.to_path_buf()
-        };
-
-        Self::available_path(&target, true)
-    }
-
-    fn resolve_folder_destination(destination_path: &Path, folder_name: &str) -> Result<PathBuf> {
-        let target = if destination_path.is_dir() {
-            destination_path.join(folder_name)
-        } else {
-            destination_path.to_path_buf()
-        };
-
-        Self::available_path(&target, false)
-    }
-
-    fn available_path(path: &Path, is_file: bool) -> Result<PathBuf> {
-        if !path.exists() {
-            return Ok(path.to_path_buf());
-        }
-
-        let parent = path.parent().ok_or(Error::InvalidPath)?;
-        let file_name = path
-            .file_name()
-            .and_then(|name| name.to_str())
-            .ok_or(Error::InvalidPath)?;
-
-        for i in 1.. {
-            let candidate_name = if is_file {
-                Self::file_name_with_suffix(file_name, i)
-            } else {
-                format!("{file_name} ({i})")
-            };
-            let candidate = parent.join(candidate_name);
-
-            if !candidate.exists() {
-                return Ok(candidate);
-            }
-        }
-
-        unreachable!()
-    }
-
-    fn file_name_with_suffix(file_name: &str, n: u32) -> String {
-        let path = Path::new(file_name);
-        let stem = path.file_stem().and_then(|name| name.to_str());
-        let extension = path.extension().and_then(|ext| ext.to_str());
-
-        match (stem, extension) {
-            (Some(stem), Some(extension)) if !extension.is_empty() => {
-                format!("{stem} ({n}).{extension}")
-            }
-            (Some(stem), _) => format!("{stem} ({n})"),
-            _ => format!("{file_name} ({n})"),
-        }
     }
 }
 

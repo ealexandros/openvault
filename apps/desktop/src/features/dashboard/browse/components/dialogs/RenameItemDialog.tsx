@@ -21,6 +21,8 @@ type RenameItemDialogProps = {
   itemType: ItemType;
 };
 
+// @todo-now make the error state different..
+
 export const RenameItemDialog = ({
   isOpen,
   onOpenChange,
