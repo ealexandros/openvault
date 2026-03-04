@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/shadcn/resizable";
 import { debounce } from "lodash-es";
 import { ChangeEvent, useEffect, useMemo, useRef } from "react";
 import { MessageWorkspace } from "./_components_/MessageWorkspace";
@@ -100,7 +105,7 @@ const MessagesPage = () => {
   };
 
   return (
-    <div className="flex h-full w-full gap-8 overflow-hidden bg-background">
+    <div className="flex h-full w-full overflow-hidden bg-background">
       <input
         ref={fileInputRef}
         type="file"
@@ -109,37 +114,43 @@ const MessagesPage = () => {
         onChange={handleImportChange}
       />
 
-      <main className="scrollbar-none flex-1 overflow-y-auto p-10">
-        <MessageWorkspace
-          algorithm={algorithm}
-          algorithmOptions={algorithmOptions}
-          setAlgorithm={setAlgorithm}
-          mode={mode}
-          setMode={setMode}
-          messageInput={messageInput}
-          setMessageInput={setMessageInput}
-          messageOutput={messageOutput}
-          transformError={transformError}
-          clearMessageFields={clearMessageFields}
-          handlePrimaryAction={handlePrimaryAction}
-          selectedUser={selectedUser}
-        />
-      </main>
+      <ResizablePanelGroup orientation="horizontal" className="h-full">
+        <ResizablePanel defaultSize="75%">
+          <main className="scrollbar-none h-full overflow-y-auto p-10">
+            <MessageWorkspace
+              algorithm={algorithm}
+              algorithmOptions={algorithmOptions}
+              setAlgorithm={setAlgorithm}
+              mode={mode}
+              setMode={setMode}
+              messageInput={messageInput}
+              setMessageInput={setMessageInput}
+              messageOutput={messageOutput}
+              transformError={transformError}
+              clearMessageFields={clearMessageFields}
+              handlePrimaryAction={handlePrimaryAction}
+              selectedUser={selectedUser}
+            />
+          </main>
+        </ResizablePanel>
 
-      <div className="w-sm shrink-0 border-l border-border bg-muted/30">
-        <UserSidebar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filteredUsers={filteredUsers}
-          selectedUserId={selectedUserId}
-          setSelectedUserId={setSelectedUserId}
-          selectedUser={selectedUser}
-          openImportPicker={openImportPicker}
-          exportSelectedUserProfile={exportSelectedUserProfile}
-          exportCurrentUserProfile={exportCurrentUserProfile}
-          importError={importError}
-        />
-      </div>
+        <ResizableHandle withHandle />
+
+        <ResizablePanel defaultSize="25%">
+          <UserSidebar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filteredUsers={filteredUsers}
+            selectedUserId={selectedUserId}
+            setSelectedUserId={setSelectedUserId}
+            selectedUser={selectedUser}
+            openImportPicker={openImportPicker}
+            exportSelectedUserProfile={exportSelectedUserProfile}
+            exportCurrentUserProfile={exportCurrentUserProfile}
+            importError={importError}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };
