@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
+import { truncateLeft } from "@/utils/format";
 import { ShieldIcon } from "lucide-react";
 
 type UnlockedVaultHeaderProps = {
@@ -18,10 +19,8 @@ export const UnlockedVaultHeader = ({ path }: UnlockedVaultHeaderProps) => (
       <Tooltip>
         <TooltipTrigger>
           <div className="flex max-w-sm items-center justify-center gap-2">
-            <p
-              className="truncate text-base font-medium tracking-wide text-muted-foreground/50"
-              dir="rtl">
-              {path}
+            <p className="text-base font-medium tracking-wide text-muted-foreground/50">
+              {truncateLeft(path, 40)}
             </p>
           </div>
         </TooltipTrigger>

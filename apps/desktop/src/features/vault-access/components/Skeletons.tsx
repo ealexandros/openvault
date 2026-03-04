@@ -23,7 +23,6 @@ export const RecentVaultListSkeleton = ({ children, isLoading }: SkeletonProps) 
     <div className="grid gap-3">
       <RecentVaultSkeleton />
       <RecentVaultSkeleton />
-      <RecentVaultSkeleton />
     </div>
   );
 };
