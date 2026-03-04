@@ -1,8 +1,8 @@
 use crate::errors::Result;
 use crate::internal::io_ext::{ReadWriter, Reader};
 use crate::vault::crypto::envelope::Envelope;
+use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
-use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
 use openvault_crypto::encryption::Nonce;
 

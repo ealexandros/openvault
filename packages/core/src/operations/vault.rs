@@ -9,7 +9,7 @@ use crate::vault::crypto::keyring::Keyring;
 use crate::vault::runtime::VaultSession;
 use crate::vault::versions::resolve_format;
 use crate::vault::versions::shared::boot_header::BootHeader;
-use crate::vault::versions::shared::traits::FormatContext;
+use crate::vault::versions::shared::format::FormatContext;
 
 pub fn create_vault_with(path: &Path, password: &[u8], config: CreateConfig) -> Result {
     let path = resolve_path(path, &config.filename, VAULT_EXTENSION);

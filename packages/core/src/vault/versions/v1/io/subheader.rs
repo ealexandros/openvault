@@ -3,9 +3,9 @@ use openvault_crypto::encryption::Nonce;
 use crate::errors::Result;
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
 use crate::vault::versions::shared::boot_header::BootHeader;
+use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
 
 pub const SUBHEADER_OFFSET: u64 = BootHeader::SIZE as u64;

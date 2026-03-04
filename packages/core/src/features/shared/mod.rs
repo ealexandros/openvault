@@ -1,2 +1,2 @@
 pub mod blob_ref;
-pub mod traits;
+pub mod codec;

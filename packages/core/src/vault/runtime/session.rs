@@ -6,7 +6,7 @@ use openvault_crypto::encryption::EncryptionAlgorithm;
 use crate::errors::Result;
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::factory::FormatRef;
-use crate::vault::versions::shared::traits::FormatContext;
+use crate::vault::versions::shared::format::FormatContext;
 
 pub struct VaultSession {
     file: File,

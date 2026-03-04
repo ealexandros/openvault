@@ -1,5 +1,5 @@
 use crate::errors::{Error, Result};
-use crate::vault::versions::shared::traits::FormatHandler;
+use crate::vault::versions::shared::format::FormatHandler;
 use crate::vault::versions::v1::{V1_FORMAT_VERSION, V1FormatHandler};
 
 pub const LATEST_FORMAT_VERSION: u16 = V1_FORMAT_VERSION;

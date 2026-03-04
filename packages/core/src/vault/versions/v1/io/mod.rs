@@ -12,8 +12,8 @@ pub use subheader::{read_subheader, write_subheader};
 
 use crate::errors::Result;
 use crate::internal::io_ext::ReadWriter;
+use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::shared::traits::FormatContext;
 
 pub fn init_layout(rw: &mut ReadWriter, context: &FormatContext) -> Result<Subheader> {
     let subheader = Subheader::default();

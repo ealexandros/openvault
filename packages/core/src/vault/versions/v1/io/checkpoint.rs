@@ -1,7 +1,7 @@
 use crate::errors::Result;
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
-use crate::vault::versions::shared::traits::FormatContext;
+use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
 use crate::vault::versions::v1::io::subheader::{read_subheader, write_subheader};

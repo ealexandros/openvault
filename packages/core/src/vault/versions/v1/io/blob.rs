@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::errors::{Error, Result};
 use crate::features::shared::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
-use crate::vault::versions::shared::traits::FormatContext;
+use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::v1::blob::{BlobChunkMeta, BlobManifest};
 use crate::vault::versions::v1::io::aad::AadDomain;
 use crate::vault::versions::v1::io::frame::{open_frame, seal_frame};
@@ -95,7 +95,7 @@ mod tests {
     use openvault_crypto::keys::salt::Salt;
 
     use crate::vault::crypto::keyring::Keyring;
-    use crate::vault::versions::shared::traits::FormatContext;
+    use crate::vault::versions::shared::format::FormatContext;
     use crate::vault::versions::v1::io::init_layout;
 
     use super::{read_blob, write_blob};

@@ -9,10 +9,10 @@ use crate::errors::{Error, Result};
 use crate::features::shared::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, Writer};
 use crate::vault::versions::shared::checkpoint::Checkpoint;
+use crate::vault::versions::shared::format::{FormatContext, FormatHandler};
 use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::shared::replay::ReplayState;
 use crate::vault::versions::shared::subheader::Subheader;
-use crate::vault::versions::shared::traits::{FormatContext, FormatHandler};
 use crate::vault::versions::v1::replay::replay_records;
 
 pub const V1_FORMAT_VERSION: u16 = 1;

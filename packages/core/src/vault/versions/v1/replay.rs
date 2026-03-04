@@ -1,7 +1,7 @@
 use crate::errors::Result;
 use crate::internal::io_ext::Reader;
+use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::shared::replay::{ReplayRecord, ReplayState};
-use crate::vault::versions::shared::traits::FormatContext;
 use crate::vault::versions::v1::io::record::read_replay_records;
 use crate::vault::versions::v1::io::{read_checkpoint, read_subheader};
 
