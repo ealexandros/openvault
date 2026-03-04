@@ -33,6 +33,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     if (isFile.success && !isFile.data) {
       return await tauriApi.uploadFolder({ parentId: currentFolderId, sourcePath: path });
     }
+
     return await tauriApi.uploadFile({ parentId: currentFolderId, sourcePath: path });
   };
 
@@ -68,7 +69,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
     });
 
     if (selected != null) {
-      await uploadPath(selected);
+      await uploadPaths([selected]);
       await refresh();
     }
   };

@@ -1,10 +1,8 @@
-export type FileType = "image" | "pdf" | "audio" | "video" | "text" | "code" | null;
+export type FileType = "image" | "pdf" | "audio" | "video" | "text" | null;
 
 const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "ico"]);
 const AUDIO_EXTENSIONS = new Set(["mp3", "wav", "ogg", "flac", "m4a"]);
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "avi", "webm", "mkv"]);
-const CODE_EXTENSIONS = new Set(["js", "ts", "tsx", "html", "css", "json", "md"]);
-const TEXT_EXTENSIONS = new Set(["pdf", "doc", "docx", "txt"]);
 
 const MIME_TYPES: Record<string, string> = {
   mp3: "audio/mpeg",
@@ -21,10 +19,7 @@ const MIME_TYPES: Record<string, string> = {
   pdf: "application/pdf",
 };
 
-const DEFAULT_MIME_BY_TYPE: Record<
-  Exclude<FileType, "pdf" | "text" | "code" | null>,
-  string
-> = {
+const DEFAULT_MIME_BY_TYPE: Record<Exclude<FileType, "pdf" | "text" | null>, string> = {
   image: "image",
   audio: "audio",
   video: "video",
@@ -39,10 +34,8 @@ export const getFileType = (extension?: string): FileType => {
   if (IMAGE_EXTENSIONS.has(ext)) return "image";
   if (AUDIO_EXTENSIONS.has(ext)) return "audio";
   if (VIDEO_EXTENSIONS.has(ext)) return "video";
-  if (CODE_EXTENSIONS.has(ext)) return "code";
-  if (TEXT_EXTENSIONS.has(ext)) return "text";
 
-  return null;
+  return "text";
 };
 
 export const getFileTypeOrDefault = (extension?: string): NonNullable<FileType> => {

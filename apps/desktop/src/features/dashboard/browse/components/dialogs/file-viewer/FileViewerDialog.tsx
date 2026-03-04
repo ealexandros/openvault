@@ -31,7 +31,6 @@ const IconMap: Record<NonNullable<FileType>, React.ElementType> = {
   audio: FileAudioIcon,
   pdf: FileTextIcon,
   text: FileTextIcon,
-  code: FileTextIcon,
 };
 
 export const FileViewerDialog = ({
@@ -49,7 +48,6 @@ export const FileViewerDialog = ({
     audio: <AudioViewer url={fileUrl} fileName={fileName} />,
     video: <VideoViewer url={fileUrl} fileName={fileName} />,
     text: <TextViewer text={text} />,
-    code: <TextViewer text={text} />,
   };
 
   const Icon = IconMap[fileType];
