@@ -61,7 +61,7 @@ export const tauriApi = {
     return safeInvokeTauri<number[]>("read_file_bytes", { params });
   },
 
-  checkPathIsFile: (params: { path: string }) => {
+  isFile: (params: { path: string }) => {
     return safeInvokeTauri<boolean>("path_is_file", { params });
   },
 

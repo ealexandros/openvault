@@ -50,7 +50,7 @@ export const useVaultAccess = () => {
   const validateVaults = async (vaults: RecentVault[]) => {
     const results = await Promise.all(
       vaults.map(async v => {
-        const result = await tauriApi.checkPathIsFile({ path: v.path });
+        const result = await tauriApi.isFile({ path: v.path });
         return result.success && result.data ? v : null;
       }),
     );

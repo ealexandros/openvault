@@ -28,7 +28,7 @@ export const useFile = ({ currentFolderId, files, searchQuery, refresh }: UseFil
   const previewSequenceRef = useRef(0);
 
   const uploadPath = async (path: string) => {
-    const isFile = await tauriApi.checkPathIsFile({ path });
+    const isFile = await tauriApi.isFile({ path });
 
     if (isFile.success && !isFile.data) {
       return await tauriApi.uploadFolder({ parentId: currentFolderId, sourcePath: path });
