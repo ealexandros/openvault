@@ -8,10 +8,10 @@ use crate::internal::parser::parse_uuid;
 use crate::state::TauriState;
 
 macro_rules! vault_fs {
-    ($state:expr, $fs:ident) => {
-        let mut vault_guard = $state.vault.lock().unwrap();
-        let vault = vault_guard.as_mut().ok_or(Error::VaultNotOpened)?;
-        let mut $fs = vault.filesystem();
+    ($state:expr, $fs:ident, $vault:ident) => {
+        let mut $vault = $state.vault.lock().unwrap();
+        let $vault = $vault.as_mut().ok_or(Error::VaultNotOpened)?;
+        let mut $fs = $vault.filesystem();
     };
 }
 
@@ -22,7 +22,7 @@ pub async fn path_is_file(params: PathIsFileParams) -> Result<bool> {
 
 #[tauri::command]
 pub async fn browse_fs(state: TauriState<'_>, params: BrowseVaultParams) -> Result<BrowseResult> {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
 
@@ -60,19 +60,19 @@ pub async fn browse_fs(state: TauriState<'_>, params: BrowseVaultParams) -> Resu
 
 #[tauri::command]
 pub async fn create_folder(state: TauriState<'_>, params: CreateFolderParams) -> Result<String> {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
     let new_folder_id = fs.add_folder(parent_uuid, params.name)?;
 
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(new_folder_id.to_string())
 }
 
 #[tauri::command]
 pub async fn delete_item(state: TauriState<'_>, params: DeleteItemParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
 
@@ -81,14 +81,14 @@ pub async fn delete_item(state: TauriState<'_>, params: DeleteItemParams) -> Res
         ItemType::Folder => fs.remove_folder(uuid)?,
     }
 
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
 
@@ -97,40 +97,40 @@ pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Res
         ItemType::Folder => fs.rename_folder(uuid, params.new_name)?,
     }
 
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.add_file(parent_uuid, &source_path)?;
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let parent_uuid = parse_uuid(&params.parent_id)?;
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.upload_folder(parent_uuid, &source_path)?;
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn read_file_bytes(state: TauriState<'_>, params: ReadFileParams) -> Result<Vec<u8>> {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
     let content = fs.read_file_bytes(uuid)?;
@@ -140,18 +140,18 @@ pub async fn read_file_bytes(state: TauriState<'_>, params: ReadFileParams) -> R
 
 #[tauri::command]
 pub async fn set_folder_icon(state: TauriState<'_>, params: ChangeFolderIconParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
     fs.set_folder_icon(uuid, params.icon)?;
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn set_favorite_item(state: TauriState<'_>, params: SetFavoriteItemParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
 
@@ -160,14 +160,14 @@ pub async fn set_favorite_item(state: TauriState<'_>, params: SetFavoriteItemPar
         ItemType::Folder => fs.set_folder_favorite(uuid, params.is_favourite)?,
     }
 
-    fs.commit()?;
+    vault.commit_all()?;
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn export_file(state: TauriState<'_>, params: ExportFileParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
     let destination_path = std::path::PathBuf::from(params.destination_path);
@@ -179,7 +179,7 @@ pub async fn export_file(state: TauriState<'_>, params: ExportFileParams) -> Res
 
 #[tauri::command]
 pub async fn export_folder(state: TauriState<'_>, params: ExportFolderParams) -> Result {
-    vault_fs!(state, fs);
+    vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
     let destination_path = std::path::PathBuf::from(params.destination_path);
