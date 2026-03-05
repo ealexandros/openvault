@@ -1,5 +1,5 @@
 use openvault_core::errors::Error;
-use openvault_core::features::filesystem::scan_directory;
+use openvault_core::internal::scanner::scan_directory;
 
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};

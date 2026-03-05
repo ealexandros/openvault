@@ -1,9 +1,9 @@
 use crate::features::shared::codec::FeatureCodec;
 
 use super::error::{FilesystemError, Result};
-use super::records::{FILESYSTEM_WIRE_VERSION_V1, FilesystemChange};
+use super::events::FilesystemChange;
 
-pub const FILESYSTEM_FEATURE_ID: &str = "filesystem";
+pub const FILESYSTEM_WIRE_VERSION: u16 = 1;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct FilesystemCodec;
@@ -12,12 +12,8 @@ impl FeatureCodec for FilesystemCodec {
     type Error = FilesystemError;
     type DomainChange = FilesystemChange;
 
-    fn feature_id(&self) -> &'static str {
-        FILESYSTEM_FEATURE_ID
-    }
-
     fn wire_version(&self) -> u16 {
-        FILESYSTEM_WIRE_VERSION_V1
+        FILESYSTEM_WIRE_VERSION
     }
 
     fn encode_change(&self, change: Self::DomainChange) -> Result<Vec<u8>> {
@@ -28,7 +24,7 @@ impl FeatureCodec for FilesystemCodec {
     }
 
     fn decode_change(&self, wire_version: u16, payload: &[u8]) -> Result<Self::DomainChange> {
-        if wire_version != FILESYSTEM_WIRE_VERSION_V1 {
+        if wire_version != FILESYSTEM_WIRE_VERSION {
             return Err(FilesystemError::UnsupportedWireVersion(wire_version));
         }
 

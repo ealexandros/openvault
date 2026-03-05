@@ -3,9 +3,8 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::metadata::{FileMetadata, FileMetadataPatch, FolderMetadata, FolderMetadataPatch};
-
-pub const FILESYSTEM_WIRE_VERSION_V1: u16 = 1;
+use super::models::{FileMetadata, FolderMetadata};
+use super::patch::{FileMetadataPatch, FolderMetadataPatch};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct FilesystemSnapshot {
@@ -22,20 +21,16 @@ impl FilesystemSnapshot {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum FilesystemDelta {
     FolderAdded(FolderMetadata),
+    FolderDeleted(Uuid),
     FolderUpdated {
         id: Uuid,
         patch: FolderMetadataPatch,
     },
-    FolderDeleted {
-        id: Uuid,
-    },
     FileAdded(FileMetadata),
+    FileDeleted(Uuid),
     FileUpdated {
         id: Uuid,
         patch: FileMetadataPatch,
-    },
-    FileDeleted {
-        id: Uuid,
     },
 }
 

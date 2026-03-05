@@ -27,11 +27,23 @@ pub enum FilesystemError {
     #[error("Invalid root folder state: {0}")]
     RootFolderInvariant(String),
 
-    #[error("Folder {0} is not empty")]
-    FolderNotEmpty(Uuid),
+    #[error("Root folder metadata is reserved")]
+    RootFolderReserved,
+
+    #[error("Root folder cannot be modified")]
+    RootFolderImmutable,
 
     #[error("Invalid folder move: {0}")]
     InvalidMove(String),
+
+    #[error("Folder {0} is missing parent id")]
+    FolderMissingParent(Uuid),
+
+    #[error("Folder must have a parent {0}")]
+    FolderMustHaveParent(Uuid),
+
+    #[error("Cycle detected for folder {0}")]
+    CycleDetected(Uuid),
 
     #[error("Unsupported filesystem wire version: {0}")]
     UnsupportedWireVersion(u16),
@@ -39,11 +51,24 @@ pub enum FilesystemError {
     #[error("Invalid filesystem payload: {0}")]
     InvalidPayload(String),
 
-    #[error("Item already exists: {0}")]
-    ItemAlreadyExists(String),
-
     #[error("Name exhausted under folder {parent_id} for entry {name}")]
     NameExhausted { parent_id: Uuid, name: String },
+}
+
+impl FilesystemError {
+    pub fn name_conflict(parent_id: Uuid, name: &str) -> Self {
+        Self::NameConflict {
+            parent_id,
+            name: name.to_string(),
+        }
+    }
+
+    pub fn name_exhausted(parent_id: Uuid, name: &str) -> Self {
+        Self::NameExhausted {
+            parent_id,
+            name: name.to_string(),
+        }
+    }
 }
 
 pub type Result<T = ()> = std::result::Result<T, FilesystemError>;

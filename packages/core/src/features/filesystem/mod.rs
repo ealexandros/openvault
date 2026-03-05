@@ -1,17 +1,19 @@
-mod codec;
-mod error;
-mod metadata;
-mod records;
-mod scanner;
-mod store;
+pub mod error;
+pub mod store;
 
-pub use codec::{FILESYSTEM_FEATURE_ID, FilesystemCodec};
+mod codec;
+mod events;
+mod index;
+mod models;
+mod namings;
+mod patch;
+mod validate;
+
+pub use codec::{FILESYSTEM_WIRE_VERSION, FilesystemCodec};
 pub use error::{FilesystemError, Result};
-pub use metadata::{
-    FileMetadata, FileMetadataPatch, FolderMetadata, FolderMetadataPatch, ROOT_FOLDER_ID,
-};
-pub use records::{
-    FILESYSTEM_WIRE_VERSION_V1, FilesystemChange, FilesystemDelta, FilesystemSnapshot,
-};
-pub use scanner::{ScannedFolder, scan_directory};
+pub use events::{FilesystemChange, FilesystemDelta, FilesystemSnapshot};
+pub use models::{FileMetadata, FolderMetadata, ROOT_FOLDER_ID};
+pub use patch::{FileMetadataPatch, FolderMetadataPatch};
 pub use store::FilesystemStore;
+
+pub use crate::internal::scanner::{ScannedFolder, scan_directory};
