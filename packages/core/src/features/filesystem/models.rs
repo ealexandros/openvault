@@ -1,18 +1,23 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
 
 use crate::features::shared::blob_ref::BlobRef;
 
 pub const ROOT_FOLDER_ID: Uuid = Uuid::nil();
 
 // @todo-soon include validation using validator..
+// @todo-soon rethink about sanitize_name, currently not being used
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate)]
 pub struct FolderMetadata {
     pub id: Uuid,
     pub parent_id: Option<Uuid>,
+    #[validate(length(min = 1, max = 255))]
+    #[validate(custom(function = "super::validate::validate_safe_name"))]
     pub name: String,
+    #[validate(length(max = 50))]
     pub icon: String,
     pub is_favourite: bool,
     pub created_at: DateTime<Utc>,
@@ -47,11 +52,14 @@ impl FolderMetadata {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate)]
 pub struct FileMetadata {
     pub id: Uuid,
     pub parent_id: Uuid,
+    #[validate(length(min = 1, max = 255))]
+    #[validate(custom(function = "super::validate::validate_safe_name"))]
     pub name: String,
+    #[validate(length(max = 10))]
     pub extension: String,
     pub blob: BlobRef,
     pub is_favourite: bool,

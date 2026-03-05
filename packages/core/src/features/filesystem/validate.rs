@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
+use validator::ValidationError;
 
 use crate::features::filesystem::errors::{FilesystemError, Result};
 use crate::features::filesystem::models::{FileMetadata, FolderMetadata, ROOT_FOLDER_ID};
-use crate::features::filesystem::namings::sanitize_name;
 
 pub fn validate_snapshot(
     folders: &HashMap<Uuid, FolderMetadata>,
@@ -108,7 +108,6 @@ fn validate_folder_invariants(
     }
 
     validate_no_cycle(folders, folder.id, parent_id)?;
-    sanitize_name(&folder.name)?;
 
     Ok(())
 }
@@ -120,8 +119,6 @@ fn validate_file_invariants(
     if !folders.contains_key(&file.parent_id) {
         return Err(FilesystemError::ParentFolderNotFound(file.parent_id));
     }
-
-    sanitize_name(&file.name)?;
 
     Ok(())
 }
@@ -145,6 +142,25 @@ pub fn validate_folder_name(
 ) -> Result {
     if is_folder_name_taken(parent_id, name, folders) {
         return Err(FilesystemError::name_conflict(parent_id, name));
+    }
+
+    Ok(())
+}
+
+pub fn validate_safe_name(name: &str) -> std::result::Result<(), ValidationError> {
+    if name == "." || name == ".." {
+        return Err(ValidationError::new("reserved_name"));
+    }
+
+    if name.trim() != name {
+        return Err(ValidationError::new("leading_or_trailing_space"));
+    }
+
+    if !name
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | ' '))
+    {
+        return Err(ValidationError::new("invalid_characters"));
     }
 
     Ok(())

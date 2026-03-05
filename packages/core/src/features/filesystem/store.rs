@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use uuid::Uuid;
+use validator::Validate;
 
 use super::errors::{FilesystemError, Result};
 use super::events::{FilesystemChange, FilesystemDelta, FilesystemSnapshot};
@@ -124,10 +125,11 @@ impl FilesystemStore {
         let folder_name = generate_folder_name(&self.folders, parent_id, name.as_str())?;
 
         let folder = FolderMetadata::new(Some(parent_id), folder_name);
-        let id = folder.id;
+        let folder_id = folder.id;
 
         self.commit_delta(&FilesystemDelta::FolderAdded(folder))?;
-        Ok(id)
+
+        Ok(folder_id)
     }
 
     pub fn add_file(
@@ -140,10 +142,11 @@ impl FilesystemStore {
         let file_name = generate_file_name(&self.files, &self.folders, parent_id, name.as_str())?;
 
         let file = FileMetadata::new(parent_id, file_name, extension, blob);
-        let id = file.id;
+        let file_id = file.id;
 
         self.commit_delta(&FilesystemDelta::FileAdded(file))?;
-        Ok(id)
+
+        Ok(file_id)
     }
 
     pub fn remove_file(&mut self, id: Uuid) -> Result {
@@ -253,6 +256,8 @@ impl FilesystemStore {
 
         validate::validate_folder_name(parent_id, &folder.name, &self.folders)?;
 
+        folder.validate()?;
+
         self.index.add_folder(parent_id, folder.id);
         self.folders.insert(folder.id, folder);
 
@@ -283,7 +288,7 @@ impl FilesystemStore {
 
         let parent_id = folder
             .parent_id
-            .ok_or_else(|| FilesystemError::FolderMissingParent(id))?;
+            .ok_or(FilesystemError::FolderMissingParent(id))?;
 
         self.index.remove_folder(parent_id, id);
         self.folders.remove(&id);
@@ -328,6 +333,8 @@ impl FilesystemStore {
 
         let folder = self.folders.get_mut(&id).unwrap();
 
+        folder.validate()?;
+
         folder.parent_id = Some(target_parent);
         folder.name = target_name;
         folder.icon = patch.icon.clone().unwrap_or(folder.icon.clone());
@@ -351,6 +358,8 @@ impl FilesystemStore {
         }
 
         validate::validate_file_name(file.parent_id, &file.name, &self.files)?;
+
+        file.validate()?;
 
         self.index.add_file(file.parent_id, file.id);
         self.files.insert(file.id, file);
@@ -397,6 +406,8 @@ impl FilesystemStore {
         }
 
         let file = self.files.get_mut(&id).unwrap();
+
+        file.validate()?;
 
         file.name = target_name;
         file.parent_id = target_parent;

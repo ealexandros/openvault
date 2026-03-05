@@ -1,8 +1,11 @@
 use thiserror::Error;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq, Error)]
+#[derive(Debug, Error)]
 pub enum FilesystemError {
+    #[error(transparent)]
+    Validation(#[from] validator::ValidationErrors),
+
     #[error("Invalid filesystem entry name: {0}")]
     InvalidName(String),
 

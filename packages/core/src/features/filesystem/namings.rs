@@ -57,23 +57,6 @@ pub fn generate_file_name(
     Err(FilesystemError::name_exhausted(parent_id, name))
 }
 
-// @todo-soon rethink about sanitize_name, currently not being used
-
-pub fn sanitize_name(name: &str) -> Result<String> {
-    let trimmed = name.trim();
-
-    if trimmed.is_empty()
-        || trimmed == "."
-        || trimmed == ".."
-        || trimmed.contains('/')
-        || trimmed.contains('\0')
-    {
-        return Err(FilesystemError::InvalidName(name.to_string()));
-    }
-
-    Ok(trimmed.to_string())
-}
-
 fn add_suffix_to_path(file_name: &str, n: u32) -> String {
     let path = Path::new(file_name);
 
