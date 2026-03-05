@@ -1,7 +1,3 @@
-pub trait FeatureChange<T> {
-    fn into_snapshot(self) -> Option<T>;
-}
-
 pub trait FeatureCodec {
     type Error;
     type DomainChange;
