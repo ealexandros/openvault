@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use super::error::{FilesystemError, Result};
+use super::errors::{FilesystemError, Result};
 use super::events::{FilesystemChange, FilesystemDelta, FilesystemSnapshot};
 use super::index::FilesystemIndex;
 use super::models::{FileMetadata, FolderMetadata};

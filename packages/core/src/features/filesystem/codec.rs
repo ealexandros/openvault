@@ -1,6 +1,6 @@
 use crate::features::shared::codec::FeatureCodec;
 
-use super::error::{FilesystemError, Result};
+use super::errors::{FilesystemError, Result};
 use super::events::FilesystemChange;
 
 pub const FILESYSTEM_WIRE_VERSION: u16 = 1;

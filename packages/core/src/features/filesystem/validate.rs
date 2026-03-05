@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
-use crate::features::filesystem::error::{FilesystemError, Result};
+use crate::features::filesystem::errors::{FilesystemError, Result};
 use crate::features::filesystem::models::{FileMetadata, FolderMetadata, ROOT_FOLDER_ID};
 use crate::features::filesystem::namings::sanitize_name;
 
