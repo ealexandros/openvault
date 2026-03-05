@@ -7,16 +7,18 @@ use crate::errors::Result;
 pub struct Subheader {
     pub checkpoint_offset: u64,
     pub tail_record_offset: u64,
+    pub reclaimable_bytes: u64,
     pub last_sequence: u64,
 }
 
 impl Subheader {
-    pub const SIZE: usize = 24;
+    pub const SIZE: usize = 32;
 
     pub fn new(checkpoint_offset: u64, tail_record_offset: u64) -> Self {
         Self {
             checkpoint_offset,
             tail_record_offset,
+            reclaimable_bytes: 0,
             last_sequence: 0,
         }
     }
@@ -25,6 +27,7 @@ impl Subheader {
         let subheader = Self {
             checkpoint_offset: reader.read_u64::<LittleEndian>()?,
             tail_record_offset: reader.read_u64::<LittleEndian>()?,
+            reclaimable_bytes: reader.read_u64::<LittleEndian>()?,
             last_sequence: reader.read_u64::<LittleEndian>()?,
         };
         Ok(subheader)
@@ -33,6 +36,7 @@ impl Subheader {
     pub fn write_to<W: Write>(self, writer: &mut W) -> Result {
         writer.write_u64::<LittleEndian>(self.checkpoint_offset)?;
         writer.write_u64::<LittleEndian>(self.tail_record_offset)?;
+        writer.write_u64::<LittleEndian>(self.reclaimable_bytes)?;
         writer.write_u64::<LittleEndian>(self.last_sequence)?;
         Ok(())
     }
