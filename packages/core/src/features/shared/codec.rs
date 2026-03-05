@@ -1,7 +1,7 @@
 pub trait FeatureCodec {
     type Error;
     type DomainChange;
-    type DomainSnapshot: TryFrom<Self::DomainChange, Error = Self::Error>;
+    type DomainSnapshot: Into<Self::DomainChange> + TryFrom<Self::DomainChange, Error = Self::Error>;
 
     fn wire_version(&self) -> u16;
 
@@ -12,6 +12,10 @@ pub trait FeatureCodec {
         wire_version: u16,
         payload: &[u8],
     ) -> Result<Self::DomainChange, Self::Error>;
+
+    fn encode_snapshot(&self, snapshot: Self::DomainSnapshot) -> Result<Vec<u8>, Self::Error> {
+        self.encode_change(snapshot.into())
+    }
 
     fn decode_snapshot(
         &self,

@@ -42,6 +42,12 @@ pub enum FilesystemChange {
     Deltas(Vec<FilesystemDelta>),
 }
 
+impl From<FilesystemSnapshot> for FilesystemChange {
+    fn from(value: FilesystemSnapshot) -> Self {
+        Self::Snapshot(value)
+    }
+}
+
 impl TryFrom<FilesystemChange> for FilesystemSnapshot {
     type Error = FilesystemError;
 
