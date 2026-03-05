@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::features::filesystem::FilesystemError;
+
 use super::models::{FileMetadata, FolderMetadata};
 use super::patch::{FileMetadataPatch, FolderMetadataPatch};
 
@@ -38,4 +40,15 @@ pub enum FilesystemDelta {
 pub enum FilesystemChange {
     Snapshot(FilesystemSnapshot),
     Deltas(Vec<FilesystemDelta>),
+}
+
+impl TryFrom<FilesystemChange> for FilesystemSnapshot {
+    type Error = FilesystemError;
+
+    fn try_from(value: FilesystemChange) -> Result<Self, Self::Error> {
+        match value {
+            FilesystemChange::Snapshot(snapshot) => Ok(snapshot),
+            FilesystemChange::Deltas(_) => Err(FilesystemError::InvalidSnapshot),
+        }
+    }
 }

@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 use crate::errors::{Error, Result};
 
 #[repr(u16)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeatureType {
     Filesystem = 1,
     Secrets = 2,

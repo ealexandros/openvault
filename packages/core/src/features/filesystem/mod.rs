@@ -1,7 +1,7 @@
-pub mod errors;
 pub mod store;
 
 mod codec;
+mod errors;
 mod events;
 mod index;
 mod models;

@@ -1,7 +1,7 @@
-use crate::features::shared::codec::FeatureCodec;
-
+use super::FilesystemSnapshot;
 use super::errors::{FilesystemError, Result};
 use super::events::FilesystemChange;
+use crate::features::shared::codec::FeatureCodec;
 
 pub const FILESYSTEM_WIRE_VERSION: u16 = 1;
 
@@ -11,6 +11,7 @@ pub struct FilesystemCodec;
 impl FeatureCodec for FilesystemCodec {
     type Error = FilesystemError;
     type DomainChange = FilesystemChange;
+    type DomainSnapshot = FilesystemSnapshot;
 
     fn wire_version(&self) -> u16 {
         FILESYSTEM_WIRE_VERSION

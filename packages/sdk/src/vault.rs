@@ -1,9 +1,9 @@
 use openvault_core::features::filesystem::FilesystemStore;
-use openvault_core::operations::filesystem::FilesystemOps;
+use openvault_core::repositories::{FeatureRepository, FilesystemRepository};
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::Result;
-use crate::features::{CommitResult, FilesystemFeature};
+use crate::features::FilesystemFeature;
 
 pub struct Vault {
     session: VaultSession,
@@ -12,7 +12,7 @@ pub struct Vault {
 
 impl Vault {
     pub(crate) fn new(mut session: VaultSession) -> Result<Self> {
-        let filesystem_store = FilesystemOps::load(&mut session)?;
+        let filesystem_store = FilesystemRepository::load(&mut session)?;
 
         Ok(Self {
             session,
@@ -28,9 +28,9 @@ impl Vault {
         FilesystemFeature::new(&mut self.session, &mut self.filesystem_store)
     }
 
-    pub fn commit_all(&mut self) -> Result<CommitResult> {
-        let filesystem = self.filesystem().commit()?;
+    pub fn commit_all(&mut self) -> Result {
+        self.filesystem().commit()?;
 
-        Ok(CommitResult { filesystem })
+        Ok(())
     }
 }

@@ -29,6 +29,9 @@ pub enum Error {
     #[error("Invalid entry header")]
     InvalidEntryHeader,
 
+    #[error("Invalid checkpoint feature")]
+    InvalidCheckpointFeature,
+
     #[error("Feature codec error: {0}")]
     FeatureCodec(String),
 

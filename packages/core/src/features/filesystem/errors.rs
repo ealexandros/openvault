@@ -51,6 +51,9 @@ pub enum FilesystemError {
     #[error("Invalid filesystem payload: {0}")]
     InvalidPayload(String),
 
+    #[error("Invalid snapshot")]
+    InvalidSnapshot,
+
     #[error("Name exhausted under folder {parent_id} for entry {name}")]
     NameExhausted { parent_id: Uuid, name: String },
 }

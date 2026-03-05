@@ -16,12 +16,13 @@ pub fn write_checkpoint(
 
     rw.seek_to_end()?;
 
-    checkpoint.last_delta_sequence = subheader.last_sequence;
+    checkpoint.sequence = subheader.last_sequence;
 
     let checkpoint_bytes = encode_checkpoint(checkpoint)?;
     let offset = seal_frame(rw, AadDomain::Checkpoint, &checkpoint_bytes, context)?;
 
     subheader.checkpoint_offset = offset;
+    subheader.reclaimable_bytes = 0;
     write_subheader(rw, &subheader, context)?;
 
     Ok(offset)
