@@ -6,6 +6,8 @@ use validator::Validate;
 use crate::features::shared::blob_ref::BlobRef;
 
 pub const ROOT_FOLDER_ID: Uuid = Uuid::nil();
+pub const ROOT_FOLDER_NAME: &str = "/";
+pub const DEFAULT_FOLDER_ICON: &str = "folder";
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate)]
 pub struct FolderMetadata {
@@ -28,7 +30,7 @@ impl FolderMetadata {
             id: Uuid::new_v4(),
             parent_id,
             name: name.into(),
-            icon: "folder".to_string(),
+            icon: DEFAULT_FOLDER_ICON.to_string(),
             is_favourite: false,
             created_at: now,
             updated_at: now,
@@ -40,8 +42,8 @@ impl FolderMetadata {
         Self {
             id: ROOT_FOLDER_ID,
             parent_id: None,
-            name: "/".to_string(),
-            icon: "folder".to_string(),
+            name: ROOT_FOLDER_NAME.to_string(),
+            icon: DEFAULT_FOLDER_ICON.to_string(),
             is_favourite: false,
             created_at: now,
             updated_at: now,

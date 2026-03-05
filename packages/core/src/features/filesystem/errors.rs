@@ -36,6 +36,12 @@ pub enum FilesystemError {
     #[error("Root folder cannot be modified")]
     RootFolderImmutable,
 
+    #[error("Root folder must not have a parent")]
+    RootFolderMustNotHaveParent,
+
+    #[error("Root folder must have name '/'")]
+    RootFolderMustHaveName,
+
     #[error("Invalid folder move: {0}")]
     InvalidMove(String),
 

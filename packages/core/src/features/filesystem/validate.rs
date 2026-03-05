@@ -3,7 +3,9 @@ use uuid::Uuid;
 use validator::ValidationError;
 
 use crate::features::filesystem::errors::{FilesystemError, Result};
-use crate::features::filesystem::models::{FileMetadata, FolderMetadata, ROOT_FOLDER_ID};
+use crate::features::filesystem::models::{
+    FileMetadata, FolderMetadata, ROOT_FOLDER_ID, ROOT_FOLDER_NAME,
+};
 
 pub fn validate_snapshot(
     folders: &HashMap<Uuid, FolderMetadata>,
@@ -78,18 +80,16 @@ pub fn validate_no_cycle(
 fn validate_root(folders: &HashMap<Uuid, FolderMetadata>) -> Result {
     let root = folders
         .get(&ROOT_FOLDER_ID)
-        .ok_or_else(|| FilesystemError::RootFolderInvariant("root folder is missing".into()))?;
+        .ok_or(FilesystemError::RootFolderInvariant(
+            "root folder is missing".into(),
+        ))?;
 
     if root.parent_id.is_some() {
-        return Err(FilesystemError::RootFolderInvariant(
-            "root folder must not have a parent".into(),
-        ));
+        return Err(FilesystemError::RootFolderMustNotHaveParent);
     }
 
-    if root.name != "/" {
-        return Err(FilesystemError::RootFolderInvariant(
-            "root folder name must be '/'".into(),
-        ));
+    if root.name != ROOT_FOLDER_NAME {
+        return Err(FilesystemError::RootFolderMustHaveName);
     }
 
     Ok(())
@@ -99,9 +99,12 @@ fn validate_folder_invariants(
     folder: &FolderMetadata,
     folders: &HashMap<Uuid, FolderMetadata>,
 ) -> Result {
-    let parent_id = folder.parent_id.ok_or_else(|| {
-        FilesystemError::InvalidMove(format!("folder {} is missing parent id", folder.id))
-    })?;
+    let parent_id = folder
+        .parent_id
+        .ok_or(FilesystemError::InvalidMove(format!(
+            "folder {} is missing parent id",
+            folder.id
+        )))?;
 
     if !folders.contains_key(&parent_id) {
         return Err(FilesystemError::ParentFolderNotFound(parent_id));
