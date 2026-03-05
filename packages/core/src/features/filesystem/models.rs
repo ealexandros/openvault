@@ -7,9 +7,6 @@ use crate::features::shared::blob_ref::BlobRef;
 
 pub const ROOT_FOLDER_ID: Uuid = Uuid::nil();
 
-// @todo-soon include validation using validator..
-// @todo-soon rethink about sanitize_name, currently not being used
-
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate)]
 pub struct FolderMetadata {
     pub id: Uuid,
