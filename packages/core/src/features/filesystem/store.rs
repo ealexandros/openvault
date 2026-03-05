@@ -9,9 +9,7 @@ use super::models::{FileMetadata, FolderMetadata};
 use super::patch::{FileMetadataPatch, FolderMetadataPatch};
 use super::validate;
 use crate::features::filesystem::ROOT_FOLDER_ID;
-use crate::features::filesystem::namings::{
-    generate_file_name, generate_folder_name, sanitize_name,
-};
+use crate::features::filesystem::namings::{generate_file_name, generate_folder_name};
 use crate::features::shared::blob_ref::BlobRef;
 
 const SNAPSHOT_THRESHOLD: usize = 64;
@@ -29,8 +27,6 @@ impl Default for FilesystemStore {
         Self::new()
     }
 }
-
-// @todo-soon rethink about sanitize_name;
 
 impl FilesystemStore {
     pub fn new() -> Self {
@@ -319,12 +315,7 @@ impl FilesystemStore {
             validate::validate_no_cycle(&self.folders, id, target_parent)?
         }
 
-        let target_name = patch
-            .name
-            .as_ref()
-            .map(|name| sanitize_name(name))
-            .transpose()?
-            .unwrap_or_else(|| folder.name.clone());
+        let target_name = patch.name.clone().unwrap_or(folder.name.clone());
 
         if target_parent != current_parent || target_name != folder.name {
             validate::validate_folder_name(target_parent, &target_name, &self.folders)?;
@@ -394,12 +385,7 @@ impl FilesystemStore {
             return Err(FilesystemError::ParentFolderNotFound(target_parent));
         }
 
-        let target_name = patch
-            .name
-            .as_ref()
-            .map(|name| sanitize_name(name))
-            .transpose()?
-            .unwrap_or_else(|| file.name.clone());
+        let target_name = patch.name.clone().unwrap_or(file.name.clone());
 
         if target_parent != current_parent || target_name != file.name {
             validate::validate_file_name(target_parent, &target_name, &self.files)?;

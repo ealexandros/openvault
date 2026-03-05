@@ -57,6 +57,8 @@ pub fn generate_file_name(
     Err(FilesystemError::name_exhausted(parent_id, name))
 }
 
+// @todo-soon rethink about sanitize_name, currently not being used
+
 pub fn sanitize_name(name: &str) -> Result<String> {
     let trimmed = name.trim();
 
