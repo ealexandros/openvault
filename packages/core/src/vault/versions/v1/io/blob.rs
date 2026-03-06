@@ -2,7 +2,7 @@ use std::io::Read;
 use uuid::Uuid;
 
 use crate::errors::{Error, Result};
-use crate::features::shared::blob_ref::BlobRef;
+use crate::features::shared::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
 use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::v1::blob::{BlobChunkMeta, BlobManifest};

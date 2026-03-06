@@ -1,7 +1,7 @@
 use super::FilesystemSnapshot;
 use super::errors::{FilesystemError, Result};
 use super::events::FilesystemChange;
-use crate::features::shared::codec::FeatureCodec;
+use crate::features::shared::FeatureCodec;
 
 pub const FILESYSTEM_WIRE_VERSION: u16 = 1;
 

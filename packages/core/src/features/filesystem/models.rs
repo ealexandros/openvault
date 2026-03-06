@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::features::shared::blob_ref::BlobRef;
+use crate::features::shared::BlobRef;
 
 pub const ROOT_FOLDER_ID: Uuid = Uuid::nil();
 pub const ROOT_FOLDER_NAME: &str = "/";

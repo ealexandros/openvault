@@ -1,6 +1,6 @@
 use crate::errors::Result;
 use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
-use crate::features::shared::codec::FeatureCodec;
+use crate::features::shared::FeatureCodec;
 use crate::operations::history::append_record;
 use crate::operations::replay::replay_since_checkpoint;
 use crate::repositories::{CommitOutcome, FeatureRepository};

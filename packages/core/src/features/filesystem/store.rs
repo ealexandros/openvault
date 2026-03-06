@@ -11,7 +11,7 @@ use super::patch::{FileMetadataPatch, FolderMetadataPatch};
 use super::validate;
 use crate::features::filesystem::ROOT_FOLDER_ID;
 use crate::features::filesystem::namings::{generate_file_name, generate_folder_name};
-use crate::features::shared::blob_ref::BlobRef;
+use crate::features::shared::BlobRef;
 
 const SNAPSHOT_THRESHOLD: usize = 64;
 
