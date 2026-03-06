@@ -1,13 +1,11 @@
 use std::fs::File;
 use std::path::Path;
-
-use openvault_core::repositories::{FeatureRepository, FilesystemRepository};
 use uuid::Uuid;
 
-use openvault_core::features::filesystem::{
-    FileMetadata, FilesystemStore, FolderMetadata, ScannedFolder, scan_directory,
-};
-use openvault_core::operations::blob::{self, read_blob};
+use openvault_core::features::filesystem::{FileMetadata, FilesystemStore, FolderMetadata};
+use openvault_core::internal::scanner::{ScannedFolder, scan_directory};
+use openvault_core::operations::blob;
+use openvault_core::repositories::{FeatureRepository, FilesystemRepository};
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::{Error, Result};
@@ -16,20 +14,20 @@ use crate::internal::file::{
     resolve_export_root_destination,
 };
 
-pub struct FilesystemFeature<'a> {
+pub struct FilesystemService<'a> {
     session: &'a mut VaultSession,
     store: &'a mut FilesystemStore,
 }
 
-impl<'a> FilesystemFeature<'a> {
-    pub(crate) fn new(session: &'a mut VaultSession, store: &'a mut FilesystemStore) -> Self {
-        Self { session, store }
+impl<'a> FilesystemService<'a> {
+    pub fn new(session: &'a mut VaultSession, store: &'a mut FilesystemStore) -> Self {
+        FilesystemService { session, store }
     }
 
     pub fn read_file_bytes(&mut self, id: Uuid) -> Result<Vec<u8>> {
         let blob_ref = self.get_file(&id)?.blob.clone();
 
-        read_blob(self.session, &blob_ref).map_err(Error::from)
+        blob::read_blob(self.session, &blob_ref).map_err(Error::from)
     }
 
     pub fn browse(&mut self, parent_id: &Uuid) -> Result<(Vec<FolderMetadata>, Vec<FileMetadata>)> {
@@ -141,10 +139,6 @@ impl<'a> FilesystemFeature<'a> {
         Ok(self.store)
     }
 
-    pub fn commit(&mut self) -> Result {
-        FilesystemRepository::commit(self.session, self.store).map_err(Error::from)
-    }
-
     fn get_file(&self, id: &Uuid) -> Result<&FileMetadata> {
         self.store
             .file(id)
@@ -175,7 +169,7 @@ impl<'a> FilesystemFeature<'a> {
 
         for file in files {
             let file_path = find_available_path(&destination_path.join(&file.name), true)?;
-            let content = read_blob(self.session, &file.blob)?;
+            let content = blob::read_blob(self.session, &file.blob)?;
             std::fs::write(file_path, content)?;
         }
 

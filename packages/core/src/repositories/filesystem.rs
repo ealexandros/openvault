@@ -1,11 +1,12 @@
 use crate::errors::Result;
 use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
 use crate::features::shared::codec::FeatureCodec;
-use crate::operations::records;
+use crate::operations::history::append_record;
 use crate::operations::replay::replay_since_checkpoint;
-use crate::repositories::FeatureRepository;
+use crate::repositories::{CommitOutcome, FeatureRepository};
 use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;
+use crate::vault::versions::shared::checkpoint::CheckpointFeature;
 use crate::vault::versions::shared::record::Record;
 
 pub struct FilesystemRepository;
@@ -16,14 +17,13 @@ impl FeatureRepository for FilesystemRepository {
     type Codec = FilesystemCodec;
 
     fn load(session: &mut VaultSession) -> Result<Self::Store> {
-        let codec = FilesystemCodec;
         let replay = replay_since_checkpoint(session)?;
 
         let mut latest_snapshot = replay
             .checkpoint
             .as_ref()
             .and_then(|checkpoint| checkpoint.find_feature(FeatureType::Filesystem))
-            .map(|feature| codec.decode_snapshot(feature.version, &feature.payload))
+            .map(|feature| FilesystemCodec::decode_snapshot(feature.version, &feature.payload))
             .transpose()?;
 
         let mut deltas = Vec::new();
@@ -33,7 +33,7 @@ impl FeatureRepository for FilesystemRepository {
             .into_iter()
             .filter(|r| r.header.feature_type == FeatureType::Filesystem)
         {
-            let change = codec.decode_change(record.header.version, &record.payload)?;
+            let change = FilesystemCodec::decode_change(record.header.version, &record.payload)?;
             match change {
                 FilesystemChange::Snapshot(s) => {
                     latest_snapshot = Some(s);
@@ -47,21 +47,30 @@ impl FeatureRepository for FilesystemRepository {
         FilesystemStore::restore(snapshot, deltas).map_err(Into::into)
     }
 
-    // @todo-now return if a checkpoint was created
+    fn commit(session: &mut VaultSession, store: &mut Self::Store) -> Result<CommitOutcome> {
+        let feature_type = FeatureType::Filesystem;
 
-    fn commit(session: &mut VaultSession, store: &mut Self::Store) -> Result {
         let Some(change) = store.pending_changes() else {
-            return Ok(());
+            return Ok(CommitOutcome::no_change(feature_type));
         };
 
-        let codec = FilesystemCodec;
-        let encoded = codec.encode_change(change)?;
+        let encoded = FilesystemCodec::encode_change(change)?;
 
-        let mut record = Record::new(FeatureType::Filesystem, codec.wire_version(), encoded);
-        records::append_record(session, &mut record)?;
+        let mut record = Record::new(feature_type, FilesystemCodec::wire_version(), encoded);
+        append_record(session, &mut record)?;
 
         store.clear_deltas();
 
-        Ok(())
+        Ok(CommitOutcome::persisted(feature_type))
+    }
+
+    fn create_checkpoint(store: &Self::Store) -> Result<CheckpointFeature> {
+        let checkpoint_payload = FilesystemCodec::encode_snapshot(store.snapshot())?;
+
+        Ok(CheckpointFeature {
+            feature_type: FeatureType::Filesystem,
+            version: FilesystemCodec::wire_version(),
+            payload: checkpoint_payload,
+        })
     }
 }

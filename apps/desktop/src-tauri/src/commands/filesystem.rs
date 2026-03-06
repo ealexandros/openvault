@@ -65,7 +65,7 @@ pub async fn create_folder(state: TauriState<'_>, params: CreateFolderParams) ->
     let parent_uuid = parse_uuid(&params.parent_id)?;
     let new_folder_id = fs.add_folder(parent_uuid, params.name)?;
 
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(new_folder_id.to_string())
 }
@@ -81,7 +81,7 @@ pub async fn delete_item(state: TauriState<'_>, params: DeleteItemParams) -> Res
         ItemType::Folder => fs.remove_folder(uuid)?,
     }
 
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(())
 }
@@ -97,7 +97,7 @@ pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Res
         ItemType::Folder => fs.rename_folder(uuid, params.new_name)?,
     }
 
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(())
 }
@@ -110,7 +110,7 @@ pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Res
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.add_file(parent_uuid, &source_path)?;
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(())
 }
@@ -123,7 +123,7 @@ pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) ->
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.upload_folder(parent_uuid, &source_path)?;
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(())
 }
@@ -144,7 +144,7 @@ pub async fn set_folder_icon(state: TauriState<'_>, params: ChangeFolderIconPara
 
     let uuid = parse_uuid(&params.id)?;
     fs.set_folder_icon(uuid, params.icon)?;
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(())
 }
@@ -160,7 +160,7 @@ pub async fn set_favorite_item(state: TauriState<'_>, params: SetFavoriteItemPar
         ItemType::Folder => fs.set_folder_favorite(uuid, params.is_favourite)?,
     }
 
-    vault.commit_all()?;
+    vault.commit()?;
 
     Ok(())
 }

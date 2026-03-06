@@ -13,18 +13,18 @@ impl FeatureCodec for FilesystemCodec {
     type DomainChange = FilesystemChange;
     type DomainSnapshot = FilesystemSnapshot;
 
-    fn wire_version(&self) -> u16 {
+    fn wire_version() -> u16 {
         FILESYSTEM_WIRE_VERSION
     }
 
-    fn encode_change(&self, change: Self::DomainChange) -> Result<Vec<u8>> {
+    fn encode_change(change: Self::DomainChange) -> Result<Vec<u8>> {
         let payload = postcard::to_allocvec(&change)
             .map_err(|e| FilesystemError::InvalidPayload(e.to_string()))?;
 
         Ok(payload)
     }
 
-    fn decode_change(&self, wire_version: u16, payload: &[u8]) -> Result<Self::DomainChange> {
+    fn decode_change(wire_version: u16, payload: &[u8]) -> Result<Self::DomainChange> {
         if wire_version != FILESYSTEM_WIRE_VERSION {
             return Err(FilesystemError::UnsupportedWireVersion(wire_version));
         }
