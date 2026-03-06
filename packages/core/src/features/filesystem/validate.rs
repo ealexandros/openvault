@@ -159,10 +159,7 @@ pub fn validate_safe_name(name: &str) -> std::result::Result<(), ValidationError
         return Err(ValidationError::new("leading_or_trailing_space"));
     }
 
-    if !name
-        .chars()
-        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | ' '))
-    {
+    if name.chars().any(|c| c.is_control()) {
         return Err(ValidationError::new("invalid_characters"));
     }
 
