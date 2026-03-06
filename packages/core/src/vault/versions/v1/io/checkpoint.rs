@@ -1,5 +1,6 @@
 use crate::errors::Result;
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
+use crate::vault::versions::shared::Offset;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::v1::io::aad::AadDomain;
@@ -11,7 +12,7 @@ pub fn write_checkpoint(
     rw: &mut ReadWriter,
     checkpoint: &mut Checkpoint,
     context: &FormatContext,
-) -> Result<u64> {
+) -> Result<Offset> {
     let mut subheader = read_subheader(rw, context)?;
 
     rw.seek_to_end()?;
@@ -30,7 +31,7 @@ pub fn write_checkpoint(
 
 pub fn read_checkpoint(
     reader: &mut Reader,
-    offset: u64,
+    offset: Offset,
     context: &FormatContext,
 ) -> Result<Checkpoint> {
     reader.seek_from_start(offset)?;

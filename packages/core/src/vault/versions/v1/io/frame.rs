@@ -1,6 +1,7 @@
 use crate::errors::Result;
 use crate::internal::io_ext::{ReadWriter, Reader};
 use crate::vault::crypto::envelope::Envelope;
+use crate::vault::versions::shared::Offset;
 use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::shared::frame::{read_frame, write_frame};
 use crate::vault::versions::v1::io::aad::AadDomain;
@@ -11,7 +12,7 @@ pub fn seal_frame(
     domain: AadDomain,
     data: &[u8],
     context: &FormatContext,
-) -> Result<u64> {
+) -> Result<Offset> {
     let offset = rw.stream_position()?;
 
     let nonce = Nonce::random();

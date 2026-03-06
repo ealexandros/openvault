@@ -1,5 +1,6 @@
 use crate::errors::{Error, Result};
 use crate::internal::io_ext::{ReadWriter, Reader, SeekExt};
+use crate::vault::versions::shared::Offset;
 use crate::vault::versions::shared::format::FormatContext;
 use crate::vault::versions::shared::record::Record;
 use crate::vault::versions::v1::io::aad::AadDomain;
@@ -11,7 +12,7 @@ pub fn append_record(
     rw: &mut ReadWriter,
     record: &mut Record,
     context: &FormatContext,
-) -> Result<u64> {
+) -> Result<Offset> {
     let mut subheader = read_subheader(rw, context)?;
 
     rw.seek_to_end()?;
@@ -30,7 +31,7 @@ pub fn append_record(
     Ok(record_offset)
 }
 
-pub fn read_record(reader: &mut Reader, offset: u64, context: &FormatContext) -> Result<Record> {
+pub fn read_record(reader: &mut Reader, offset: Offset, context: &FormatContext) -> Result<Record> {
     reader.seek_from_start(offset)?;
     let record_bytes = open_frame(reader, AadDomain::Record, context)?;
     decode_record(&record_bytes)
@@ -38,10 +39,10 @@ pub fn read_record(reader: &mut Reader, offset: u64, context: &FormatContext) ->
 
 pub fn read_replay_records(
     reader: &mut Reader,
-    start_offset: u64,
-    stop_offset: u64,
+    start_offset: Offset,
+    stop_offset: Offset,
     context: &FormatContext,
-) -> Result<Vec<(u64, Record)>> {
+) -> Result<Vec<(Offset, Record)>> {
     let mut current_offset = start_offset;
     let mut last_sequence = None;
     let mut records = Vec::new();

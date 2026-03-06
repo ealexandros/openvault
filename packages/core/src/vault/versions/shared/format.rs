@@ -32,6 +32,8 @@ impl<'a> FormatContext<'a> {
     }
 }
 
+pub type Offset = u64;
+
 pub trait FormatHandler: Sync + Send {
     fn version(&self) -> u16;
 
@@ -63,7 +65,7 @@ pub trait FormatHandler: Sync + Send {
     fn read_checkpoint(
         &self,
         reader: &mut Reader,
-        offset: u64,
+        offset: Offset,
         context: &FormatContext,
     ) -> Result<Checkpoint>;
 
@@ -72,12 +74,12 @@ pub trait FormatHandler: Sync + Send {
         rw: &mut ReadWriter,
         checkpoint: &mut Checkpoint,
         context: &FormatContext,
-    ) -> Result<u64>;
+    ) -> Result<Offset>;
 
     fn read_record(
         &self,
         reader: &mut Reader,
-        offset: u64,
+        offset: Offset,
         context: &FormatContext,
     ) -> Result<Record>;
 
@@ -86,7 +88,7 @@ pub trait FormatHandler: Sync + Send {
         rw: &mut ReadWriter,
         record: &mut Record,
         context: &FormatContext,
-    ) -> Result<u64>;
+    ) -> Result<Offset>;
 
     fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result<ReplayState>;
 

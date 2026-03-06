@@ -8,6 +8,7 @@ use std::io::Read;
 use crate::errors::{Error, Result};
 use crate::features::shared::blob_ref::BlobRef;
 use crate::internal::io_ext::{ReadWriter, Reader, Writer};
+use crate::vault::versions::shared::Offset;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::format::{FormatContext, FormatHandler};
 use crate::vault::versions::shared::record::Record;
@@ -63,7 +64,7 @@ impl FormatHandler for V1FormatHandler {
     fn read_checkpoint(
         &self,
         reader: &mut Reader,
-        offset: u64,
+        offset: Offset,
         context: &FormatContext,
     ) -> Result<Checkpoint> {
         io::read_checkpoint(reader, offset, context)
@@ -74,7 +75,7 @@ impl FormatHandler for V1FormatHandler {
         rw: &mut ReadWriter,
         checkpoint: &mut Checkpoint,
         context: &FormatContext,
-    ) -> Result<u64> {
+    ) -> Result<Offset> {
         io::write_checkpoint(rw, checkpoint, context)
     }
 
@@ -83,14 +84,14 @@ impl FormatHandler for V1FormatHandler {
         rw: &mut ReadWriter,
         record: &mut Record,
         context: &FormatContext,
-    ) -> Result<u64> {
+    ) -> Result<Offset> {
         io::append_record(rw, record, context)
     }
 
     fn read_record(
         &self,
         reader: &mut Reader,
-        offset: u64,
+        offset: Offset,
         context: &FormatContext,
     ) -> Result<Record> {
         io::read_record(reader, offset, context)
