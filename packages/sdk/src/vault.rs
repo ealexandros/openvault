@@ -1,11 +1,13 @@
 use openvault_core::operations::history;
 use openvault_core::vault::runtime::VaultSession;
 use openvault_core::vault::versions::shared::checkpoint::Checkpoint;
+use zeroize::Zeroize;
 
 use crate::errors::Result;
 use crate::features::FeatureRuntime;
 use crate::features::filesystem::{FilesystemRuntime, FilesystemService};
 
+#[derive(Zeroize)]
 pub struct Vault {
     session: VaultSession,
     filesystem: FilesystemRuntime,

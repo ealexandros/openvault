@@ -1,8 +1,9 @@
 use argon2::password_hash::rand_core::{OsRng, RngCore};
+use zeroize::ZeroizeOnDrop;
 
 pub const SALT_SIZE: usize = 16;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, ZeroizeOnDrop)]
 pub struct Salt([u8; SALT_SIZE]);
 
 impl Salt {

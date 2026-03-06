@@ -33,6 +33,10 @@ export const tauriApi = {
     return safeInvokeTauri<void>("open_vault", { params });
   },
 
+  lockVault: () => {
+    return safeInvokeTauri<void>("lock_vault", {});
+  },
+
   browseFs: (params: { parentId: string }) => {
     return safeInvokeTauri<BrowseResult>("browse_fs", { params });
   },

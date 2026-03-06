@@ -1,10 +1,10 @@
 use std::ops::Deref;
 
-use zeroize::Zeroizing;
+use zeroize::{ZeroizeOnDrop, Zeroizing};
 
 pub const DK_SIZE: usize = 32;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, ZeroizeOnDrop)]
 pub struct DerivedKey<const N: usize = DK_SIZE>(Zeroizing<[u8; N]>);
 
 impl<const N: usize> DerivedKey<N> {

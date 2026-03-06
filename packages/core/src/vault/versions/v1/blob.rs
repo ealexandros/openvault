@@ -11,10 +11,6 @@ impl BlobChunkMeta {
     pub fn new(offset: u64, size: u32) -> Self {
         Self { offset, size }
     }
-
-    pub fn size_bytes(&self) -> u64 {
-        self.size as u64
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

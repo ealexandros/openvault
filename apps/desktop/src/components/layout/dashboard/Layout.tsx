@@ -6,9 +6,9 @@ import { DashboardSidebar } from "./sidebar";
 
 type DashboardLayoutProps = {
   children: ReactNode;
-  onLogout: () => void;
   vaultName?: string;
   title?: string;
+  onLogout: () => Promise<void>;
 };
 
 const routeTitleMap: Record<string, string> = {
@@ -23,9 +23,9 @@ const routeTitleMap: Record<string, string> = {
 
 export const DashboardLayout = ({
   children,
-  onLogout,
   vaultName,
   title: explicitTitle,
+  onLogout,
 }: DashboardLayoutProps) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const pathname = usePathname();
@@ -35,9 +35,9 @@ export const DashboardLayout = ({
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <DashboardSidebar
-        onLogout={onLogout}
         vaultName={vaultName}
         isCollapsed={isSidebarCollapsed}
+        onLogout={onLogout}
       />
       <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <DashboardHeader

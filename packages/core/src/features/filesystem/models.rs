@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
+use zeroize::Zeroize;
 
 use crate::features::shared::BlobRef;
 
@@ -88,5 +89,19 @@ impl FileMetadata {
 
     pub fn size_bytes(&self) -> u64 {
         self.blob.size_bytes
+    }
+}
+
+impl Zeroize for FolderMetadata {
+    fn zeroize(&mut self) {
+        self.name.zeroize();
+        self.icon.zeroize();
+    }
+}
+
+impl Zeroize for FileMetadata {
+    fn zeroize(&mut self) {
+        self.name.zeroize();
+        self.extension.zeroize();
     }
 }

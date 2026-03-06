@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 use validator::Validate;
+use zeroize::Zeroize;
 
 use super::errors::{FilesystemError, Result};
 use super::events::{FilesystemChange, FilesystemDelta, FilesystemSnapshot};
@@ -427,5 +428,26 @@ impl FilesystemStore {
         }
 
         Ok(())
+    }
+}
+
+impl Zeroize for FilesystemStore {
+    fn zeroize(&mut self) {
+        for folder in self.folders.values_mut() {
+            folder.zeroize();
+        }
+        self.folders.clear();
+
+        for file in self.files.values_mut() {
+            file.zeroize();
+        }
+        self.files.clear();
+
+        for delta in &mut self.deltas {
+            delta.zeroize();
+        }
+        self.deltas.clear();
+
+        self.index = FilesystemIndex::new();
     }
 }

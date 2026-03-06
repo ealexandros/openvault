@@ -15,9 +15,9 @@ import { NavItem } from "./NavItem";
 import { SidebarHeader } from "./SidebarHeader";
 
 type SidebarProps = {
-  onLogout: () => void;
   vaultName?: string;
   isCollapsed?: boolean;
+  onLogout: () => Promise<void>;
 };
 
 const mainNavItems = [
@@ -33,7 +33,7 @@ const bottomNavItems = [
   { href: hrefs.dashboard.settings.get(), label: "Settings", icon: SettingsIcon },
 ] as const;
 
-export const DashboardSidebar = ({ onLogout, vaultName, isCollapsed }: SidebarProps) => (
+export const DashboardSidebar = ({ vaultName, isCollapsed, onLogout }: SidebarProps) => (
   <aside
     className={cn(
       "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 p-6 transition-all duration-200 ease-in-out",

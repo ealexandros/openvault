@@ -1,12 +1,13 @@
 use openvault_crypto::keys::derived_key::DerivedKey;
 use openvault_crypto::keys::master_key::MasterKey;
 use openvault_crypto::keys::salt::Salt;
+use zeroize::Zeroize;
 
 use crate::errors::Result;
 
 const CONTEXT_PREFIX: &str = "openvault";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Zeroize)]
 pub struct Keyring {
     master: MasterKey,
 }

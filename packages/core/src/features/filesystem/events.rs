@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use zeroize::Zeroize;
 
 use crate::features::filesystem::FilesystemError;
 
@@ -55,6 +56,18 @@ impl TryFrom<FilesystemChange> for FilesystemSnapshot {
         match value {
             FilesystemChange::Snapshot(snapshot) => Ok(snapshot),
             FilesystemChange::Deltas(_) => Err(FilesystemError::InvalidSnapshot),
+        }
+    }
+}
+
+impl Zeroize for FilesystemDelta {
+    fn zeroize(&mut self) {
+        match self {
+            FilesystemDelta::FolderAdded(folder) => folder.zeroize(),
+            FilesystemDelta::FileAdded(file) => file.zeroize(),
+            FilesystemDelta::FolderUpdated { patch, .. } => patch.zeroize(),
+            FilesystemDelta::FileUpdated { patch, .. } => patch.zeroize(),
+            _ => {}
         }
     }
 }

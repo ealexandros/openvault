@@ -1,7 +1,7 @@
 use argon2::{Algorithm, Argon2, Params, Version};
 use hkdf::Hkdf;
 use sha2::Sha256;
-use zeroize::Zeroizing;
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 use crate::errors::{Error, Result};
 use crate::keys::derived_key::DerivedKey;
@@ -9,7 +9,7 @@ use crate::keys::salt::Salt;
 
 pub const MKEY_SIZE: usize = 32;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Zeroize, ZeroizeOnDrop)]
 pub struct MasterKey(Zeroizing<[u8; MKEY_SIZE]>);
 
 impl MasterKey {

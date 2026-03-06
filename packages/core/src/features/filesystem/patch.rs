@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use zeroize::Zeroize;
 
 use crate::features::shared::BlobRef;
 
@@ -97,6 +98,28 @@ impl FolderMetadataPatch {
         Self {
             is_favourite: Some(favourite),
             ..Default::default()
+        }
+    }
+}
+
+impl Zeroize for FileMetadataPatch {
+    fn zeroize(&mut self) {
+        if let Some(name) = &mut self.name {
+            name.zeroize();
+        }
+        if let Some(extension) = &mut self.extension {
+            extension.zeroize();
+        }
+    }
+}
+
+impl Zeroize for FolderMetadataPatch {
+    fn zeroize(&mut self) {
+        if let Some(name) = &mut self.name {
+            name.zeroize();
+        }
+        if let Some(icon) = &mut self.icon {
+            icon.zeroize();
         }
     }
 }

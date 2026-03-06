@@ -2,6 +2,7 @@ use std::fs::File;
 
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
+use zeroize::Zeroize;
 
 use crate::errors::Result;
 use crate::vault::crypto::keyring::Keyring;
@@ -67,5 +68,11 @@ impl VaultSession {
     ) -> Result<T> {
         let context = FormatContext::new(&self.keyring, self.compressor, self.cipher);
         callback(&mut self.file, &context)
+    }
+}
+
+impl Zeroize for VaultSession {
+    fn zeroize(&mut self) {
+        self.keyring.zeroize();
     }
 }

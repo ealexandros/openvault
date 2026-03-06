@@ -8,3 +8,4 @@ openvault-core = { workspace = true }
 openvault-crypto = { workspace = true }
 thiserror = { workspace = true }
 uuid = { workspace = true }
+zeroize = { workspace = true, features = ["zeroize_derive"] }

@@ -1,15 +1,17 @@
 "use client";
 
+import { tauriApi } from "@/libraries/tauri-api";
 import { useRouter } from "next/navigation";
 import { createContext, PropsWithChildren, useContext, useState } from "react";
+import { toast } from "sonner";
 
 type VaultContextType = {
-  selectedPath: string | null;
-  setSelectedPath: (path: string | null) => void;
   isUnlocked: boolean;
-  setIsUnlocked: (unlocked: boolean) => void;
+  selectedPath: string | null;
   vaultName: string | undefined;
-  lockVault: () => void;
+  setSelectedPath: (path: string | null) => void;
+  setIsUnlocked: (unlocked: boolean) => void;
+  lockVault: () => Promise<void>;
 };
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
@@ -22,20 +24,24 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
 
   const router = useRouter();
 
-  const lockVault = () => {
+  const lockVault = async () => {
+    const toastId = toast.loading("Locking the vault");
+    await tauriApi.lockVault();
     setIsUnlocked(false);
     setSelectedPath(null);
+    toast.dismiss(toastId);
+
     router.push("/");
   };
 
   return (
     <VaultContext.Provider
       value={{
-        selectedPath,
-        setSelectedPath,
         isUnlocked,
-        setIsUnlocked,
+        selectedPath,
         vaultName,
+        setSelectedPath,
+        setIsUnlocked,
         lockVault,
       }}>
       {children}
