@@ -4,6 +4,7 @@ use crate::state::TauriState;
 use openvault_sdk::{CompressionAlgorithm, CreateConfig, EncryptionAlgorithm};
 use std::path::PathBuf;
 use std::str::FromStr;
+use zeroize::Zeroize;
 
 #[tauri::command]
 pub async fn create_vault(state: TauriState<'_>, params: CreateVaultParams) -> Result {
@@ -34,4 +35,20 @@ pub async fn open_vault(state: TauriState<'_>, params: OpenVaultParams) -> Resul
     *vault_state = Some(vault);
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn lock_vault(state: TauriState<'_>) -> Result {
+    if let Some(mut vault) = state.vault.lock().unwrap().take() {
+        vault.zeroize();
+    }
+
+    Ok(())
+}
+
+// @todo-now implement those
+
+#[tauri::command]
+pub async fn compact_vault(_state: TauriState<'_>) -> Result {
+    todo!()
 }
