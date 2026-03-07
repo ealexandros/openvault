@@ -75,8 +75,9 @@ pub struct CreateVaultParams {
 #[serde(rename_all = "camelCase")]
 pub struct OpenVaultParams {
     pub path: String,
-    pub password: String,
+    pub password: Vec<u8>,
 }
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeFolderIconParams {

@@ -37,12 +37,26 @@ export const baseConfig: Linter.Config[] = [
       "@typescript-eslint/prefer-find": ["warn"],
       "@typescript-eslint/require-await": ["warn"],
       "@typescript-eslint/no-unnecessary-boolean-literal-compare": ["warn"],
-      "@typescript-eslint/no-unnecessary-parameter-property-assignment": ["warn"],
+      "@typescript-eslint/no-unnecessary-parameter-property-assignment": [
+        "warn",
+      ],
       "@typescript-eslint/strict-boolean-expressions": ["warn"],
       "@typescript-eslint/no-unnecessary-condition": ["warn"],
       "@typescript-eslint/prefer-nullish-coalescing": ["warn"],
       "@typescript-eslint/array-type": ["warn"],
       "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          args: "all",
+          argsIgnorePattern: "^_$",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_$",
+          destructuredArrayIgnorePattern: "^_$",
+          varsIgnorePattern: "^_$",
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
 ];

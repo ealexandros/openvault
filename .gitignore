@@ -80,3 +80,6 @@ target
 **/mutants.out*/
 
 packages/**/src/main.rs
+
+# temporary
+docs/*.png

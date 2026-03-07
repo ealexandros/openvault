@@ -29,7 +29,7 @@ export const tauriApi = {
     return safeInvokeTauri<void>("create_vault", { params });
   },
 
-  openVault: (params: { path: string; password: string }) => {
+  openVault: (params: { path: string; password: number[] }) => {
     return safeInvokeTauri<void>("open_vault", { params });
   },
 

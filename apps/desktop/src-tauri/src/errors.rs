@@ -6,6 +6,9 @@ pub enum Error {
     #[error(transparent)]
     Sdk(#[from] openvault_sdk::Error),
 
+    #[error("Invalid UTF-8")]
+    InvalidUtf8,
+
     #[error("Invalid UUID: {0}")]
     InvalidUuid(String),
 

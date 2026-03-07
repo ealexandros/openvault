@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/
 import { cn } from "@/utils/cn";
 import { truncateLeft } from "@/utils/format";
 import { FileIcon, XIcon } from "lucide-react";
-import { RecentVault } from "../hooks/useVaultAccess";
+import { RecentVault } from "../../hooks/useSelectVault";
 
 type RecentVaultItemProps = {
   vault: RecentVault;

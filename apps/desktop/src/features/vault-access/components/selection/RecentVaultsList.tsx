@@ -1,7 +1,7 @@
 import { Empty, EmptyHeader } from "@/components/ui/shadcn/empty";
 import { cn } from "@/utils/cn";
 import { History } from "lucide-react";
-import { RecentVault } from "../hooks/useVaultAccess";
+import { RecentVault } from "../../hooks/useSelectVault";
 import { RecentVaultItem } from "./RecentVaultItem";
 import { RecentVaultListSkeleton } from "./Skeletons";
 
