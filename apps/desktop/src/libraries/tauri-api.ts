@@ -22,7 +22,7 @@ export const tauriApi = {
   createVault: (params: {
     path: string;
     name: string;
-    password: string;
+    password: number[];
     encryption: string;
     compression: string;
   }) => {
