@@ -5,90 +5,78 @@ import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
 import { cn } from "@/utils/cn";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { useState } from "react";
 
 type PasswordSectionProps = {
-  passwordValue: string;
-  verifyValue: string;
-  passwordError?: string;
-  passwordTouched?: boolean;
-  verifyError?: string;
-  verifyTouched?: boolean;
-  onChange: (e: React.ChangeEvent<unknown>) => void;
-  onBlur: (e: unknown) => void;
+  passwordRef: React.RefObject<HTMLInputElement | null>;
+  verifyPasswordRef: React.RefObject<HTMLInputElement | null>;
+  passwordError: string | null;
+  showPassword: boolean;
+  passwordStrengthScore: number;
+  toggleShowPassword: () => void;
+  handlePasswordChange: () => void;
 };
 
 export const PasswordSection = ({
-  passwordValue,
-  verifyValue,
+  passwordRef,
+  verifyPasswordRef,
   passwordError,
-  passwordTouched,
-  verifyError,
-  verifyTouched,
-  onChange,
-  onBlur,
-}: PasswordSectionProps) => {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-            Password
-          </Label>
-        </div>
-        <div className="relative">
-          <Input
-            name="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Min. 8 characters"
-            value={passwordValue}
-            onChange={onChange}
-            onBlur={onBlur}
-            className={cn(
-              "px-4 pr-12",
-              passwordTouched === true && passwordError != null
-                ? "border-destructive/50"
-                : "border-border",
-            )}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
-            {showPassword ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
-          </button>
-        </div>
-
-        {passwordValue && <PasswordStrength password={passwordValue} />}
-
-        {passwordTouched === true && passwordError != null && (
-          <p className="ml-1 text-xs text-destructive">{passwordError}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label className="ml-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
-          Verify Password
+  showPassword,
+  passwordStrengthScore,
+  toggleShowPassword,
+  handlePasswordChange,
+}: PasswordSectionProps) => (
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between px-1">
+        <Label className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+          Password
         </Label>
+      </div>
+      <div className="relative">
         <Input
-          name="verifyPassword"
-          type="password"
-          placeholder="Repeat password"
-          value={verifyValue}
-          onChange={onChange}
-          onBlur={onBlur}
+          name="password"
+          ref={passwordRef}
+          type={showPassword ? "text" : "password"}
+          placeholder="Min. 8 characters"
+          onChange={handlePasswordChange}
           className={cn(
-            verifyTouched === true && verifyError != null
-              ? "border-destructive/50"
-              : "border-border",
+            "px-4 pr-12",
+            passwordError != null ? "border-destructive/50" : "border-border",
           )}
         />
-        {verifyTouched === true && verifyError != null && (
-          <p className="ml-1 text-xs text-destructive">{verifyError}</p>
-        )}
+        <button
+          type="button"
+          onClick={toggleShowPassword}
+          className="absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+          {showPassword ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+        </button>
       </div>
+
+      {passwordStrengthScore > 0 && <PasswordStrength strengthScore={passwordStrengthScore} />}
+
+      {passwordError != null && (
+        <p className="ml-1 text-xs text-destructive">{passwordError}</p>
+      )}
     </div>
-  );
-};
+
+    <div className="space-y-2">
+      <Label className="ml-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+        Verify Password
+      </Label>
+      <Input
+        name="verifyPassword"
+        ref={verifyPasswordRef}
+        type="password"
+        placeholder="Repeat password"
+        className={cn(
+          passwordError === "Passwords do not match"
+            ? "border-destructive/50"
+            : "border-border",
+        )}
+      />
+      {passwordError === "Passwords do not match" && (
+        <p className="ml-1 text-xs text-destructive">{passwordError}</p>
+      )}
+    </div>
+  </div>
+);

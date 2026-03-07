@@ -66,7 +66,7 @@ pub struct PathIsFileParams {
 pub struct CreateVaultParams {
     pub path: String,
     pub name: String,
-    pub password: String,
+    pub password: Vec<u8>,
     pub encryption: String,
     pub compression: String,
 }

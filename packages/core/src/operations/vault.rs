@@ -58,6 +58,7 @@ pub fn open_vault(path: &Path, password: &[u8]) -> Result<VaultSession> {
 
     Ok(VaultSession::new(
         file,
+        path.to_path_buf(),
         keyring,
         boot_header.compressor,
         boot_header.cipher,

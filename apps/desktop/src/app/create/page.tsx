@@ -15,7 +15,19 @@ import { Separator } from "@/components/ui/shadcn/separator";
 import Link from "next/link";
 
 const SetupVaultPage = () => {
-  const { formik, isEncrypting, chooseFolder, setIsEncrypting } = useSetupVault();
+  const {
+    formik,
+    isEncrypting,
+    passwordRef,
+    verifyPasswordRef,
+    passwordError,
+    showPassword,
+    passwordStrengthScore,
+    chooseFolder,
+    setIsEncrypting,
+    toggleShowPassword,
+    handlePasswordChange,
+  } = useSetupVault();
 
   if (isEncrypting) {
     return <EncryptionProgress onCancel={() => setIsEncrypting(false)} />;
@@ -54,14 +66,13 @@ const SetupVaultPage = () => {
           />
           <Separator className="my-7" />
           <PasswordSection
-            passwordValue={formik.values.password}
-            verifyValue={formik.values.verifyPassword}
-            passwordError={formik.errors.password}
-            passwordTouched={formik.touched.password}
-            verifyError={formik.errors.verifyPassword}
-            verifyTouched={formik.touched.verifyPassword}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            passwordRef={passwordRef}
+            verifyPasswordRef={verifyPasswordRef}
+            passwordError={passwordError}
+            showPassword={showPassword}
+            passwordStrengthScore={passwordStrengthScore}
+            toggleShowPassword={toggleShowPassword}
+            handlePasswordChange={handlePasswordChange}
           />
           <AdvancedSettings
             encryption={formik.values.encryption}
@@ -71,7 +82,7 @@ const SetupVaultPage = () => {
 
           <Button
             type="submit"
-            disabled={!formik.isValid || !formik.dirty || formik.isSubmitting}
+            disabled={formik.isSubmitting}
             className="relative h-14 w-full overflow-hidden bg-primary text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100">
             <span className="relative flex items-center justify-center gap-2">
               <ShieldCheckIcon className="size-4" />

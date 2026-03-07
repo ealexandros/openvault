@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::path::PathBuf;
 
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
@@ -11,6 +12,7 @@ use crate::vault::versions::shared::format::FormatContext;
 
 pub struct VaultSession {
     file: File,
+    file_path: PathBuf,
     keyring: Keyring,
     compressor: CompressionAlgorithm,
     cipher: EncryptionAlgorithm,
@@ -20,6 +22,7 @@ pub struct VaultSession {
 impl VaultSession {
     pub fn new(
         file: File,
+        file_path: PathBuf,
         keyring: Keyring,
         compressor: CompressionAlgorithm,
         cipher: EncryptionAlgorithm,
@@ -27,6 +30,7 @@ impl VaultSession {
     ) -> Self {
         Self {
             file,
+            file_path,
             keyring,
             compressor,
             cipher,
@@ -40,6 +44,10 @@ impl VaultSession {
 
     pub fn file_mut(&mut self) -> &mut File {
         &mut self.file
+    }
+
+    pub fn file_path(&self) -> &PathBuf {
+        &self.file_path
     }
 
     pub fn version(&self) -> u16 {

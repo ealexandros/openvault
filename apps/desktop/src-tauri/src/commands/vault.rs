@@ -1,5 +1,6 @@
 use crate::commands::contracts::{CreateVaultParams, OpenVaultParams};
 use crate::errors::{Error, Result};
+use crate::internal::format::string_from_bytes;
 use crate::state::TauriState;
 use openvault_sdk::{CompressionAlgorithm, CreateConfig, EncryptionAlgorithm};
 use std::path::PathBuf;
@@ -18,9 +19,10 @@ pub async fn create_vault(state: TauriState<'_>, params: CreateVaultParams) -> R
         .with_encryption(encryption)
         .with_compression(compression);
 
-    let mut password = params.password;
+    let mut password = string_from_bytes(params.password)?;
+
     let vault =
-        openvault_sdk::create_and_open_vault(PathBuf::from(params.path), password.clone(), config)?;
+        openvault_sdk::create_and_open_vault(PathBuf::from(params.path), &password, config)?;
     password.zeroize();
 
     let mut vault_state = state.vault.lock().unwrap();
@@ -32,9 +34,9 @@ pub async fn create_vault(state: TauriState<'_>, params: CreateVaultParams) -> R
 #[tauri::command]
 pub async fn open_vault(state: TauriState<'_>, params: OpenVaultParams) -> Result {
     let path = PathBuf::from(params.path);
-    let mut password = String::from_utf8(params.password).map_err(|_| Error::InvalidUtf8)?;
+    let mut password = string_from_bytes(params.password)?;
 
-    let vault = openvault_sdk::open_vault(path, password.clone())?;
+    let vault = openvault_sdk::open_vault(path, &password)?;
 
     password.zeroize();
 
@@ -53,9 +55,8 @@ pub async fn lock_vault(state: TauriState<'_>) -> Result {
     Ok(())
 }
 
-// @todo-now implement those
-
 #[tauri::command]
 pub async fn compact_vault(_state: TauriState<'_>) -> Result {
+    // @todo-now implement those
     todo!()
 }
