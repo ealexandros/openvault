@@ -1,11 +1,10 @@
 use std::io::Read;
 
-use super::compact;
 use super::io;
 use super::replay::replay_records;
 use crate::errors::Result;
 use crate::features::shared::BlobRef;
-use crate::internal::io_ext::{ReadWriter, Reader, Writer};
+use crate::internal::io_ext::{ReadWriter, Reader};
 use crate::vault::versions::shared::Offset;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::format::{FormatContext, FormatHandler};
@@ -96,9 +95,5 @@ impl FormatHandler for V1FormatHandler {
 
     fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result<ReplayState> {
         replay_records(reader, context)
-    }
-
-    fn compact(&self, reader: &mut Reader, writer: &mut Writer, context: &FormatContext) -> Result {
-        compact::run_compaction(reader, writer, context)
     }
 }

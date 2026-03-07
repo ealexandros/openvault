@@ -56,7 +56,11 @@ pub async fn lock_vault(state: TauriState<'_>) -> Result {
 }
 
 #[tauri::command]
-pub async fn compact_vault(_state: TauriState<'_>) -> Result {
-    // @todo-now implement those
-    todo!()
+pub async fn compact_vault(state: TauriState<'_>) -> Result {
+    let mut vault_state = state.vault.lock().unwrap();
+    let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
+
+    vault.compact()?;
+
+    Ok(())
 }

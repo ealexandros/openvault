@@ -1,4 +1,4 @@
-use openvault_core::operations::history;
+use openvault_core::operations::{compact, history};
 use openvault_core::vault::runtime::VaultSession;
 use openvault_core::vault::versions::shared::checkpoint::Checkpoint;
 use zeroize::Zeroize;
@@ -40,6 +40,15 @@ impl Vault {
         }
 
         self.commit_checkpoint()
+    }
+
+    pub fn compact(&mut self) -> Result {
+        self.commit()?;
+        compact::compact_vault(&mut self.session)?;
+
+        self.filesystem = FilesystemRuntime::load(&mut self.session)?;
+
+        Ok(())
     }
 
     fn commit_checkpoint(&mut self) -> Result {

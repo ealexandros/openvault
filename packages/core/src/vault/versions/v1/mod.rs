@@ -1,5 +1,4 @@
 mod blob;
-mod compact;
 mod format;
 mod io;
 mod mapper;

@@ -5,7 +5,7 @@ use openvault_crypto::encryption::EncryptionAlgorithm;
 
 use crate::errors::Result;
 use crate::features::shared::BlobRef;
-use crate::internal::io_ext::{ReadWriter, Reader, Writer};
+use crate::internal::io_ext::{ReadWriter, Reader};
 use crate::vault::crypto::keyring::Keyring;
 use crate::vault::versions::shared::checkpoint::Checkpoint;
 use crate::vault::versions::shared::record::Record;
@@ -91,6 +91,4 @@ pub trait FormatHandler: Sync + Send {
     ) -> Result<Offset>;
 
     fn replay(&self, reader: &mut Reader, context: &FormatContext) -> Result<ReplayState>;
-
-    fn compact(&self, reader: &mut Reader, writer: &mut Writer, context: &FormatContext) -> Result;
 }
