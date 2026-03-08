@@ -2,6 +2,7 @@
 
 import { useVault } from "@/context/VaultContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export type MessageAlgorithm = "rsa-4096" | "x25519-aes-gcm" | "xchacha20-poly1305";
 export type MessageMode = "encrypt" | "decrypt";
@@ -15,11 +16,16 @@ export type MessageUserProfile = {
   publicKey: string;
   status: UserPresence;
   trusted: boolean;
-  lastSeen: string;
+  importedAt: string;
+  expiresAt: string;
+  isExpired: boolean;
 };
 
 type ImportUserPayload = Partial<
-  Pick<MessageUserProfile, "displayName" | "email" | "publicKey" | "status" | "trusted">
+  Pick<
+    MessageUserProfile,
+    "displayName" | "email" | "publicKey" | "status" | "trusted" | "expiresAt"
+  >
 >;
 
 const KEY_SIZE_BYTES = 512;
@@ -38,7 +44,9 @@ const MOCK_USERS: MessageUserProfile[] = [
     publicKey: "cHVibGljX2tleV9tYXlhX2NoZW5fMDE1ZV9hNGZiX2IxMGE5YjFhNjJjM2I3ZDQ5YzAy",
     status: "online",
     trusted: true,
-    lastSeen: "Active now",
+    importedAt: "2024-03-01T10:00:00Z",
+    expiresAt: "2026-12-31T23:59:59Z",
+    isExpired: false,
   },
   {
     id: "user-2",
@@ -47,7 +55,9 @@ const MOCK_USERS: MessageUserProfile[] = [
     publicKey: "cHVibGljX2tleV9saWFtX2NhcnRlcl8wN2FlX2UyNGQ4NmQxYTZjN2JiYjVlMTkxNmQ5",
     status: "offline",
     trusted: true,
-    lastSeen: "Last seen 2h ago",
+    importedAt: "2024-02-15T14:30:00Z",
+    expiresAt: "2025-01-01T00:00:00Z",
+    isExpired: true,
   },
   {
     id: "user-3",
@@ -56,7 +66,9 @@ const MOCK_USERS: MessageUserProfile[] = [
     publicKey: "cHVibGljX2tleV9zb2ZpYV9yaXZlcmFfMGMxYV9hZDE4N2Y2YjVhYjQ4Y2I1MjQxMjAw",
     status: "offline",
     trusted: false,
-    lastSeen: "Last seen yesterday",
+    importedAt: "2024-03-05T09:15:00Z",
+    expiresAt: "2027-06-30T12:00:00Z",
+    isExpired: false,
   },
 ];
 
@@ -112,8 +124,15 @@ export const useMessagesPage = () => {
   const [messageOutput, setMessageOutput] = useState("");
   const [transformError, setTransformError] = useState<string | null>(null);
 
+  const currentUserName = useMemo(() => vaultName ?? "Current User", [vaultName]);
+
+  const [isSetup, setIsSetup] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [keyRotationMonths, setKeyRotationMonths] = useState(12);
+
   const [publicKey, setPublicKey] = useState("");
   const [privateKey, setPrivateKey] = useState("");
+  const [keyExpiresAt, setKeyExpiresAt] = useState<string>("");
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(true);
 
   const [users, setUsers] = useState<MessageUserProfile[]>(MOCK_USERS);
@@ -121,16 +140,17 @@ export const useMessagesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
 
-  const currentUserName = useMemo(() => vaultName ?? "Current User", [vaultName]);
-
   const generateKeyPair = useCallback(() => {
     setIsGeneratingKeys(true);
 
     const generatedPublicKey = bytesToBase64(randomBytes(KEY_SIZE_BYTES));
     const generatedPrivateKey = bytesToBase64(randomBytes(KEY_SIZE_BYTES));
+    const expirationDate = new Date();
+    expirationDate.setFullYear(expirationDate.getFullYear() + 1);
 
     setPublicKey(generatedPublicKey);
     setPrivateKey(generatedPrivateKey);
+    setKeyExpiresAt(expirationDate.toISOString());
     setIsGeneratingKeys(false);
   }, []);
 
@@ -211,7 +231,12 @@ export const useMessagesPage = () => {
         publicKey: importedPublicKey,
         status: parsed.status === "online" ? "online" : "offline",
         trusted: parsed.trusted ?? false,
-        lastSeen: "Imported just now",
+        importedAt: new Date().toISOString(),
+        expiresAt: parsed.expiresAt ?? new Date(Date.now() + 31536000000).toISOString(),
+        isExpired:
+          parsed.expiresAt != null && parsed.expiresAt !== ""
+            ? new Date(parsed.expiresAt) < new Date()
+            : false,
       };
 
       setUsers(previousUsers => [importedUser, ...previousUsers]);
@@ -235,6 +260,8 @@ export const useMessagesPage = () => {
       exportedAt: new Date().toISOString(),
       algorithm,
     });
+
+    toast.success(`Profile for ${selectedUser.displayName} exported successfully`);
   }, [algorithm, selectedUser]);
 
   const exportCurrentUserProfile = useCallback(() => {
@@ -247,8 +274,21 @@ export const useMessagesPage = () => {
       privateKey,
       algorithm,
       exportedAt: new Date().toISOString(),
+      expiresAt: keyExpiresAt,
     });
-  }, [algorithm, currentUserName, privateKey, publicKey]);
+
+    toast.success("Your profile has been exported successfully");
+  }, [algorithm, currentUserName, keyExpiresAt, privateKey, publicKey]);
+
+  const completeOnboarding = useCallback(
+    ({ name, rotationMonths }: { name: string; rotationMonths: number }) => {
+      setDisplayName(name);
+      setKeyRotationMonths(rotationMonths);
+      setIsSetup(true);
+      toast.success("Profile setup complete!");
+    },
+    [],
+  );
 
   return {
     algorithm,
@@ -258,7 +298,11 @@ export const useMessagesPage = () => {
     transformError,
     publicKey,
     privateKey,
+    keyExpiresAt,
     isGeneratingKeys,
+    isSetup,
+    displayName,
+    keyRotationMonths,
     users,
     selectedUser,
     filteredUsers,
@@ -279,5 +323,6 @@ export const useMessagesPage = () => {
     importUserProfile,
     exportSelectedUserProfile,
     exportCurrentUserProfile,
+    completeOnboarding,
   };
 };

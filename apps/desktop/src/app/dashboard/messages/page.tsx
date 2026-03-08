@@ -5,8 +5,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/shadcn/resizable";
+import { AnimatePresence, motion } from "framer-motion";
 import { debounce } from "lodash-es";
 import { ChangeEvent, useEffect, useMemo, useRef } from "react";
+import { MessageOnboarding } from "./_components_/MessageOnboarding";
 import { MessageWorkspace } from "./_components_/MessageWorkspace";
 import { UserSidebar } from "./_components_/UserSidebar";
 import { useMessagesPage } from "./useMessagesPage";
@@ -38,6 +40,7 @@ const MessagesPage = () => {
     selectedUserId,
     searchQuery,
     importError,
+    keyExpiresAt,
     algorithmOptions,
     setAlgorithm,
     setMode,
@@ -49,6 +52,9 @@ const MessagesPage = () => {
     importUserProfile,
     exportSelectedUserProfile,
     exportCurrentUserProfile,
+    completeOnboarding,
+    isSetup,
+    currentUserName,
   } = useMessagesPage();
 
   const transformMessageRef = useRef(transformMessage);
@@ -67,31 +73,44 @@ const MessagesPage = () => {
     [],
   );
 
-  useEffect(() => {
-    if (mode !== "decrypt") {
-      debouncedDecrypt.cancel();
-      return;
-    }
+  const debouncedEncrypt = useMemo(
+    () =>
+      // eslint-disable-next-line react-hooks/refs
+      typedDebounce(() => {
+        const fn = transformMessageRef.current;
+        fn();
+      }, 450),
+    [],
+  );
 
-    debouncedDecrypt();
+  useEffect(() => {
+    if (mode === "decrypt") {
+      debouncedDecrypt();
+    } else {
+      debouncedEncrypt();
+    }
 
     return () => {
       debouncedDecrypt.cancel();
+      debouncedEncrypt.cancel();
     };
-  }, [debouncedDecrypt, mode, messageInput]);
+  }, [debouncedDecrypt, debouncedEncrypt, mode, messageInput]);
 
   const openImportPicker = () => {
     fileInputRef.current?.click();
   };
 
   const handleImportChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = event.target.files;
 
-    if (file == null) {
+    if (files == null || files.length === 0) {
       return;
     }
 
-    await importUserProfile(file);
+    for (const file of Array.from(files)) {
+      await importUserProfile(file);
+    }
+
     event.target.value = "";
   };
 
@@ -109,48 +128,72 @@ const MessagesPage = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/json"
+        accept=".ovp"
+        multiple
         className="hidden"
         onChange={handleImportChange}
       />
-
-      <ResizablePanelGroup orientation="horizontal" className="h-full">
-        <ResizablePanel defaultSize="75%">
-          <main className="scrollbar-none h-full overflow-y-auto p-10">
-            <MessageWorkspace
-              algorithm={algorithm}
-              algorithmOptions={algorithmOptions}
-              setAlgorithm={setAlgorithm}
-              mode={mode}
-              setMode={setMode}
-              messageInput={messageInput}
-              setMessageInput={setMessageInput}
-              messageOutput={messageOutput}
-              transformError={transformError}
-              clearMessageFields={clearMessageFields}
-              handlePrimaryAction={handlePrimaryAction}
-              selectedUser={selectedUser}
+      <AnimatePresence mode="wait">
+        {!isSetup ? (
+          <motion.div
+            key="onboarding"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-full w-full">
+            <MessageOnboarding
+              currentUserName={currentUserName}
+              onComplete={completeOnboarding}
+              openImportPicker={openImportPicker}
             />
-          </main>
-        </ResizablePanel>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="workspace"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex h-full w-full">
+            <ResizablePanelGroup orientation="horizontal" className="h-full">
+              <ResizablePanel defaultSize="75%">
+                <main className="scrollbar-none h-full overflow-y-auto p-10">
+                  <MessageWorkspace
+                    algorithm={algorithm}
+                    algorithmOptions={algorithmOptions}
+                    setAlgorithm={setAlgorithm}
+                    mode={mode}
+                    setMode={setMode}
+                    messageInput={messageInput}
+                    setMessageInput={setMessageInput}
+                    messageOutput={messageOutput}
+                    transformError={transformError}
+                    clearMessageFields={clearMessageFields}
+                    handlePrimaryAction={handlePrimaryAction}
+                    selectedUser={selectedUser}
+                  />
+                </main>
+              </ResizablePanel>
 
-        <ResizableHandle withHandle />
+              <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize="25%">
-          <UserSidebar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filteredUsers={filteredUsers}
-            selectedUserId={selectedUserId}
-            setSelectedUserId={setSelectedUserId}
-            selectedUser={selectedUser}
-            openImportPicker={openImportPicker}
-            exportSelectedUserProfile={exportSelectedUserProfile}
-            exportCurrentUserProfile={exportCurrentUserProfile}
-            importError={importError}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+              <ResizablePanel defaultSize="25%">
+                <UserSidebar
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  filteredUsers={filteredUsers}
+                  selectedUserId={selectedUserId}
+                  setSelectedUserId={setSelectedUserId}
+                  selectedUser={selectedUser}
+                  openImportPicker={openImportPicker}
+                  exportSelectedUserProfile={exportSelectedUserProfile}
+                  exportCurrentUserProfile={exportCurrentUserProfile}
+                  importError={importError}
+                  keyExpiresAt={keyExpiresAt}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

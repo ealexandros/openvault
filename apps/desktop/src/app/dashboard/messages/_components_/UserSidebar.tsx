@@ -21,6 +21,7 @@ type UserSidebarProps = {
   exportSelectedUserProfile: () => void;
   exportCurrentUserProfile: () => void;
   importError: string | null;
+  keyExpiresAt: string;
 };
 
 export const UserSidebar = ({
@@ -34,6 +35,7 @@ export const UserSidebar = ({
   exportSelectedUserProfile,
   exportCurrentUserProfile,
   importError,
+  keyExpiresAt,
 }: UserSidebarProps) => {
   return (
     <aside className="flex h-full w-full flex-col overflow-hidden bg-background">
@@ -43,6 +45,12 @@ export const UserSidebar = ({
           <p className="text-xs text-muted-foreground">
             Manage public keys and identities for secure messaging.
           </p>
+          {keyExpiresAt && (
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600/80 uppercase">
+              <Clock className="h-2.5 w-2.5" />
+              <span>Key expires: {new Date(keyExpiresAt).toLocaleDateString()}</span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-2">
@@ -104,9 +112,6 @@ export const UserSidebar = ({
               {filteredUsers.map(user => (
                 <motion.button
                   layout
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
                   key={user.id}
                   type="button"
                   onClick={() => setSelectedUserId(user.id)}
@@ -116,12 +121,6 @@ export const UserSidebar = ({
                       ? "border-primary/50 bg-primary/5 shadow-sm shadow-primary/10"
                       : "border-transparent hover:border-border hover:bg-muted/50",
                   )}>
-                  {selectedUserId === user.id && (
-                    <motion.div
-                      layoutId="active-pill"
-                      className="absolute top-3 left-0 h-6 w-0.5 rounded-r-full bg-primary"
-                    />
-                  )}
                   <div className="flex items-start gap-3">
                     <div
                       className={cn(
@@ -137,7 +136,7 @@ export const UserSidebar = ({
                         <p className="truncate text-sm leading-none font-medium">
                           {user.displayName}
                         </p>
-                        {user.trusted && (
+                        {user.trusted && !user.isExpired && (
                           <ShieldCheck className="h-3 w-3 shrink-0 text-primary" />
                         )}
                       </div>
@@ -172,18 +171,36 @@ export const UserSidebar = ({
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <h4 className="text-sm font-semibold">{selectedUser.displayName}</h4>
-                <div className="flex items-center gap-2 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
-                  <Clock className="h-2.5 w-2.5" />
-                  <span>{selectedUser.lastSeen}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+                    <Clock className="h-2.5 w-2.5" />
+                    <span>
+                      Imported: {new Date(selectedUser.importedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+                    <ShieldCheck className="h-2.5 w-2.5" />
+                    <span>
+                      Expires: {new Date(selectedUser.expiresAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
               <Badge
-                variant={selectedUser.trusted ? "secondary" : "outline"}
+                variant={
+                  selectedUser.trusted && !selectedUser.isExpired ? "secondary" : "outline"
+                }
                 className={cn(
                   "h-5 px-1.5 text-[10px] font-bold tracking-wider uppercase",
-                  selectedUser.trusted ? "border-primary/20 bg-primary/10 text-primary" : "",
+                  selectedUser.trusted && !selectedUser.isExpired
+                    ? "border-primary/20 bg-primary/10 text-primary"
+                    : "border-destructive/20 bg-destructive/5 text-destructive",
                 )}>
-                {selectedUser.trusted ? "Trusted" : "Unverified"}
+                {selectedUser.isExpired
+                  ? "Expired"
+                  : selectedUser.trusted
+                    ? "Trusted"
+                    : "Unverified"}
               </Badge>
             </div>
 

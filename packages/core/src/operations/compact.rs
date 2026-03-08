@@ -20,6 +20,8 @@ use crate::vault::versions::shared::replay::ReplayState;
 
 const COMPACT_TEMP_SUFFIX: &str = ".compact-tmp";
 
+// @todo-now refactor this
+
 pub fn compact_vault(session: &mut VaultSession) -> Result {
     let replay = replay_since_checkpoint(session)?;
     ensure_only_filesystem_feature(&replay)?;
