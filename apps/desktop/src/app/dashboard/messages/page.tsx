@@ -10,7 +10,7 @@ import { debounce } from "lodash-es";
 import { ChangeEvent, useEffect, useMemo, useRef } from "react";
 import { MessageOnboarding } from "./_components_/MessageOnboarding";
 import { MessageWorkspace } from "./_components_/MessageWorkspace";
-import { UserSidebar } from "./_components_/UserSidebar";
+import { UserSidebar } from "./_components_/users-sidebar";
 import { useMessagesPage } from "./useMessagesPage";
 
 // @todo-soon continue this..
@@ -42,6 +42,8 @@ const MessagesPage = () => {
     importError,
     keyExpiresAt,
     algorithmOptions,
+    isSetup,
+    currentUserName,
     setAlgorithm,
     setMode,
     setMessageInput,
@@ -53,8 +55,6 @@ const MessagesPage = () => {
     exportSelectedUserProfile,
     exportCurrentUserProfile,
     completeOnboarding,
-    isSetup,
-    currentUserName,
   } = useMessagesPage();
 
   const transformMessageRef = useRef(transformMessage);
@@ -178,16 +178,16 @@ const MessagesPage = () => {
               <ResizablePanel defaultSize="25%">
                 <UserSidebar
                   searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
                   filteredUsers={filteredUsers}
                   selectedUserId={selectedUserId}
-                  setSelectedUserId={setSelectedUserId}
                   selectedUser={selectedUser}
-                  openImportPicker={openImportPicker}
-                  exportSelectedUserProfile={exportSelectedUserProfile}
-                  exportCurrentUserProfile={exportCurrentUserProfile}
                   importError={importError}
                   keyExpiresAt={keyExpiresAt}
+                  openImportPicker={openImportPicker}
+                  setSearchQuery={setSearchQuery}
+                  setSelectedUserId={setSelectedUserId}
+                  exportSelectedUserProfile={exportSelectedUserProfile}
+                  exportCurrentUserProfile={exportCurrentUserProfile}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>
