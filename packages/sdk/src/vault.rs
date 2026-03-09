@@ -15,7 +15,8 @@ pub struct Vault {
 
 impl Vault {
     pub(crate) fn new(mut session: VaultSession) -> Result<Self> {
-        let filesystem = FilesystemRuntime::load(&mut session)?;
+        let replay = history::replay_since_checkpoint(&mut session)?;
+        let filesystem = FilesystemRuntime::restore_from_replay(&replay)?;
 
         Ok(Self {
             session,

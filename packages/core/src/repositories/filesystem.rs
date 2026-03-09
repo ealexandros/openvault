@@ -8,6 +8,7 @@ use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;
 use crate::vault::versions::shared::checkpoint::CheckpointFeature;
 use crate::vault::versions::shared::record::Record;
+use crate::vault::versions::shared::replay::ReplayState;
 
 pub struct FilesystemRepository;
 
@@ -16,10 +17,8 @@ impl FeatureRepository for FilesystemRepository {
     type Change = FilesystemChange;
     type Codec = FilesystemCodec;
 
-    fn load(session: &mut VaultSession) -> Result<Self::Store> {
-        let replay = replay_since_checkpoint(session)?;
-
-        let mut latest_snapshot = replay
+    fn restore_from_replay(state: &ReplayState) -> Result<Self::Store> {
+        let mut latest_snapshot = state
             .checkpoint
             .as_ref()
             .and_then(|checkpoint| checkpoint.find_feature(FeatureType::Filesystem))
@@ -28,12 +27,13 @@ impl FeatureRepository for FilesystemRepository {
 
         let mut deltas = Vec::new();
 
-        for record in replay
+        for record in state
             .records
-            .into_iter()
+            .iter()
             .filter(|r| r.header.feature_type == FeatureType::Filesystem)
         {
             let change = FilesystemCodec::decode_change(record.header.version, &record.payload)?;
+
             match change {
                 FilesystemChange::Snapshot(s) => {
                     latest_snapshot = Some(s);
@@ -44,7 +44,13 @@ impl FeatureRepository for FilesystemRepository {
         }
 
         let snapshot = latest_snapshot.unwrap_or_else(|| FilesystemStore::new().snapshot());
+
         FilesystemStore::restore(snapshot, deltas).map_err(Into::into)
+    }
+
+    fn load(session: &mut VaultSession) -> Result<Self::Store> {
+        let replay = replay_since_checkpoint(session)?;
+        Self::restore_from_replay(&replay)
     }
 
     fn commit(session: &mut VaultSession, store: &mut Self::Store) -> Result<CommitOutcome> {

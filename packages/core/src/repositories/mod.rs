@@ -1,8 +1,10 @@
 use crate::errors::Result;
 use crate::features::shared::FeatureCodec;
+use crate::operations::replay::replay_since_checkpoint;
 use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;
 use crate::vault::versions::shared::checkpoint::CheckpointFeature;
+use crate::vault::versions::shared::replay::ReplayState;
 
 pub mod filesystem;
 
@@ -13,9 +15,14 @@ pub trait FeatureRepository {
     type Change;
     type Codec: FeatureCodec;
 
-    fn load(session: &mut VaultSession) -> Result<Self::Store>;
+    fn restore_from_replay(state: &ReplayState) -> Result<Self::Store>;
     fn commit(session: &mut VaultSession, store: &mut Self::Store) -> Result<CommitOutcome>;
     fn create_checkpoint(store: &Self::Store) -> Result<CheckpointFeature>;
+
+    fn load(session: &mut VaultSession) -> Result<Self::Store> {
+        let replay = replay_since_checkpoint(session)?;
+        Self::restore_from_replay(&replay)
+    }
 }
 
 pub struct CommitOutcome {
