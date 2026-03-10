@@ -18,7 +18,7 @@ pub fn write_subheader(rw: &mut ReadWriter, data: &Subheader, context: &FormatCo
     let key = aad_domain.derive_key(context.keyring)?;
 
     let cipher = context.cipher.resolve();
-    let ciphertext = cipher.encrypt(&key, &nonce, &data.to_bytes()?, &aad)?;
+    let ciphertext = cipher.encrypt(&key.as_bytes(), &nonce, &data.to_bytes()?, &aad)?;
 
     rw.seek_from_start(SUBHEADER_OFFSET)?;
 
@@ -36,7 +36,7 @@ pub fn read_subheader(reader: &mut Reader, context: &FormatContext) -> Result<Su
     let key = aad_domain.derive_key(context.keyring)?;
 
     let cipher = context.cipher.resolve();
-    let plaintext = cipher.decrypt(&key, &frame.nonce, &ciphertext, &aad)?;
+    let plaintext = cipher.decrypt(&key.as_bytes(), &frame.nonce, &ciphertext, &aad)?;
 
     Subheader::from_bytes(&plaintext)
 }

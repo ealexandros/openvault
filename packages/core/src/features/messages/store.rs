@@ -131,7 +131,7 @@ impl MessagesStore {
                 self.contacts.insert(contact.id, contact.clone());
             }
             MessagesDelta::ContactUpdated { id, patch } => {
-                self.patch(id.clone(), patch.clone())?;
+                self.patch(*id, patch.clone())?;
             }
             MessagesDelta::ContactDeleted(id) => {
                 self.contacts

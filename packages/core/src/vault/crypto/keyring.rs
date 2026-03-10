@@ -7,7 +7,7 @@ use crate::errors::Result;
 
 const CONTEXT_PREFIX: &str = "openvault";
 
-#[derive(Debug, Clone, Zeroize)]
+#[derive(Zeroize)]
 pub struct Keyring {
     master: MasterKey,
 }

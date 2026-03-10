@@ -1,28 +1,22 @@
-use std::ops::Deref;
-
 use zeroize::{ZeroizeOnDrop, Zeroizing};
 
 pub const DK_SIZE: usize = 32;
 
-#[derive(Debug, Clone, PartialEq, ZeroizeOnDrop)]
+#[derive(PartialEq, ZeroizeOnDrop)]
 pub struct DerivedKey<const N: usize = DK_SIZE>(Zeroizing<[u8; N]>);
 
 impl<const N: usize> DerivedKey<N> {
     pub fn new(bytes: [u8; N]) -> Self {
         Self(Zeroizing::new(bytes))
     }
-}
 
-impl<const N: usize> AsRef<[u8]> for DerivedKey<N> {
-    fn as_ref(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         self.0.as_ref()
     }
 }
 
-impl<const N: usize> Deref for DerivedKey<N> {
-    type Target = [u8];
-
-    fn deref(&self) -> &[u8] {
+impl<const N: usize> AsRef<[u8]> for DerivedKey<N> {
+    fn as_ref(&self) -> &[u8] {
         self.0.as_ref()
     }
 }

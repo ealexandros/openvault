@@ -61,15 +61,16 @@ pub struct EnvelopeHeader {
 }
 
 impl EnvelopeHeader {
-    pub fn aad_bytes(&self) -> [u8; 38] {
-        let mut aad = [0u8; 38];
-        aad[0] = self.version;
-        aad[1] = self.hash as u8;
-        aad[2] = self.signature as u8;
-        aad[3] = self.kdf as u8;
-        aad[4] = self.encryption as u8;
-        aad[5] = self.compression as u8;
-        aad[6..].copy_from_slice(&self.ephemeral_public_key);
+    pub fn aad_bytes(&self) -> Vec<u8> {
+        let mut aad = vec![
+            self.version,
+            self.hash as u8,
+            self.signature as u8,
+            self.kdf as u8,
+            self.encryption as u8,
+            self.compression as u8,
+        ];
+        aad.extend_from_slice(&self.ephemeral_public_key);
         aad
     }
 
