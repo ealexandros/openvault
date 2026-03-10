@@ -22,7 +22,7 @@ pub enum KdfAlgorithm {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct EnvelopeHeader {
+pub struct MessageHeader {
     pub version: u8,
     pub hash: HashAlgorithm,
     pub kdf: KdfAlgorithm,
@@ -34,12 +34,12 @@ pub struct EnvelopeHeader {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EncryptedMessage {
-    pub header: EnvelopeHeader,
+    pub header: MessageHeader,
     pub ciphertext: Vec<u8>,
 }
 
 #[derive(Default)]
-pub struct EnvelopeConfig {
+pub struct MessageConfig {
     pub hash: HashAlgorithm,
     pub kdf: KdfAlgorithm,
     pub signature: SignatureAlgorithm,
@@ -47,7 +47,7 @@ pub struct EnvelopeConfig {
     pub encryption: EncryptionAlgorithm,
 }
 
-impl EnvelopeHeader {
+impl MessageHeader {
     pub fn aad_bytes(&self) -> Vec<u8> {
         let mut aad = vec![
             self.version,
