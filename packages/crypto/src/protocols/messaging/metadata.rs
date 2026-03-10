@@ -8,14 +8,16 @@ use crate::signature::SignatureAlgorithm;
 pub const ENVELOPE_VERSION: u8 = 1;
 
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum HashAlgorithm {
+    #[default]
     Sha256 = 1,
 }
 
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum KdfAlgorithm {
+    #[default]
     HkdfSha256 = 1,
 }
 
@@ -36,6 +38,7 @@ pub struct EncryptedMessage {
     pub ciphertext: Vec<u8>,
 }
 
+#[derive(Default)]
 pub struct EnvelopeConfig {
     pub hash: HashAlgorithm,
     pub kdf: KdfAlgorithm,
@@ -64,17 +67,5 @@ impl EnvelopeHeader {
         }
 
         Ok(())
-    }
-}
-
-impl Default for EnvelopeConfig {
-    fn default() -> Self {
-        Self {
-            hash: HashAlgorithm::Sha256,
-            signature: SignatureAlgorithm::Ed25519,
-            kdf: KdfAlgorithm::HkdfSha256,
-            compression: CompressionAlgorithm::Zstd,
-            encryption: EncryptionAlgorithm::XChaCha20Poly1305,
-        }
     }
 }
