@@ -9,6 +9,9 @@ pub enum Error {
     Filesystem(#[from] crate::features::filesystem::FilesystemError),
 
     #[error(transparent)]
+    Messages(#[from] crate::features::messages::MessagesError),
+
+    #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]

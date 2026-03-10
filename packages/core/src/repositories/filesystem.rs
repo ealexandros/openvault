@@ -1,10 +1,12 @@
-use crate::errors::Result;
+use std::collections::HashMap;
+
+use crate::errors::{Error, Result};
+use crate::features::FeatureType;
 use crate::features::filesystem::{FilesystemChange, FilesystemCodec, FilesystemStore};
-use crate::features::shared::FeatureCodec;
+use crate::features::shared::{BlobRef, FeatureCodec};
 use crate::operations::history::append_record;
 use crate::operations::replay::replay_since_checkpoint;
 use crate::repositories::{CommitOutcome, FeatureRepository};
-use crate::vault::features::FeatureType;
 use crate::vault::runtime::VaultSession;
 use crate::vault::versions::shared::checkpoint::CheckpointFeature;
 use crate::vault::versions::shared::record::Record;
@@ -78,5 +80,27 @@ impl FeatureRepository for FilesystemRepository {
             version: FilesystemCodec::wire_version(),
             payload: checkpoint_payload,
         })
+    }
+
+    fn referenced_blobs(store: &Self::Store) -> Vec<BlobRef> {
+        store
+            .snapshot()
+            .files
+            .values()
+            .map(|file| file.blob.clone())
+            .collect()
+    }
+
+    fn rewrite_blob_refs(store: &mut Self::Store, remap: &HashMap<BlobRef, BlobRef>) -> Result {
+        let mut snapshot = store.snapshot();
+
+        for file in snapshot.files.values_mut() {
+            file.blob = remap
+                .get(&file.blob)
+                .cloned()
+                .ok_or(Error::InvalidVaultFormat)?;
+        }
+
+        Ok(())
     }
 }

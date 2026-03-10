@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 openvault-core = { workspace = true }
 openvault-crypto = { workspace = true }
+chrono = { workspace = true }
 thiserror = { workspace = true }
 uuid = { workspace = true }
 zeroize = { workspace = true, features = ["zeroize_derive"] }

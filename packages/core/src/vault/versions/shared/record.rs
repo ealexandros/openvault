@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::vault::features::FeatureType;
+use crate::features::FeatureType;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct RecordHeader {

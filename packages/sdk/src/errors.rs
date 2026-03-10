@@ -9,6 +9,9 @@ pub enum Error {
     Filesystem(#[from] openvault_core::features::filesystem::FilesystemError),
 
     #[error(transparent)]
+    Messages(#[from] openvault_core::features::messages::MessagesError),
+
+    #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error("Invalid path")]

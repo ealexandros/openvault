@@ -2,6 +2,7 @@ use openvault_core::features::filesystem::FilesystemStore;
 use openvault_core::repositories::{CommitOutcome, FeatureRepository, FilesystemRepository};
 use openvault_core::vault::runtime::VaultSession;
 use openvault_core::vault::versions::shared::checkpoint::CheckpointFeature;
+use openvault_core::vault::versions::shared::replay::ReplayState;
 use zeroize::Zeroize;
 
 use crate::errors::Result;
@@ -16,6 +17,12 @@ pub(crate) struct FilesystemRuntime {
 impl FilesystemRuntime {
     pub fn load(session: &mut VaultSession) -> Result<Self> {
         let store = FilesystemRepository::load(session)?;
+
+        Ok(Self { store })
+    }
+
+    pub fn restore_from_replay(replay: &ReplayState) -> Result<Self> {
+        let store = FilesystemRepository::restore_from_replay(replay)?;
 
         Ok(Self { store })
     }

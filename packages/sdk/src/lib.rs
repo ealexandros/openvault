@@ -19,6 +19,9 @@ pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;
 
 pub use openvault_core::features::filesystem::{FileMetadata, FolderMetadata};
+pub use openvault_core::features::messages::{
+    MessageContact, MessageContactPatch, MessageCredentials, MessageEnvelope,
+};
 
 pub fn client() -> VaultClient {
     VaultClient::new()

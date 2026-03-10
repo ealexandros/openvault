@@ -1,4 +1,5 @@
 pub mod filesystem;
+pub mod messages;
 
 use openvault_core::repositories::CommitOutcome;
 use openvault_core::vault::runtime::VaultSession;
