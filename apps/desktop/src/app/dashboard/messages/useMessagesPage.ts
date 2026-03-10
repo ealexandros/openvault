@@ -31,8 +31,6 @@ type ImportUserPayload = Partial<
 const KEY_SIZE_BYTES = 512;
 
 const ALGORITHM_OPTIONS: { value: MessageAlgorithm; label: string }[] = [
-  { value: "rsa-4096", label: "RSA-4096" },
-  { value: "x25519-aes-gcm", label: "X25519 + AES-256-GCM" },
   { value: "xchacha20-poly1305", label: "XChaCha20-Poly1305" },
 ];
 
@@ -118,7 +116,7 @@ const downloadJson = (filename: string, payload: unknown) => {
 export const useMessagesPage = () => {
   const { vaultName } = useVault();
 
-  const [algorithm, setAlgorithm] = useState<MessageAlgorithm>("rsa-4096");
+  const [algorithm, setAlgorithm] = useState<MessageAlgorithm>("xchacha20-poly1305");
   const [mode, setMode] = useState<MessageMode>("encrypt");
   const [messageInput, setMessageInput] = useState("");
   const [messageOutput, setMessageOutput] = useState("");
