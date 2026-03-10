@@ -10,6 +10,9 @@ use crate::errors::Result;
 use crate::features::filesystem::FilesystemService;
 use crate::features::messages::MessagesService;
 
+// @todo-now fix the OCP problem on commit, commit_checkpoint, compact
+// @todo-now return the checkpoint from the compact
+
 #[derive(Zeroize)]
 pub struct Vault {
     session: VaultSession,
@@ -60,8 +63,6 @@ impl Vault {
 
     pub fn compact(&mut self) -> Result {
         self.commit()?;
-
-        // @todo-now return the new features..
 
         compact::compact_vault(&mut self.session)?;
 

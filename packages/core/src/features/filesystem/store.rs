@@ -12,9 +12,7 @@ use super::patch::{FileMetadataPatch, FolderMetadataPatch};
 use super::validate;
 use crate::features::filesystem::ROOT_FOLDER_ID;
 use crate::features::filesystem::namings::{generate_file_name, generate_folder_name};
-use crate::features::shared::BlobRef;
-
-const SNAPSHOT_THRESHOLD: usize = 64;
+use crate::features::shared::{BlobRef, DEFAULT_SNAPSHOT_THRESHOLD};
 
 #[derive(Clone, Debug)]
 pub struct FilesystemStore {
@@ -202,7 +200,7 @@ impl FilesystemStore {
             return None;
         }
 
-        if self.deltas.len() >= SNAPSHOT_THRESHOLD {
+        if self.deltas.len() >= DEFAULT_SNAPSHOT_THRESHOLD {
             return Some(FilesystemChange::Snapshot(self.snapshot()));
         }
 

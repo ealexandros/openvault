@@ -4,11 +4,11 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use zeroize::Zeroize;
 
+use crate::features::shared::DEFAULT_SNAPSHOT_THRESHOLD;
+
 use super::error::{MessagesError, Result};
 use super::events::{MessagesChange, MessagesDelta, MessagesSnapshot};
 use super::models::{MessageContact, MessageContactPatch, MessageCredentials};
-
-const SNAPSHOT_THRESHOLD: usize = 30;
 
 #[derive(Clone, Debug, Default)]
 pub struct MessagesStore {
@@ -34,6 +34,7 @@ impl MessagesStore {
         }
 
         store.clear_deltas();
+
         Ok(store)
     }
 
@@ -89,7 +90,7 @@ impl MessagesStore {
             return None;
         }
 
-        if self.deltas.len() >= SNAPSHOT_THRESHOLD {
+        if self.deltas.len() >= DEFAULT_SNAPSHOT_THRESHOLD {
             return Some(MessagesChange::Snapshot(self.snapshot()));
         }
 
