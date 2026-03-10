@@ -31,6 +31,15 @@ pub enum Error {
 
     #[error("Unsupported compressor: {0}")]
     UnsupportedCompressor(u8),
+
+    #[error("Invalid envelope")]
+    InvalidEnvelope,
+
+    #[error("Unsupported envelope version: {0}")]
+    UnsupportedEnvelopeVersion(u8),
+
+    #[error("Signature verification failed")]
+    SignatureVerificationFailed,
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;

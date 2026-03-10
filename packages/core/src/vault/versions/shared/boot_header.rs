@@ -1,9 +1,9 @@
 use std::io::{Cursor, Write};
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use crc32fast;
 use openvault_crypto::compression::CompressionAlgorithm;
 use openvault_crypto::encryption::EncryptionAlgorithm;
+use openvault_crypto::hash::Crc32Hasher;
 use openvault_crypto::keys::salt::{SALT_SIZE, Salt};
 
 use crate::errors::{Error, Result};
@@ -56,7 +56,7 @@ impl BootHeader {
             cursor.write_u8(self.compressor as u8)?;
         }
 
-        let crc = crc32fast::hash(&bytes[..VAULT_PAYLOAD_SIZE]);
+        let crc = Crc32Hasher::checksum(&bytes[..VAULT_PAYLOAD_SIZE]);
         bytes[VAULT_PAYLOAD_SIZE..].copy_from_slice(&crc.to_le_bytes());
 
         Ok(bytes)
@@ -74,7 +74,7 @@ impl BootHeader {
                 .try_into()
                 .map_err(|_| Error::InvalidVaultFormat)?,
         );
-        let computed_crc = crc32fast::hash(payload);
+        let computed_crc = Crc32Hasher::checksum(payload);
 
         if stored_crc != computed_crc {
             return Err(Error::InvalidVaultChecksum);

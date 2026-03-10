@@ -9,6 +9,8 @@ use crate::keys::salt::Salt;
 
 pub const MKEY_SIZE: usize = 32;
 
+// @todo-now Remove Debug, Clone, PartialEq from secret types
+
 #[derive(Debug, Clone, PartialEq, Zeroize, ZeroizeOnDrop)]
 pub struct MasterKey(Zeroizing<[u8; MKEY_SIZE]>);
 
