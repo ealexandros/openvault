@@ -2,6 +2,8 @@ use std::path::{Path, PathBuf};
 
 use crate::errors::{Error, Result};
 
+const MAX_NAME_ATTEMPTS: u32 = 1000;
+
 pub(crate) fn resolve_export_file_destination(
     destination: &Path,
     file_name: &str,
@@ -44,7 +46,7 @@ pub(crate) fn find_available_path(path: &Path, is_file: bool) -> Result<PathBuf>
         .and_then(|n| n.to_str())
         .ok_or(Error::InvalidPath)?;
 
-    for i in 1.. {
+    for i in 1..=MAX_NAME_ATTEMPTS {
         let candidate_name = if is_file {
             add_suffix_to_file(name, i)
         } else {
@@ -56,13 +58,9 @@ pub(crate) fn find_available_path(path: &Path, is_file: bool) -> Result<PathBuf>
         if !candidate.exists() {
             return Ok(candidate);
         }
-
-        if i == u32::MAX {
-            return Err(Error::ItemAlreadyExists(name.to_string()));
-        }
     }
 
-    unreachable!()
+    Err(Error::ItemAlreadyExists(name.to_string()))
 }
 
 fn add_suffix_to_file(file_name: &str, n: u32) -> String {

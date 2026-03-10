@@ -1,3 +1,9 @@
+pub mod filesystem;
+pub mod messages;
+
+pub use filesystem::FilesystemRepository;
+pub use messages::MessagesRepository;
+
 use std::collections::HashMap;
 
 use crate::errors::Result;
@@ -7,12 +13,6 @@ use crate::operations::replay::replay_since_checkpoint;
 use crate::vault::runtime::VaultSession;
 use crate::vault::versions::shared::checkpoint::CheckpointFeature;
 use crate::vault::versions::shared::replay::ReplayState;
-
-pub mod filesystem;
-pub mod messages;
-
-pub use filesystem::FilesystemRepository;
-pub use messages::MessagesRepository;
 
 pub trait FeatureRepository {
     type Store;

@@ -1,26 +1,28 @@
+use openvault_core::features::filesystem::FilesystemStore;
+use openvault_core::features::messages::MessagesStore;
 use openvault_core::operations::{compact, history, replay};
+use openvault_core::repositories::{FeatureRepository, FilesystemRepository, MessagesRepository};
 use openvault_core::vault::runtime::VaultSession;
 use openvault_core::vault::versions::shared::checkpoint::Checkpoint;
 use zeroize::Zeroize;
 
 use crate::errors::Result;
-use crate::features::FeatureRuntime;
-use crate::features::filesystem::{FilesystemRuntime, FilesystemService};
-use crate::features::messages::{MessagesRuntime, MessagesService};
+use crate::features::filesystem::FilesystemService;
+use crate::features::messages::MessagesService;
 
 #[derive(Zeroize)]
 pub struct Vault {
     session: VaultSession,
-    filesystem: FilesystemRuntime,
-    messages: MessagesRuntime,
+    filesystem: FilesystemStore,
+    messages: MessagesStore,
 }
 
 impl Vault {
     pub(crate) fn new(mut session: VaultSession) -> Result<Self> {
         let replay = replay::replay_since_checkpoint(&mut session)?;
 
-        let filesystem = FilesystemRuntime::restore_from_replay(&replay)?;
-        let messages = MessagesRuntime::restore_from_replay(&replay)?;
+        let filesystem = FilesystemRepository::restore_from_replay(&replay)?;
+        let messages = MessagesRepository::restore_from_replay(&replay)?;
 
         Ok(Self {
             session,
@@ -33,19 +35,9 @@ impl Vault {
         self.session.version()
     }
 
-    #[inline]
-    pub fn filesystem(&mut self) -> FilesystemService<'_> {
-        self.filesystem.service(&mut self.session)
-    }
-
-    #[inline]
-    pub fn messages(&mut self) -> MessagesService<'_> {
-        self.messages.service(&mut self.session)
-    }
-
     pub fn commit(&mut self) -> Result {
-        self.filesystem.commit(&mut self.session)?;
-        self.messages.commit(&mut self.session)?;
+        FilesystemRepository::commit(&mut self.session, &mut self.filesystem)?;
+        MessagesRepository::commit(&mut self.session, &mut self.messages)?;
 
         if !history::should_create_checkpoint(&mut self.session)? {
             return Ok(());
@@ -54,25 +46,38 @@ impl Vault {
         self.commit_checkpoint()
     }
 
-    pub fn compact(&mut self) -> Result {
-        self.commit()?;
-        compact::compact_vault(&mut self.session)?;
+    fn commit_checkpoint(&mut self) -> Result {
+        let checkpoint_features = vec![
+            FilesystemRepository::create_checkpoint(&mut self.filesystem)?,
+            MessagesRepository::create_checkpoint(&mut self.messages)?,
+        ];
 
-        self.filesystem = FilesystemRuntime::load(&mut self.session)?;
-        self.messages = MessagesRuntime::load(&mut self.session)?;
+        let mut checkpoint = Checkpoint::new(checkpoint_features);
+        history::create_checkpoint(&mut self.session, &mut checkpoint)?;
 
         Ok(())
     }
 
-    fn commit_checkpoint(&mut self) -> Result {
-        let checkpoint_features = vec![
-            self.filesystem.create_checkpoint()?,
-            self.messages.create_checkpoint()?,
-        ];
-        let mut checkpoint = Checkpoint::new(checkpoint_features);
+    pub fn compact(&mut self) -> Result {
+        self.commit()?;
 
-        history::create_checkpoint(&mut self.session, &mut checkpoint)?;
+        // @todo-now return the new features..
+
+        compact::compact_vault(&mut self.session)?;
+
+        self.filesystem = FilesystemRepository::load(&mut self.session)?;
+        self.messages = MessagesRepository::load(&mut self.session)?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub fn filesystem(&mut self) -> FilesystemService<'_> {
+        FilesystemService::new(&mut self.session, &mut self.filesystem)
+    }
+
+    #[inline]
+    pub fn messages(&mut self) -> MessagesService<'_> {
+        MessagesService::new(&mut self.session, &mut self.messages)
     }
 }
