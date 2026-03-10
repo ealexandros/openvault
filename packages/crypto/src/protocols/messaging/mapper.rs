@@ -1,3 +1,6 @@
+use base64::Engine;
+use base64::engine::general_purpose;
+
 use crate::errors::{Error, Result};
 use crate::protocols::messaging::MessageEnvelope;
 
@@ -39,9 +42,15 @@ pub fn decode_payload(payload: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
 }
 
 pub fn encode_message(message: &MessageEnvelope) -> Result<Vec<u8>> {
-    postcard::to_allocvec(message).map_err(|_| Error::InvalidMessageFormat)
+    let bytes = postcard::to_allocvec(message).map_err(|_| Error::InvalidMessageFormat)?;
+    let encoded = general_purpose::STANDARD.encode(bytes);
+    Ok(encoded.as_bytes().to_vec())
 }
 
 pub fn decode_message(bytes: &[u8]) -> Result<MessageEnvelope> {
-    postcard::from_bytes(bytes).map_err(|_| Error::InvalidMessageFormat)
+    let encoded = general_purpose::STANDARD
+        .decode(bytes)
+        .map_err(|_| Error::DecodeBase64)?;
+
+    postcard::from_bytes(encoded.as_slice()).map_err(|_| Error::InvalidMessageFormat)
 }

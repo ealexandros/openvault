@@ -19,3 +19,4 @@ strum = { workspace = true }
 strum_macros = { workspace = true }
 thiserror = { workspace = true }
 zeroize = { workspace = true }
+base64 = "0.22.1"

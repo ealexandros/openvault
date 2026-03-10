@@ -2642,6 +2642,7 @@ name = "openvault-crypto"
 version = "0.0.0"
 dependencies = [
  "argon2",
+ "base64 0.22.1",
  "chacha20poly1305",
  "crc32fast",
  "ed25519-dalek",

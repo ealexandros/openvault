@@ -43,6 +43,9 @@ pub enum Error {
 
     #[error("Signature verification failed")]
     SignatureVerificationFailed,
+
+    #[error("Failed to base64 decode")]
+    DecodeBase64,
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
