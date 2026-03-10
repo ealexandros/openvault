@@ -1,19 +1,18 @@
 use argon2::password_hash::rand_core::OsRng;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-// @todo-now remove clone partialeq and eq
-
 pub type EphemeralKeyType = [u8; 32];
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct EphemeralPrivateKey(EphemeralKeyType);
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct EphemeralPublicKey(EphemeralKeyType);
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct EphemeralKeyPair {
     pub public: EphemeralPublicKey,
     pub private: EphemeralPrivateKey,
@@ -67,6 +66,21 @@ impl EphemeralKeyPair {
             public: EphemeralPublicKey(public.to_bytes()),
             private: EphemeralPrivateKey(secret.to_bytes()),
         }
+    }
+}
+
+impl fmt::Debug for EphemeralPrivateKey {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "EphemeralPrivateKey(<redacted>)")
+    }
+}
+
+impl fmt::Debug for EphemeralKeyPair {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EphemeralKeyPair")
+            .field("public", &self.public)
+            .field("private", &"<redacted>")
+            .finish()
     }
 }
 
