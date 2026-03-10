@@ -35,6 +35,9 @@ pub enum Error {
     #[error("Invalid envelope")]
     InvalidEnvelope,
 
+    #[error("Invalid message format")]
+    InvalidMessageFormat,
+
     #[error("Unsupported envelope version: {0}")]
     UnsupportedEnvelopeVersion(u8),
 

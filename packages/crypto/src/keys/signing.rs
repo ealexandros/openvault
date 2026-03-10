@@ -5,6 +5,8 @@ use zeroize::{Zeroize, ZeroizeOnDrop};
 
 pub type SignatureKeyType = [u8; 32];
 
+// @todo-now remove clone partialeq and eq
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct SigningPrivateKey(SignatureKeyType);
 

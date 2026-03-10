@@ -1,4 +1,5 @@
 use crate::errors::{Error, Result};
+use crate::protocols::messaging::MessageEnvelope;
 
 const SIGNATURE_LEN_BYTES: usize = 2;
 
@@ -35,4 +36,12 @@ pub fn decode_payload(payload: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
     let message = payload[signature_end..].to_vec();
 
     Ok((signature, message))
+}
+
+pub fn encode_message(message: &MessageEnvelope) -> Result<Vec<u8>> {
+    postcard::to_allocvec(message).map_err(|_| Error::InvalidMessageFormat)
+}
+
+pub fn decode_message(bytes: &[u8]) -> Result<MessageEnvelope> {
+    postcard::from_bytes(bytes).map_err(|_| Error::InvalidMessageFormat)
 }

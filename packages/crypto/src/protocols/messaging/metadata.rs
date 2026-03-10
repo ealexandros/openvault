@@ -33,7 +33,7 @@ pub struct MessageHeader {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct EncryptedMessage {
+pub struct MessageEnvelope {
     pub header: MessageHeader,
     pub ciphertext: Vec<u8>,
 }

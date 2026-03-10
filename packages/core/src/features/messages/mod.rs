@@ -5,10 +5,12 @@ mod crypto;
 mod error;
 mod events;
 mod models;
+mod patch;
 
 pub use codec::{MESSAGES_WIRE_VERSION, MessagesCodec};
-pub use crypto::{MessageEnvelope, open_message, seal_message};
+pub use crypto::{open_message, seal_message};
 pub use error::{MessagesError, Result};
 pub use events::{MessagesChange, MessagesDelta, MessagesSnapshot};
-pub use models::{MessageContact, MessageContactPatch, MessageCredentials};
+pub use models::{MessageContact, MessageCredentials, MessageCredentialsView};
+pub use patch::MessageContactPatch;
 pub use store::MessagesStore;

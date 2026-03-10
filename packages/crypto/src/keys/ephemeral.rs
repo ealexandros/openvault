@@ -3,11 +3,15 @@ use serde::{Deserialize, Serialize};
 use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
-pub struct EphemeralPrivateKey([u8; 32]);
+// @todo-now remove clone partialeq and eq
+
+pub type EphemeralKeyType = [u8; 32];
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
-pub struct EphemeralPublicKey([u8; 32]);
+pub struct EphemeralPrivateKey(EphemeralKeyType);
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
+pub struct EphemeralPublicKey(EphemeralKeyType);
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct EphemeralKeyPair {
@@ -16,19 +20,19 @@ pub struct EphemeralKeyPair {
 }
 
 impl EphemeralPrivateKey {
-    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+    pub fn from_bytes(bytes: EphemeralKeyType) -> Self {
         Self(bytes)
     }
 
-    pub fn as_bytes(&self) -> &[u8; 32] {
+    pub fn as_bytes(&self) -> &EphemeralKeyType {
         &self.0
     }
 
-    pub fn to_bytes(&self) -> [u8; 32] {
+    pub fn to_bytes(&self) -> EphemeralKeyType {
         self.0
     }
 
-    pub fn shared_secret(&self, peer: &EphemeralPublicKey) -> [u8; 32] {
+    pub fn shared_secret(&self, peer: &EphemeralPublicKey) -> EphemeralKeyType {
         let secret = StaticSecret::from(self.0);
         let peer_public = X25519PublicKey::from(peer.0);
         let shared = secret.diffie_hellman(&peer_public);
@@ -37,15 +41,15 @@ impl EphemeralPrivateKey {
 }
 
 impl EphemeralPublicKey {
-    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+    pub fn from_bytes(bytes: EphemeralKeyType) -> Self {
         Self(bytes)
     }
 
-    pub fn as_bytes(&self) -> &[u8; 32] {
+    pub fn as_bytes(&self) -> &EphemeralKeyType {
         &self.0
     }
 
-    pub fn to_bytes(&self) -> [u8; 32] {
+    pub fn to_bytes(&self) -> EphemeralKeyType {
         self.0
     }
 }

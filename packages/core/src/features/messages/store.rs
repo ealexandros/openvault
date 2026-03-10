@@ -9,12 +9,13 @@ use openvault_crypto::keys::{
 };
 use validator::Validate;
 
+use crate::features::messages::MessageContactPatch;
 use crate::features::shared::DEFAULT_SNAPSHOT_THRESHOLD;
 
-use super::crypto::{MessageEnvelope, open_message, seal_message};
+use super::crypto::{open_message, seal_message};
 use super::error::{MessagesError, Result};
 use super::events::{MessagesChange, MessagesDelta, MessagesSnapshot};
-use super::models::{MessageContact, MessageContactPatch, MessageCredentials};
+use super::models::{MessageContact, MessageCredentials, MessageCredentialsView};
 
 #[derive(Clone, Debug, Default)]
 pub struct MessagesStore {
@@ -42,13 +43,11 @@ impl MessagesStore {
         }
         store.clear_deltas();
 
-        // @todo-now validate if credentials are set if not no users must be present
-
         Ok(store)
     }
 
-    pub fn credentials(&self) -> Option<&MessageCredentials> {
-        self.credentials.as_ref()
+    pub fn get_credentials(&self) -> Option<MessageCredentialsView> {
+        self.credentials.as_ref().map(|c| c.to_view())
     }
 
     pub fn find_contact(&self, id: &Uuid) -> Option<MessageContact> {
@@ -64,10 +63,10 @@ impl MessagesStore {
     pub fn create_credentials(
         &mut self,
         name: String,
-        expiration_at: Option<DateTime<Utc>>,
+        expires_at: Option<DateTime<Utc>>,
     ) -> Result<MessageCredentials> {
-        let credentials = Self::build_credentials(name, expiration_at)?;
-        self.set_credentials(credentials.clone())?;
+        let credentials = Self::build_credentials(name, expires_at)?;
+        self.commit_delta(&MessagesDelta::CredentialsSet(credentials.clone()))?;
         Ok(credentials)
     }
 
@@ -77,38 +76,30 @@ impl MessagesStore {
             .as_ref()
             .ok_or(MessagesError::CredentialsNotSet)?;
 
-        let renewed = Self::build_credentials(current.name.clone(), current.expiration_at)?;
-        self.set_credentials(renewed.clone())?;
+        let renewed = Self::build_credentials(current.name.clone(), current.expires_at)?;
+        self.commit_delta(&MessagesDelta::CredentialsSet(renewed.clone()))?;
 
         Ok(renewed)
     }
 
-    pub fn set_credentials(&mut self, credentials: MessageCredentials) -> Result {
-        self.commit_delta(&MessagesDelta::CredentialsSet(credentials))
-    }
-
-    pub fn clear_credentials(&mut self) -> Result {
+    pub fn reset_credentials(&mut self) -> Result {
         self.commit_delta(&MessagesDelta::CredentialsCleared)
     }
 
     pub fn add_contact(
         &mut self,
         name: String,
-        signing_public_key: SigningPublicKey,
-        ephemeral_public_key: EphemeralPublicKey,
+        signing_pub_key: SigningPublicKey,
+        ephemeral_pub_key: EphemeralPublicKey,
         secure: bool,
-        expiration_at: Option<DateTime<Utc>>,
+        expires_at: Option<DateTime<Utc>>,
     ) -> Result<Uuid> {
-        let contact = MessageContact {
-            id: Uuid::new_v4(),
-            name,
-            expiration_at,
-            secure,
-            signing_key: signing_public_key,
-            ephemeral_key: ephemeral_public_key,
-        };
+        let contact =
+            MessageContact::new(name, signing_pub_key, ephemeral_pub_key, secure, expires_at);
+
         let id = contact.id;
         self.commit_delta(&MessagesDelta::ContactAdded(contact))?;
+
         Ok(id)
     }
 
@@ -120,38 +111,34 @@ impl MessagesStore {
         self.commit_delta(&MessagesDelta::ContactDeleted(id))
     }
 
-    pub fn encrypt_for_contact(&self, id: Uuid, message: &[u8]) -> Result<MessageEnvelope> {
+    pub fn encrypt_for_contact(&self, id: Uuid, payload: &[u8]) -> Result<Vec<u8>> {
         let credentials = self.ensure_credentials()?;
         let contact = self
             .contacts
             .get(&id)
             .ok_or_else(|| MessagesError::NotFound(id.to_string()))?;
 
-        seal_message(message, credentials, &contact.ephemeral_key)
+        seal_message(payload, credentials, &contact.ephemeral_pub_key)
     }
 
-    pub fn decrypt_from_contact(&self, id: Uuid, envelope: &MessageEnvelope) -> Result<Vec<u8>> {
+    pub fn decrypt_from_contact(&self, id: Uuid, payload: &[u8]) -> Result<Vec<u8>> {
         let credentials = self.ensure_credentials()?;
         let contact = self
             .contacts
             .get(&id)
             .ok_or_else(|| MessagesError::NotFound(id.to_string()))?;
 
-        open_message(envelope, credentials, &contact.signing_key)
+        open_message(payload, credentials, &contact.signing_pub_key)
     }
 
-    pub fn encrypt_for_contact_name(&self, name: &str, message: &[u8]) -> Result<MessageEnvelope> {
+    pub fn encrypt_for_contact_name(&self, name: &str, payload: &[u8]) -> Result<Vec<u8>> {
         let contact = self.contact_by_name(name)?;
-        self.encrypt_for_contact(contact.id, message)
+        self.encrypt_for_contact(contact.id, payload)
     }
 
-    pub fn decrypt_from_contact_name(
-        &self,
-        name: &str,
-        envelope: &MessageEnvelope,
-    ) -> Result<Vec<u8>> {
+    pub fn decrypt_from_contact_name(&self, name: &str, payload: &[u8]) -> Result<Vec<u8>> {
         let contact = self.contact_by_name(name)?;
-        self.decrypt_from_contact(contact.id, envelope)
+        self.decrypt_from_contact(contact.id, payload)
     }
 
     pub fn snapshot(&self) -> MessagesSnapshot {
@@ -189,14 +176,11 @@ impl MessagesStore {
 
     fn build_credentials(
         name: String,
-        expiration_at: Option<DateTime<Utc>>,
+        expires_at: Option<DateTime<Utc>>,
     ) -> Result<MessageCredentials> {
-        let credentials = MessageCredentials {
-            name,
-            signing_keys: SigningKeyPair::generate(),
-            ephemeral_keys: EphemeralKeyPair::generate(),
-            expiration_at,
-        };
+        let signing_keys = SigningKeyPair::generate();
+        let ephemeral_keys = EphemeralKeyPair::generate();
+        let credentials = MessageCredentials::new(name, signing_keys, ephemeral_keys, expires_at);
 
         credentials.validate()?;
 
@@ -254,21 +238,17 @@ impl MessagesStore {
         if let Some(name) = patch.name {
             contact.name = name;
         }
-
-        if let Some(expiration_at) = patch.expiration_at {
-            contact.expiration_at = expiration_at;
+        if let Some(expires_at) = patch.expires_at {
+            contact.expires_at = expires_at;
         }
-
         if let Some(secure) = patch.secure {
             contact.secure = secure;
         }
-
-        if let Some(signing_public_key) = patch.signing_key {
-            contact.signing_key = signing_public_key;
+        if let Some(signing_public_key) = patch.signing_pub_key {
+            contact.signing_pub_key = signing_public_key;
         }
-
-        if let Some(ephemeral_public_key) = patch.ephemeral_key {
-            contact.ephemeral_key = ephemeral_public_key;
+        if let Some(ephemeral_public_key) = patch.ephemeral_pub_key {
+            contact.ephemeral_pub_key = ephemeral_public_key;
         }
 
         contact.validate()?;

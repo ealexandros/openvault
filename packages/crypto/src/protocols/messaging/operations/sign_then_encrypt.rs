@@ -3,18 +3,18 @@ use crate::hash::{Hasher, Sha256Hasher};
 use crate::keys::ephemeral::{EphemeralKeyPair, EphemeralPublicKey};
 use crate::keys::signing::SigningKeyPair;
 use crate::protocols::messaging::kdf::derive_encryption_key;
-use crate::protocols::messaging::mapper::encode_payload;
+use crate::protocols::messaging::mapper::{encode_message, encode_payload};
 use crate::protocols::messaging::metadata::{
-    ENVELOPE_VERSION, EncryptedMessage, MessageConfig, MessageHeader,
+    ENVELOPE_VERSION, MessageConfig, MessageEnvelope, MessageHeader,
 };
 
 pub fn sign_then_encrypt(
-    message: &[u8],
+    payload: &[u8],
     sender_signing: &SigningKeyPair,
     recipient_pub: &EphemeralPublicKey,
-) -> Result<EncryptedMessage> {
+) -> Result<Vec<u8>> {
     sign_then_encrypt_with(
-        message,
+        payload,
         sender_signing,
         recipient_pub,
         &MessageConfig::default(),
@@ -22,17 +22,17 @@ pub fn sign_then_encrypt(
 }
 
 pub fn sign_then_encrypt_with(
-    message: &[u8],
+    payload: &[u8],
     sender_signing: &SigningKeyPair,
     recipient_pub: &EphemeralPublicKey,
     config: &MessageConfig,
-) -> Result<EncryptedMessage> {
-    let message_hash = Sha256Hasher::hash(message);
+) -> Result<Vec<u8>> {
+    let payload_hash = Sha256Hasher::hash(payload);
 
     let singer = config.signature.resolve();
-    let signature = singer.sign(sender_signing.private.as_bytes(), &message_hash);
+    let signature = singer.sign(sender_signing.private.as_bytes(), &payload_hash);
 
-    let payload = encode_payload(&signature, message)?;
+    let payload = encode_payload(&signature, payload)?;
     let compressor = config.compression.resolve();
     let compressed = compressor.compress(&payload)?;
 
@@ -54,5 +54,7 @@ pub fn sign_then_encrypt_with(
     let cipher = config.encryption.resolve();
     let ciphertext = cipher.encrypt_prefixed_nonce(&key, &compressed, &aad)?;
 
-    Ok(EncryptedMessage { header, ciphertext })
+    let message_envelope = MessageEnvelope { header, ciphertext };
+
+    encode_message(&message_envelope)
 }

@@ -51,8 +51,8 @@ impl Vault {
 
     fn commit_checkpoint(&mut self) -> Result {
         let checkpoint_features = vec![
-            FilesystemRepository::create_checkpoint(&mut self.filesystem)?,
-            MessagesRepository::create_checkpoint(&mut self.messages)?,
+            FilesystemRepository::create_checkpoint(&self.filesystem)?,
+            MessagesRepository::create_checkpoint(&self.messages)?,
         ];
 
         let mut checkpoint = Checkpoint::new(checkpoint_features);

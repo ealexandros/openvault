@@ -5,7 +5,8 @@ use uuid::Uuid;
 use zeroize::Zeroize;
 
 use super::error::MessagesError;
-use super::models::{MessageContact, MessageContactPatch, MessageCredentials};
+use super::models::{MessageContact, MessageCredentials};
+use super::patch::MessageContactPatch;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct MessagesSnapshot {
@@ -68,10 +69,10 @@ impl Zeroize for MessagesDelta {
                 if let Some(name) = &mut patch.name {
                     name.zeroize();
                 }
-                if let Some(signing_public_key) = &mut patch.signing_key {
+                if let Some(signing_public_key) = &mut patch.signing_pub_key {
                     signing_public_key.zeroize();
                 }
-                if let Some(ephemeral_public_key) = &mut patch.ephemeral_key {
+                if let Some(ephemeral_public_key) = &mut patch.ephemeral_pub_key {
                     ephemeral_public_key.zeroize();
                 }
             }

@@ -13,6 +13,7 @@ openvault-crypto = { path = "packages/crypto" }
 openvault-sdk = { path = "packages/sdk" }
 byteorder = { version = "1.5.0" }
 chrono = { version = "0.4.43", features = ["serde"] }
+postcard = { version = "1.1.3", features = ["use-std"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149" }
 strum = "0.27.2"

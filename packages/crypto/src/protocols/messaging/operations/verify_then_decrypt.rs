@@ -3,14 +3,16 @@ use crate::hash::{Hasher, Sha256Hasher};
 use crate::keys::ephemeral::{EphemeralPrivateKey, EphemeralPublicKey};
 use crate::keys::signing::SigningPublicKey;
 use crate::protocols::messaging::kdf::derive_encryption_key;
-use crate::protocols::messaging::mapper::decode_payload;
-use crate::protocols::messaging::metadata::{EncryptedMessage, HashAlgorithm, KdfAlgorithm};
+use crate::protocols::messaging::mapper::{decode_message, decode_payload};
+use crate::protocols::messaging::metadata::{HashAlgorithm, KdfAlgorithm};
 
 pub fn verify_then_decrypt(
-    envelope: &EncryptedMessage,
+    ciphertext: &[u8],
     recipient_private: &EphemeralPrivateKey,
     sender_public: &SigningPublicKey,
 ) -> Result<Vec<u8>> {
+    let envelope = decode_message(ciphertext)?;
+
     envelope.header.ensure_supported()?;
 
     if envelope.header.hash != HashAlgorithm::Sha256 {
