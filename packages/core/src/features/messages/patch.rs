@@ -12,3 +12,12 @@ pub struct MessageContactPatch {
     pub secure: Option<bool>,
     pub expires_at: Option<Option<DateTime<Utc>>>,
 }
+
+impl MessageContactPatch {
+    pub fn rename(name: impl Into<String>) -> Self {
+        Self {
+            name: Some(name.into()),
+            ..Default::default()
+        }
+    }
+}

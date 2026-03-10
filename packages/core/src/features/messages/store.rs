@@ -4,9 +4,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use zeroize::Zeroize;
 
-use openvault_crypto::keys::{
-    EphemeralKeyPair, EphemeralPublicKey, SigningKeyPair, SigningPublicKey,
-};
+use openvault_crypto::keys::{EphemeralKeyPair, SigningKeyPair};
 use validator::Validate;
 
 use crate::features::messages::MessageContactPatch;
@@ -23,8 +21,6 @@ pub struct MessagesStore {
     credentials: Option<MessageCredentials>,
     deltas: Vec<MessagesDelta>,
 }
-
-// @todo-now don't return the private keys..
 
 impl MessagesStore {
     pub fn new() -> Self {
@@ -86,24 +82,15 @@ impl MessagesStore {
         self.commit_delta(&MessagesDelta::CredentialsCleared)
     }
 
-    pub fn add_contact(
-        &mut self,
-        name: String,
-        signing_pub_key: SigningPublicKey,
-        ephemeral_pub_key: EphemeralPublicKey,
-        secure: bool,
-        expires_at: Option<DateTime<Utc>>,
-    ) -> Result<Uuid> {
-        let contact =
-            MessageContact::new(name, signing_pub_key, ephemeral_pub_key, secure, expires_at);
-
+    pub fn add_contact(&mut self, contact: MessageContact) -> Result<Uuid> {
         let id = contact.id;
         self.commit_delta(&MessagesDelta::ContactAdded(contact))?;
 
         Ok(id)
     }
 
-    pub fn update_contact(&mut self, id: Uuid, patch: MessageContactPatch) -> Result {
+    pub fn rename_contact(&mut self, id: Uuid, new_name: String) -> Result {
+        let patch = MessageContactPatch::rename(new_name);
         self.commit_delta(&MessagesDelta::ContactUpdated { id, patch })
     }
 

@@ -2,10 +2,9 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use openvault_core::features::messages::{
-    MessageContact, MessageContactPatch, MessageCredentials, MessageCredentialsView, MessagesStore,
+    MessageContact, MessageCredentials, MessageCredentialsView, MessagesStore,
 };
 use openvault_core::vault::runtime::VaultSession;
-use openvault_crypto::keys::{EphemeralPublicKey, SigningPublicKey};
 
 use crate::errors::{Error, Result};
 
@@ -42,25 +41,16 @@ impl<'a> MessagesService<'a> {
         self.store.reset_credentials().map_err(Error::from)
     }
 
-    pub fn add_contact(
-        &mut self,
-        name: String,
-        signing_pub_key: SigningPublicKey,
-        ephemeral_pub_key: EphemeralPublicKey,
-        secure: bool,
-        expires_at: Option<DateTime<Utc>>,
-    ) -> Result<Uuid> {
-        self.store
-            .add_contact(name, signing_pub_key, ephemeral_pub_key, secure, expires_at)
-            .map_err(Error::from)
-    }
-
-    pub fn update_contact(&mut self, id: Uuid, patch: MessageContactPatch) -> Result {
-        self.store.update_contact(id, patch).map_err(Error::from)
-    }
-
     pub fn list_contacts(&self) -> Vec<MessageContact> {
         self.store.list_contacts()
+    }
+
+    pub fn add_contact(&mut self, contact: MessageContact) -> Result<Uuid> {
+        self.store.add_contact(contact).map_err(Error::from)
+    }
+
+    pub fn rename_contact(&mut self, id: Uuid, new_name: String) -> Result {
+        self.store.rename_contact(id, new_name).map_err(Error::from)
     }
 
     pub fn remove_contact(&mut self, id: Uuid) -> Result {
