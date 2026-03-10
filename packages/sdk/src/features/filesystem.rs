@@ -5,7 +5,6 @@ use uuid::Uuid;
 use openvault_core::features::filesystem::{FileMetadata, FilesystemStore, FolderMetadata};
 use openvault_core::internal::scanner::{ScannedFolder, scan_directory};
 use openvault_core::operations::blob;
-use openvault_core::repositories::{FeatureRepository, FilesystemRepository};
 use openvault_core::vault::runtime::VaultSession;
 
 use crate::errors::{Error, Result};
@@ -132,11 +131,6 @@ impl<'a> FilesystemService<'a> {
 
     pub fn folder_total_size_bytes(&self, folder_id: &Uuid) -> u64 {
         self.store.folder_total_size_bytes(folder_id)
-    }
-
-    pub fn reload(&mut self) -> Result<&FilesystemStore> {
-        *self.store = FilesystemRepository::load(self.session)?;
-        Ok(self.store)
     }
 
     fn get_file(&self, id: &Uuid) -> Result<&FileMetadata> {

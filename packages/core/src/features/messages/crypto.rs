@@ -1,37 +1,30 @@
-use serde::{Deserialize, Serialize};
+use openvault_crypto::keys::{EphemeralPublicKey, SigningPublicKey};
+use openvault_crypto::protocols::messaging::{
+    EncryptedMessage, sign_then_encrypt, verify_then_decrypt,
+};
 
-use super::error::{MessagesError, Result};
-use super::models::{MessageCredentials, PrivateKey};
+use super::error::Result;
+use super::models::MessageCredentials;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub struct MessageEnvelope {
-    pub ciphertext: Vec<u8>,
-}
-
-impl MessageEnvelope {
-    pub fn new(ciphertext: Vec<u8>) -> Result<Self> {
-        if ciphertext.is_empty() {
-            return Err(MessagesError::InvalidInput(
-                "Ciphertext must not be empty".to_string(),
-            ));
-        }
-
-        Ok(Self { ciphertext })
-    }
-}
+pub type MessageEnvelope = EncryptedMessage;
 
 pub fn seal_message(
-    _plaintext: &[u8],
-    _sender: &MessageCredentials,
-    _recipient_public_key: &[u8],
+    plaintext: &[u8],
+    sender: &MessageCredentials,
+    recipient_public_key: &EphemeralPublicKey,
 ) -> Result<MessageEnvelope> {
-    Err(MessagesError::CryptoUnavailable)
+    sign_then_encrypt(plaintext, &sender.signing_keys, recipient_public_key).map_err(From::from)
 }
 
 pub fn open_message(
-    _envelope: &MessageEnvelope,
-    _recipient_private_key: &PrivateKey,
-    _sender_public_key: &[u8],
+    envelope: &MessageEnvelope,
+    recipient: &MessageCredentials,
+    sender_public_key: &SigningPublicKey,
 ) -> Result<Vec<u8>> {
-    Err(MessagesError::CryptoUnavailable)
+    verify_then_decrypt(
+        envelope,
+        &recipient.ephemeral_keys.private,
+        sender_public_key,
+    )
+    .map_err(From::from)
 }

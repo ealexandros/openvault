@@ -3,6 +3,9 @@ use uuid::Uuid;
 
 #[derive(Debug, Error)]
 pub enum MessagesError {
+    #[error(transparent)]
+    Validation(#[from] validator::ValidationErrors),
+
     #[error("Serialization error: {0}")]
     SerializationError(String),
 
@@ -27,8 +30,11 @@ pub enum MessagesError {
     #[error("Invalid snapshot")]
     InvalidSnapshot,
 
-    #[error("Message cryptography not available")]
-    CryptoUnavailable,
+    #[error(transparent)]
+    Crypto(#[from] openvault_crypto::errors::Error),
+
+    #[error("Credentials have not been set")]
+    CredentialsNotSet,
 }
 
 pub type Result<T = ()> = std::result::Result<T, MessagesError>;

@@ -1,14 +1,15 @@
 use argon2::password_hash::rand_core::OsRng;
+use serde::{Deserialize, Serialize};
 use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-#[derive(Clone, Zeroize, ZeroizeOnDrop)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct EphemeralPrivateKey([u8; 32]);
 
-#[derive(Clone, Zeroize, ZeroizeOnDrop)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct EphemeralPublicKey([u8; 32]);
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct EphemeralKeyPair {
     pub public: EphemeralPublicKey,
     pub private: EphemeralPrivateKey,

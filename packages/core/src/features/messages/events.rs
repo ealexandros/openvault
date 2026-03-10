@@ -28,7 +28,10 @@ impl MessagesSnapshot {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MessagesDelta {
     ContactAdded(MessageContact),
-    ContactUpdated { id: Uuid, patch: MessageContactPatch },
+    ContactUpdated {
+        id: Uuid,
+        patch: MessageContactPatch,
+    },
     ContactDeleted(Uuid),
     CredentialsSet(MessageCredentials),
     CredentialsCleared,
@@ -65,8 +68,11 @@ impl Zeroize for MessagesDelta {
                 if let Some(name) = &mut patch.name {
                     name.zeroize();
                 }
-                if let Some(public_key) = &mut patch.public_key {
-                    public_key.zeroize();
+                if let Some(signing_public_key) = &mut patch.signing_key {
+                    signing_public_key.zeroize();
+                }
+                if let Some(ephemeral_public_key) = &mut patch.ephemeral_key {
+                    ephemeral_public_key.zeroize();
                 }
             }
             MessagesDelta::CredentialsSet(credentials) => credentials.zeroize(),
