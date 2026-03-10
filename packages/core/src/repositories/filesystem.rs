@@ -92,9 +92,7 @@ impl FeatureRepository for FilesystemRepository {
     }
 
     fn rewrite_blob_refs(store: &mut Self::Store, remap: &HashMap<BlobRef, BlobRef>) -> Result {
-        let mut snapshot = store.snapshot();
-
-        for file in snapshot.files.values_mut() {
+        for file in store.files.values_mut() {
             file.blob = remap
                 .get(&file.blob)
                 .cloned()
