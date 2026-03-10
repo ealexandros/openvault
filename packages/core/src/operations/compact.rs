@@ -20,6 +20,8 @@ use crate::vault::versions::shared::replay::ReplayState;
 
 const COMPACT_TEMP_SUFFIX: &str = ".compact-tmp";
 
+// @todo-soon clean this up
+
 type RemapFn = Box<dyn FnOnce(&HashMap<BlobRef, BlobRef>) -> Result<CheckpointFeature>>;
 
 pub struct CompactionBundle {
@@ -27,8 +29,6 @@ pub struct CompactionBundle {
     pub blob_refs: Vec<BlobRef>,
     remap_fn: RemapFn,
 }
-
-// @todo-now fix compaction
 
 pub fn compact_vault(session: &mut VaultSession) -> Result {
     let replay = replay_since_checkpoint(session)?;
@@ -51,7 +51,7 @@ pub fn compact_vault(session: &mut VaultSession) -> Result {
         .create_new(true)
         .open(&temp_path)?;
 
-    let _cleanup = TempFileGuard(temp_path.clone());
+    let _ = TempFileGuard(temp_path.clone());
 
     let remap = session.with_format_context(|source_file, context| {
         rewrite_vault(format, source_file, &mut temp_file, context, &blob_refs)

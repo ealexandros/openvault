@@ -10,8 +10,8 @@ use crate::errors::Result;
 use crate::features::filesystem::FilesystemService;
 use crate::features::messages::MessagesService;
 
-// @todo-now fix the OCP problem on commit, commit_checkpoint, compact
-// @todo-now return the checkpoint from the compact
+// @todo-soon fix the OCP problem on commit, commit_checkpoint, compact
+// @todo-soon return the checkpoint from the compact
 
 #[derive(Zeroize)]
 pub struct Vault {
