@@ -2,11 +2,13 @@ use argon2::password_hash::rand_core::OsRng;
 use ed25519_dalek::{SigningKey, VerifyingKey};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-#[derive(Clone, Zeroize, ZeroizeOnDrop)]
-pub struct SigningPrivateKey([u8; 32]);
+pub type SignatureKeyType = [u8; 32];
 
 #[derive(Clone, Zeroize, ZeroizeOnDrop)]
-pub struct SigningPublicKey([u8; 32]);
+pub struct SigningPrivateKey(SignatureKeyType);
+
+#[derive(Clone, Zeroize, ZeroizeOnDrop)]
+pub struct SigningPublicKey(SignatureKeyType);
 
 #[derive(Clone)]
 pub struct SigningKeyPair {
@@ -15,21 +17,21 @@ pub struct SigningKeyPair {
 }
 
 impl SigningPrivateKey {
-    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+    pub fn from_bytes(bytes: SignatureKeyType) -> Self {
         Self(bytes)
     }
 
-    pub fn as_bytes(&self) -> &[u8; 32] {
+    pub fn as_bytes(&self) -> &SignatureKeyType {
         &self.0
     }
 }
 
 impl SigningPublicKey {
-    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+    pub fn from_bytes(bytes: SignatureKeyType) -> Self {
         Self(bytes)
     }
 
-    pub fn as_bytes(&self) -> &[u8; 32] {
+    pub fn as_bytes(&self) -> &SignatureKeyType {
         &self.0
     }
 }

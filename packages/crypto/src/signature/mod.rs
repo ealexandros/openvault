@@ -1,10 +1,12 @@
 pub mod ed25519;
+pub mod factory;
 
 pub use ed25519::Ed25519Signer;
+pub use factory::{SignatureAlgorithm, SignerRef};
 
-use crate::keys::{SigningPrivateKey, SigningPublicKey};
+use crate::keys::signing::SignatureKeyType;
 
 pub trait Signer {
-    fn sign(private: &SigningPrivateKey, message: &[u8]) -> Vec<u8>;
-    fn verify(public: &SigningPublicKey, message: &[u8], signature: &[u8]) -> bool;
+    fn sign(&self, private: &SignatureKeyType, message: &[u8]) -> Vec<u8>;
+    fn verify(&self, public: &SignatureKeyType, message: &[u8], signature: &[u8]) -> bool;
 }

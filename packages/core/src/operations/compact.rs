@@ -28,6 +28,8 @@ pub struct CompactionBundle {
     remap_fn: RemapFn,
 }
 
+// @todo-now fix compaction
+
 pub fn compact_vault(session: &mut VaultSession) -> Result {
     let replay = replay_since_checkpoint(session)?;
     let feature_types = collect_present_features(&replay);
