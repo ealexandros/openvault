@@ -26,6 +26,16 @@ pub fn run() {
             crate::commands::filesystem::rename_item,
             crate::commands::filesystem::export_file,
             crate::commands::filesystem::export_folder,
+            crate::commands::messages::get_message_credentials,
+            crate::commands::messages::create_message_credentials,
+            crate::commands::messages::renew_message_credentials,
+            crate::commands::messages::reset_message_credentials,
+            crate::commands::messages::list_contacts,
+            crate::commands::messages::add_contact,
+            crate::commands::messages::rename_contact,
+            crate::commands::messages::remove_contact,
+            crate::commands::messages::encrypt_message,
+            crate::commands::messages::decrypt_message,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

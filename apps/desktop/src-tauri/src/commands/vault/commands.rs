@@ -1,11 +1,12 @@
-use crate::commands::contracts::{CreateVaultParams, OpenVaultParams};
-use crate::errors::{Error, Result};
-use crate::internal::format::string_from_bytes;
-use crate::state::TauriState;
 use openvault_sdk::{CompressionAlgorithm, CreateConfig, EncryptionAlgorithm};
 use std::path::PathBuf;
 use std::str::FromStr;
 use zeroize::Zeroize;
+
+use super::contracts::{CreateVaultParams, OpenVaultParams};
+use crate::errors::{Error, Result};
+use crate::internal::format::string_from_bytes;
+use crate::state::TauriState;
 
 #[tauri::command]
 pub async fn create_vault(state: TauriState<'_>, params: CreateVaultParams) -> Result {

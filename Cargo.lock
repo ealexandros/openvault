@@ -2605,6 +2605,7 @@ dependencies = [
 name = "openvault"
 version = "1.0.0"
 dependencies = [
+ "chrono",
  "openvault-sdk",
  "serde",
  "serde_json",

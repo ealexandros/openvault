@@ -20,6 +20,9 @@ pub enum Error {
 
     #[error("Invalid compression algorithm: {0}")]
     InvalidCompression(String),
+
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
 }
 
 impl Serialize for Error {

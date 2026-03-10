@@ -1,4 +1,4 @@
-use crate::commands::contracts::{
+use super::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
     ExportFileParams, ExportFolderParams, FileItem, FolderItem, ItemType, PathIsFileParams,
     ReadFileParams, RenameItemParams, SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
