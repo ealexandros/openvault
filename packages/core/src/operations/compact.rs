@@ -20,10 +20,12 @@ use crate::vault::versions::shared::replay::ReplayState;
 
 const COMPACT_TEMP_SUFFIX: &str = ".compact-tmp";
 
+type RemapFn = Box<dyn FnOnce(&HashMap<BlobRef, BlobRef>) -> Result<CheckpointFeature>>;
+
 pub struct CompactionBundle {
     pub feature_type: FeatureType,
     pub blob_refs: Vec<BlobRef>,
-    remap_fn: Box<dyn FnOnce(&HashMap<BlobRef, BlobRef>) -> Result<CheckpointFeature>>,
+    remap_fn: RemapFn,
 }
 
 pub fn compact_vault(session: &mut VaultSession) -> Result {

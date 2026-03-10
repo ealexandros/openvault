@@ -20,7 +20,7 @@ pub fn seal_frame(
     let key = domain.derive_key(context.keyring)?;
 
     let envelope = Envelope::new(context.compressor, context.cipher);
-    let ciphertext = envelope.seal_bytes(data, &key, &nonce, &aad)?;
+    let ciphertext = envelope.seal_bytes(data, key.as_bytes(), &nonce, &aad)?;
 
     write_frame(rw, &nonce, &ciphertext)?;
 
@@ -41,5 +41,5 @@ pub fn open_frame(
 
     let envelope = Envelope::new(context.compressor, context.cipher);
 
-    envelope.open_bytes(&ciphertext, &key, &frame.nonce, &aad)
+    envelope.open_bytes(&ciphertext, key.as_bytes(), &frame.nonce, &aad)
 }
