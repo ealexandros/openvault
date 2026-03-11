@@ -10,7 +10,7 @@ pub fn verify_then_decrypt(
     ciphertext: &[u8],
     recipient_private: &EphemeralPrivateKey,
     sender_public: &SigningPublicKey,
-) -> Result<Vec<u8>> {
+) -> Result<String> {
     let envelope = decode_message(ciphertext)?;
 
     envelope.header.ensure_supported()?;
@@ -46,5 +46,5 @@ pub fn verify_then_decrypt(
         return Err(Error::SignatureVerificationFailed);
     }
 
-    Ok(message)
+    String::from_utf8(message).map_err(|_| Error::InvalidMessageFormat)
 }

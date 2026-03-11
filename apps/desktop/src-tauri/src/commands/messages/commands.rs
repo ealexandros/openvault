@@ -148,11 +148,11 @@ pub async fn remove_contact(state: TauriState<'_>, params: RemoveContactParams) 
 pub async fn encrypt_message(
     state: TauriState<'_>,
     params: EncryptMessageParams,
-) -> Result<Vec<u8>> {
+) -> Result<String> {
     vault_messages!(state, messages, vault);
 
     let id = parse_uuid(&params.id)?;
-    let encrypted = messages.encrypt_for_contact(id, &params.payload)?;
+    let encrypted = messages.encrypt_for_contact(id, params.payload.as_bytes())?;
 
     Ok(encrypted)
 }
@@ -161,11 +161,11 @@ pub async fn encrypt_message(
 pub async fn decrypt_message(
     state: TauriState<'_>,
     params: DecryptMessageParams,
-) -> Result<Vec<u8>> {
+) -> Result<String> {
     vault_messages!(state, messages, vault);
 
     let id = parse_uuid(&params.id)?;
-    let decrypted = messages.decrypt_from_contact(id, &params.payload)?;
+    let decrypted = messages.decrypt_from_contact(id, params.payload.as_bytes())?;
 
     Ok(decrypted)
 }

@@ -32,14 +32,14 @@ pub struct RemoveContactParams {
 #[serde(rename_all = "camelCase")]
 pub struct EncryptMessageParams {
     pub id: String,
-    pub payload: Vec<u8>,
+    pub payload: String,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DecryptMessageParams {
     pub id: String,
-    pub payload: Vec<u8>,
+    pub payload: String,
 }
 
 #[derive(Serialize)]

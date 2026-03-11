@@ -12,7 +12,7 @@ pub fn sign_then_encrypt(
     payload: &[u8],
     sender_signing: &SigningKeyPair,
     recipient_pub: &EphemeralPublicKey,
-) -> Result<Vec<u8>> {
+) -> Result<String> {
     sign_then_encrypt_with(
         payload,
         sender_signing,
@@ -26,7 +26,7 @@ pub fn sign_then_encrypt_with(
     sender_signing: &SigningKeyPair,
     recipient_pub: &EphemeralPublicKey,
     config: &MessageConfig,
-) -> Result<Vec<u8>> {
+) -> Result<String> {
     let payload_hash = Sha256Hasher::hash(payload);
 
     let singer = config.signature.resolve();

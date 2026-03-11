@@ -98,7 +98,7 @@ impl MessagesStore {
         self.commit_delta(&MessagesDelta::ContactDeleted(id))
     }
 
-    pub fn encrypt_for_contact(&self, id: Uuid, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn encrypt_for_contact(&self, id: Uuid, payload: &[u8]) -> Result<String> {
         let credentials = self.ensure_credentials()?;
         let contact = self
             .contacts
@@ -108,7 +108,7 @@ impl MessagesStore {
         seal_message(payload, credentials, &contact.ephemeral_pub_key)
     }
 
-    pub fn decrypt_from_contact(&self, id: Uuid, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn decrypt_from_contact(&self, id: Uuid, payload: &[u8]) -> Result<String> {
         let credentials = self.ensure_credentials()?;
         let contact = self
             .contacts
@@ -118,12 +118,12 @@ impl MessagesStore {
         open_message(payload, credentials, &contact.signing_pub_key)
     }
 
-    pub fn encrypt_for_contact_name(&self, name: &str, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn encrypt_for_contact_name(&self, name: &str, payload: &[u8]) -> Result<String> {
         let contact = self.contact_by_name(name)?;
         self.encrypt_for_contact(contact.id, payload)
     }
 
-    pub fn decrypt_from_contact_name(&self, name: &str, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn decrypt_from_contact_name(&self, name: &str, payload: &[u8]) -> Result<String> {
         let contact = self.contact_by_name(name)?;
         self.decrypt_from_contact(contact.id, payload)
     }

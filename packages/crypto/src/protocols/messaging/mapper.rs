@@ -41,16 +41,15 @@ pub fn decode_payload(payload: &[u8]) -> Result<(Vec<u8>, Vec<u8>)> {
     Ok((signature, message))
 }
 
-pub fn encode_message(message: &MessageEnvelope) -> Result<Vec<u8>> {
+pub fn encode_message(message: &MessageEnvelope) -> Result<String> {
     let bytes = postcard::to_allocvec(message).map_err(|_| Error::InvalidMessageFormat)?;
-    let encoded = general_purpose::STANDARD.encode(bytes);
-    Ok(encoded.as_bytes().to_vec())
+    Ok(general_purpose::STANDARD.encode(bytes))
 }
 
 pub fn decode_message(bytes: &[u8]) -> Result<MessageEnvelope> {
-    let encoded = general_purpose::STANDARD
+    let decoded = general_purpose::STANDARD
         .decode(bytes)
         .map_err(|_| Error::DecodeBase64)?;
 
-    postcard::from_bytes(encoded.as_slice()).map_err(|_| Error::InvalidMessageFormat)
+    postcard::from_bytes(&decoded).map_err(|_| Error::InvalidMessageFormat)
 }

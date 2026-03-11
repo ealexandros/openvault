@@ -63,25 +63,25 @@ impl<'a> MessagesService<'a> {
             .ok_or_else(|| Error::ItemNotFound(id.to_string()))
     }
 
-    pub fn encrypt_for_contact(&self, id: Uuid, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn encrypt_for_contact(&self, id: Uuid, payload: &[u8]) -> Result<String> {
         self.store
             .encrypt_for_contact(id, payload)
             .map_err(Error::from)
     }
 
-    pub fn encrypt_for_contact_name(&self, name: &str, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn encrypt_for_contact_name(&self, name: &str, payload: &[u8]) -> Result<String> {
         self.store
             .encrypt_for_contact_name(name, payload)
             .map_err(Error::from)
     }
 
-    pub fn decrypt_from_contact(&self, id: Uuid, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn decrypt_from_contact(&self, id: Uuid, payload: &[u8]) -> Result<String> {
         self.store
             .decrypt_from_contact(id, payload)
             .map_err(Error::from)
     }
 
-    pub fn decrypt_from_contact_name(&self, name: &str, payload: &[u8]) -> Result<Vec<u8>> {
+    pub fn decrypt_from_contact_name(&self, name: &str, payload: &[u8]) -> Result<String> {
         self.store
             .decrypt_from_contact_name(name, payload)
             .map_err(Error::from)
