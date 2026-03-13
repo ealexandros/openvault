@@ -1,5 +1,6 @@
 import { logger } from "@/libraries/logger";
 import { ItemType, type BrowseResult } from "@/types/filesystem";
+import { type MessageContact, type MessageCredentials } from "@/types/messages";
 import { invoke } from "@tauri-apps/api/core";
 
 export type Result<T> = { success: true; data: T } | { success: false; error: unknown };
@@ -83,5 +84,49 @@ export const tauriApi = {
 
   exportFolder: (params: { id: string; destinationPath: string }) => {
     return safeInvokeTauri<void>("export_folder", { params });
+  },
+
+  getMessageCredentials: () => {
+    return safeInvokeTauri<MessageCredentials | null>("get_message_credentials", {});
+  },
+
+  createMessageCredentials: (params: { name: string; expiresAt?: string }) => {
+    return safeInvokeTauri<void>("create_message_credentials", { params });
+  },
+
+  renewMessageCredentials: () => {
+    return safeInvokeTauri<void>("renew_message_credentials", {});
+  },
+
+  resetMessageCredentials: () => {
+    return safeInvokeTauri<void>("reset_message_credentials", {});
+  },
+
+  listContacts: () => {
+    return safeInvokeTauri<MessageContact[]>("list_contacts", {});
+  },
+
+  addContact: (params: {
+    name: string;
+    signingPubKey: number[];
+    ephemeralPubKey: number[];
+  }) => {
+    return safeInvokeTauri<string>("add_contact", { params });
+  },
+
+  renameContact: (params: { id: string; newName: string }) => {
+    return safeInvokeTauri<void>("rename_contact", { params });
+  },
+
+  removeContact: (params: { id: string }) => {
+    return safeInvokeTauri<void>("remove_contact", { params });
+  },
+
+  encryptMessage: (params: { id: string; payload: string }) => {
+    return safeInvokeTauri<string>("encrypt_message", { params });
+  },
+
+  decryptMessage: (params: { id: string; payload: string }) => {
+    return safeInvokeTauri<string>("decrypt_message", { params });
   },
 };

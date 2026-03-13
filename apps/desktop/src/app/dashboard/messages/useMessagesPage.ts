@@ -1,7 +1,8 @@
 "use client";
 
-import { useVault } from "@/context/VaultContext";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { tauriApi } from "@/libraries/tauri-api";
+import { type MessageContact } from "@/types/messages";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export type MessageAlgorithm = "rsa-4096" | "x25519-aes-gcm" | "xchacha20-poly1305";
@@ -21,272 +22,277 @@ export type MessageUserProfile = {
   isExpired: boolean;
 };
 
-type ImportUserPayload = Partial<
-  Pick<
-    MessageUserProfile,
-    "displayName" | "email" | "publicKey" | "status" | "trusted" | "expiresAt"
-  >
->;
-
-const KEY_SIZE_BYTES = 512;
-
-const ALGORITHM_OPTIONS: { value: MessageAlgorithm; label: string }[] = [
-  { value: "xchacha20-poly1305", label: "XChaCha20-Poly1305" },
-];
-
-const MOCK_USERS: MessageUserProfile[] = [
-  {
-    id: "user-1",
-    displayName: "Maya Chen",
-    email: "maya.chen@openvault.app",
-    publicKey: "cHVibGljX2tleV9tYXlhX2NoZW5fMDE1ZV9hNGZiX2IxMGE5YjFhNjJjM2I3ZDQ5YzAy",
-    status: "online",
-    trusted: true,
-    importedAt: "2024-03-01T10:00:00Z",
-    expiresAt: "2026-12-31T23:59:59Z",
-    isExpired: false,
-  },
-  {
-    id: "user-2",
-    displayName: "Liam Carter",
-    email: "liam.carter@openvault.app",
-    publicKey: "cHVibGljX2tleV9saWFtX2NhcnRlcl8wN2FlX2UyNGQ4NmQxYTZjN2JiYjVlMTkxNmQ5",
-    status: "offline",
-    trusted: true,
-    importedAt: "2024-02-15T14:30:00Z",
-    expiresAt: "2025-01-01T00:00:00Z",
-    isExpired: true,
-  },
-  {
-    id: "user-3",
-    displayName: "Sofia Rivera",
-    email: "sofia.rivera@openvault.app",
-    publicKey: "cHVibGljX2tleV9zb2ZpYV9yaXZlcmFfMGMxYV9hZDE4N2Y2YjVhYjQ4Y2I1MjQxMjAw",
-    status: "offline",
-    trusted: false,
-    importedAt: "2024-03-05T09:15:00Z",
-    expiresAt: "2027-06-30T12:00:00Z",
-    isExpired: false,
-  },
-];
-
-const bytesToBase64 = (bytes: Uint8Array) => {
-  let binary = "";
-  const chunkSize = 0x8000;
-
-  for (let index = 0; index < bytes.length; index += chunkSize) {
-    const chunk = bytes.subarray(index, index + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-
-  return btoa(binary);
+type MessageUserProfileImport = {
+  name?: string;
+  signingPubKey?: number[];
+  ephemeralPubKey?: number[];
+  expiresAt?: string | null;
 };
 
-const encodeTextToBase64 = (value: string) => {
-  const bytes = new TextEncoder().encode(value);
-  return bytesToBase64(bytes);
-};
-
-const decodeBase64ToText = (base64: string) => {
-  const binary = atob(base64);
-  const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-
-  return new TextDecoder().decode(bytes);
-};
-
-const randomBytes = (size: number) => {
-  const bytes = new Uint8Array(size);
-  crypto.getRandomValues(bytes);
-
-  return bytes;
-};
+const ALGORITHM_OPTIONS = [{ value: "xchacha20-poly1305", label: "XChaCha20-Poly1305" }];
 
 const downloadJson = (filename: string, payload: unknown) => {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
+  const blob = new Blob([JSON.stringify(payload, null)], {
+    type: "application/json",
+  });
 
-  anchor.href = objectUrl;
-  anchor.download = filename;
-  anchor.click();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
 
-  URL.revokeObjectURL(objectUrl);
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
 };
 
 export const useMessagesPage = () => {
-  const { vaultName } = useVault();
-
   const [algorithm, setAlgorithm] = useState<MessageAlgorithm>("xchacha20-poly1305");
   const [mode, setMode] = useState<MessageMode>("encrypt");
   const [messageInput, setMessageInput] = useState("");
   const [messageOutput, setMessageOutput] = useState("");
   const [transformError, setTransformError] = useState<string | null>(null);
-
-  const currentUserName = useMemo(() => vaultName ?? "Current User", [vaultName]);
-
+  const [isLoading, setIsLoading] = useState(true);
   const [isSetup, setIsSetup] = useState(false);
-  const [displayName, setDisplayName] = useState("");
-  const [keyRotationMonths, setKeyRotationMonths] = useState(12);
+  const [credentials, setCredentials] = useState<{
+    name: string;
+    signingPubKey: number[];
+    ephemeralPubKey: number[];
+    expiresAt: string | null;
+  } | null>(null);
 
-  const [publicKey, setPublicKey] = useState("");
-  const [privateKey, setPrivateKey] = useState("");
-  const [keyExpiresAt, setKeyExpiresAt] = useState<string>("");
-  const [isGeneratingKeys, setIsGeneratingKeys] = useState(true);
-
-  const [users, setUsers] = useState<MessageUserProfile[]>(MOCK_USERS);
-  const [selectedUserId, setSelectedUserId] = useState<string>(MOCK_USERS[0]?.id ?? "");
+  const [users, setUsers] = useState<MessageContact[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
 
-  const generateKeyPair = useCallback(() => {
-    setIsGeneratingKeys(true);
+  async function refreshContacts() {
+    const result = await tauriApi.listContacts();
+    if (result.success) setUsers(result.data);
+  }
 
-    const generatedPublicKey = bytesToBase64(randomBytes(KEY_SIZE_BYTES));
-    const generatedPrivateKey = bytesToBase64(randomBytes(KEY_SIZE_BYTES));
-    const expirationDate = new Date();
-    expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+  async function checkSetup() {
+    setIsLoading(true);
 
-    setPublicKey(generatedPublicKey);
-    setPrivateKey(generatedPrivateKey);
-    setKeyExpiresAt(expirationDate.toISOString());
-    setIsGeneratingKeys(false);
-  }, []);
+    const result = await tauriApi.getMessageCredentials();
+
+    if (result.success && result.data) {
+      setCredentials(result.data);
+      setIsSetup(true);
+      await refreshContacts();
+    } else {
+      setIsSetup(false);
+    }
+
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    generateKeyPair();
-  }, [generateKeyPair]);
+    void checkSetup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const transformMessage = useCallback(() => {
-    if (messageInput.trim().length === 0) {
+  async function transformMessage() {
+    if (!messageInput.trim()) {
       setMessageOutput("");
       setTransformError(null);
       return;
     }
 
-    try {
-      const result =
-        mode === "encrypt"
-          ? encodeTextToBase64(messageInput)
-          : decodeBase64ToText(messageInput.trim());
-      setMessageOutput(result);
-      setTransformError(null);
-    } catch {
-      setMessageOutput("");
-      setTransformError("Input is not valid Base64.");
+    if (!selectedUserId) {
+      setTransformError("Please select a user first.");
+      return;
     }
-  }, [messageInput, mode]);
 
-  const clearMessageFields = useCallback(() => {
+    if (mode === "encrypt") {
+      const result = await tauriApi.encryptMessage({
+        id: selectedUserId,
+        payload: messageInput,
+      });
+
+      if (!result.success) {
+        setTransformError("Encryption failed.");
+        return;
+      }
+
+      setMessageOutput(result.data.toString());
+      setTransformError(null);
+      return;
+    }
+
+    const payload = messageInput.trim();
+    const result = await tauriApi.decryptMessage({ id: selectedUserId, payload });
+
+    if (!result.success) {
+      setTransformError("Decryption failed. Invalid payload or wrong key.");
+      return;
+    }
+
+    setMessageOutput(result.data);
+    setTransformError(null);
+  }
+
+  function clearMessageFields() {
     setMessageInput("");
     setMessageOutput("");
     setTransformError(null);
-  }, []);
+  }
 
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return users;
-    }
+  function swapMessageFields() {
+    setMessageInput(messageOutput);
+    setMessageOutput(messageInput);
+    setTransformError(null);
+  }
 
-    const query = searchQuery.toLowerCase();
+  const filteredUsers = searchQuery.trim()
+    ? users.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : users;
 
-    return users.filter(user => {
-      if (user.displayName.toLowerCase().includes(query)) return true;
-      return user.email.toLowerCase().includes(query);
-    });
-  }, [searchQuery, users]);
+  const selectedUser = users.find(u => u.id === selectedUserId) ?? null;
 
-  const selectedUser = useMemo(
-    () => users.find(user => user.id === selectedUserId) ?? null,
-    [selectedUserId, users],
-  );
-
-  const importUserProfile = useCallback(async (file: File) => {
+  async function importUserProfile(file: File) {
     setImportError(null);
 
+    const text = await file.text();
+
+    let parsed: MessageUserProfileImport | null = null;
+
     try {
-      const raw = await file.text();
-      const parsed = JSON.parse(raw) as ImportUserPayload;
-
-      const displayName = parsed.displayName?.trim();
-      const email = parsed.email?.trim();
-      const importedPublicKey = parsed.publicKey?.trim();
-
-      if (
-        displayName == null ||
-        displayName.length === 0 ||
-        email == null ||
-        email.length === 0 ||
-        importedPublicKey == null ||
-        importedPublicKey.length === 0
-      ) {
-        throw new Error("Missing required fields");
-      }
-
-      const importedUser: MessageUserProfile = {
-        id: `user-${Date.now()}`,
-        displayName,
-        email,
-        publicKey: importedPublicKey,
-        status: parsed.status === "online" ? "online" : "offline",
-        trusted: parsed.trusted ?? false,
-        importedAt: new Date().toISOString(),
-        expiresAt: parsed.expiresAt ?? new Date(Date.now() + 31536000000).toISOString(),
-        isExpired:
-          parsed.expiresAt != null && parsed.expiresAt !== ""
-            ? new Date(parsed.expiresAt) < new Date()
-            : false,
-      };
-
-      setUsers(previousUsers => [importedUser, ...previousUsers]);
-      setSelectedUserId(importedUser.id);
+      parsed = JSON.parse(text) as MessageUserProfileImport;
     } catch {
-      setImportError(
-        "Unable to import profile. Expected a JSON file with displayName, email and publicKey.",
-      );
-    }
-  }, []);
-
-  const exportSelectedUserProfile = useCallback(() => {
-    if (selectedUser == null) {
+      setImportError("Invalid JSON format.");
       return;
     }
 
-    const filename = `${selectedUser.displayName.toLowerCase().replace(/\s+/g, "-")}-profile.json`;
+    const name = parsed.name?.trim();
+    const signingPubKey = parsed.signingPubKey;
+    const ephemeralPubKey = parsed.ephemeralPubKey;
 
-    downloadJson(filename, {
-      ...selectedUser,
-      exportedAt: new Date().toISOString(),
-      algorithm,
+    if (name == null || signingPubKey == null || ephemeralPubKey == null) {
+      setImportError("Profile missing required fields.");
+      return;
+    }
+
+    const result = await tauriApi.addContact({
+      name,
+      signingPubKey,
+      ephemeralPubKey,
     });
 
-    toast.success(`Profile for ${selectedUser.displayName} exported successfully`);
-  }, [algorithm, selectedUser]);
+    if (!result.success) {
+      setImportError("Failed to add contact.");
+      return;
+    }
 
-  const exportCurrentUserProfile = useCallback(() => {
-    const filename = `${currentUserName.toLowerCase().replace(/\s+/g, "-")}-profile.json`;
+    await refreshContacts();
+    setSelectedUserId(result.data);
+
+    toast.success(`Contact ${name} imported successfully`);
+  }
+
+  function exportSelectedUserProfile() {
+    if (!selectedUser) return;
+
+    const filename = selectedUser.name.toLowerCase().replace(/\s+/g, "-") + "-profile.ovp";
 
     downloadJson(filename, {
-      displayName: currentUserName,
-      keySizeBytes: KEY_SIZE_BYTES,
-      publicKey,
-      privateKey,
-      algorithm,
-      exportedAt: new Date().toISOString(),
-      expiresAt: keyExpiresAt,
+      name: selectedUser.name,
+      signingPubKey: selectedUser.signingPubKey,
+      ephemeralPubKey: selectedUser.ephemeralPubKey,
+      expiresAt: selectedUser.expiresAt,
     });
 
-    toast.success("Your profile has been exported successfully");
-  }, [algorithm, currentUserName, keyExpiresAt, privateKey, publicKey]);
+    toast.success(`Profile for ${selectedUser.name} exported`);
+  }
 
-  const completeOnboarding = useCallback(
-    ({ name, rotationMonths }: { name: string; rotationMonths: number }) => {
-      setDisplayName(name);
-      setKeyRotationMonths(rotationMonths);
-      setIsSetup(true);
-      toast.success("Profile setup complete!");
-    },
-    [],
-  );
+  function exportCurrentUserProfile() {
+    if (!credentials) return;
+
+    const filename = credentials.name.toLowerCase().replace(/\s+/g, "-") + "-profile.ovp";
+
+    downloadJson(filename, {
+      name: credentials.name,
+      signingPubKey: credentials.signingPubKey,
+      ephemeralPubKey: credentials.ephemeralPubKey,
+      expiresAt: credentials.expiresAt,
+    });
+
+    toast.success("Your profile exported");
+  }
+
+  async function completeOnboarding({
+    name,
+    rotationMonths,
+  }: {
+    name: string;
+    rotationMonths: number;
+  }) {
+    const expiresAt = new Date();
+    expiresAt.setMonth(expiresAt.getMonth() + rotationMonths);
+
+    const result = await tauriApi.createMessageCredentials({
+      name,
+      expiresAt: expiresAt.toISOString(),
+    });
+
+    if (!result.success) {
+      toast.error("Failed to create profile");
+      return;
+    }
+
+    await checkSetup();
+    toast.success("Profile setup complete");
+  }
+
+  async function renameContact(id: string, newName: string) {
+    const result = await tauriApi.renameContact({ id, newName });
+
+    if (!result.success) {
+      toast.error("Failed to rename contact");
+      return;
+    }
+
+    await refreshContacts();
+    toast.success("Contact renamed");
+  }
+
+  async function removeContact(id: string) {
+    const result = await tauriApi.removeContact({ id });
+
+    if (!result.success) {
+      toast.error("Failed to remove contact");
+      return;
+    }
+
+    if (selectedUserId === id) setSelectedUserId("");
+
+    await refreshContacts();
+    toast.success("Contact removed");
+  }
+
+  async function renewCredentials() {
+    const result = await tauriApi.renewMessageCredentials();
+
+    if (!result.success) {
+      toast.error("Failed to renew credentials");
+      return;
+    }
+
+    await checkSetup();
+    toast.success("Credentials renewed");
+  }
+
+  async function resetCredentials() {
+    const result = await tauriApi.resetMessageCredentials();
+
+    if (!result.success) {
+      toast.error("Failed to reset credentials");
+      return;
+    }
+
+    await checkSetup();
+    toast.success("Credentials reset");
+  }
 
   return {
     algorithm,
@@ -294,33 +300,32 @@ export const useMessagesPage = () => {
     messageInput,
     messageOutput,
     transformError,
-    publicKey,
-    privateKey,
-    keyExpiresAt,
-    isGeneratingKeys,
+    isLoading,
     isSetup,
-    displayName,
-    keyRotationMonths,
+    credentials,
     users,
     selectedUser,
     filteredUsers,
     selectedUserId,
     searchQuery,
     importError,
-    currentUserName,
-    keySizeBytes: KEY_SIZE_BYTES,
     algorithmOptions: ALGORITHM_OPTIONS,
     setAlgorithm,
     setMode,
     setMessageInput,
+    setMessageOutput,
     setSelectedUserId,
     setSearchQuery,
-    generateKeyPair,
     transformMessage,
     clearMessageFields,
+    swapMessageFields,
     importUserProfile,
     exportSelectedUserProfile,
     exportCurrentUserProfile,
     completeOnboarding,
+    renameContact,
+    removeContact,
+    renewCredentials,
+    resetCredentials,
   };
 };

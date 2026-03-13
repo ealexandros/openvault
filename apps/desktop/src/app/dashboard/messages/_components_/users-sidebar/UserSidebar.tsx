@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/shadcn/input";
 import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
 import { AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
-import { MessageUserProfile } from "../../useMessagesPage";
+import { type MessageContact } from "@/types/messages";
 import { SelectedUserDetails } from "./SelectedUserDetails";
 import { UserList } from "./UserList";
 import { UserListEmpty } from "./UserListEmpty";
@@ -13,16 +13,27 @@ import { UserSidebarHeader } from "./UserSidebarHeader";
 
 type UserSidebarProps = {
   searchQuery: string;
-  filteredUsers: MessageUserProfile[];
+  filteredUsers: MessageContact[];
   selectedUserId: string;
-  selectedUser: MessageUserProfile | null;
+  selectedUser: MessageContact | null;
   importError: string | null;
-  keyExpiresAt: string;
+  isLoading: boolean;
   openImportPicker: () => void;
   setSearchQuery: (query: string) => void;
   setSelectedUserId: (id: string) => void;
   exportSelectedUserProfile: () => void;
   exportCurrentUserProfile: () => void;
+  renameContact: (id: string, newName: string) => Promise<void>;
+  removeContact: (id: string) => Promise<void>;
+  renewCredentials: () => Promise<void>;
+  resetCredentials: () => Promise<void>;
+  updateProfile: (data: { name: string; rotationMonths: number }) => Promise<void>;
+  credentials: {
+    name: string;
+    signingPubKey: number[];
+    ephemeralPubKey: number[];
+    expiresAt: string | null;
+  } | null;
 };
 
 export const UserSidebar = ({
@@ -31,15 +42,26 @@ export const UserSidebar = ({
   selectedUserId,
   selectedUser,
   importError,
-  keyExpiresAt,
+  isLoading,
   openImportPicker,
   setSearchQuery,
   setSelectedUserId,
   exportSelectedUserProfile,
   exportCurrentUserProfile,
+  renameContact,
+  removeContact,
+  renewCredentials,
+  resetCredentials,
+  updateProfile,
+  credentials,
 }: UserSidebarProps) => (
   <aside className="flex h-full w-full flex-col overflow-hidden bg-background">
-    <UserSidebarHeader keyExpiresAt={keyExpiresAt} />
+    <UserSidebarHeader
+      credentials={credentials}
+      onRenew={renewCredentials}
+      onReset={resetCredentials}
+      onUpdate={updateProfile}
+    />
 
     <UserSidebarActions
       openImportPicker={openImportPicker}
@@ -56,7 +78,7 @@ export const UserSidebar = ({
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by name or email..."
+            placeholder="Search by name..."
             className="h-9 rounded-lg pl-9 text-xs"
           />
         </div>
@@ -69,9 +91,12 @@ export const UserSidebar = ({
               users={filteredUsers}
               selectedUserId={selectedUserId}
               setSelectedUserId={setSelectedUserId}
+              isLoading={isLoading}
+              onRename={renameContact}
+              onDelete={removeContact}
             />
           </AnimatePresence>
-          {filteredUsers.length === 0 && <UserListEmpty />}
+          {!isLoading && filteredUsers.length === 0 && <UserListEmpty />}
         </div>
       </ScrollArea>
     </div>

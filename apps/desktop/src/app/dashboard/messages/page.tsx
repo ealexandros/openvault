@@ -40,10 +40,10 @@ const MessagesPage = () => {
     selectedUserId,
     searchQuery,
     importError,
-    keyExpiresAt,
     algorithmOptions,
+    isLoading,
     isSetup,
-    currentUserName,
+    credentials,
     setAlgorithm,
     setMode,
     setMessageInput,
@@ -55,6 +55,11 @@ const MessagesPage = () => {
     exportSelectedUserProfile,
     exportCurrentUserProfile,
     completeOnboarding,
+    renameContact,
+    removeContact,
+    renewCredentials,
+    resetCredentials,
+    swapMessageFields,
   } = useMessagesPage();
 
   const transformMessageRef = useRef(transformMessage);
@@ -68,7 +73,7 @@ const MessagesPage = () => {
       // eslint-disable-next-line react-hooks/refs
       typedDebounce(() => {
         const fn = transformMessageRef.current;
-        fn();
+        void fn();
       }, 450),
     [],
   );
@@ -78,7 +83,7 @@ const MessagesPage = () => {
       // eslint-disable-next-line react-hooks/refs
       typedDebounce(() => {
         const fn = transformMessageRef.current;
-        fn();
+        void fn();
       }, 450),
     [],
   );
@@ -116,7 +121,7 @@ const MessagesPage = () => {
 
   const handlePrimaryAction = () => {
     if (mode === "encrypt") {
-      transformMessage();
+      void transformMessage();
       return;
     }
 
@@ -142,7 +147,7 @@ const MessagesPage = () => {
             exit={{ opacity: 0 }}
             className="h-full w-full">
             <MessageOnboarding
-              currentUserName={currentUserName}
+              currentUserName={credentials?.name ?? ""}
               onComplete={completeOnboarding}
               openImportPicker={openImportPicker}
             />
@@ -167,6 +172,7 @@ const MessagesPage = () => {
                     messageOutput={messageOutput}
                     transformError={transformError}
                     clearMessageFields={clearMessageFields}
+                    swapMessageFields={swapMessageFields}
                     handlePrimaryAction={handlePrimaryAction}
                     selectedUser={selectedUser}
                   />
@@ -182,12 +188,18 @@ const MessagesPage = () => {
                   selectedUserId={selectedUserId}
                   selectedUser={selectedUser}
                   importError={importError}
-                  keyExpiresAt={keyExpiresAt}
+                  isLoading={isLoading}
                   openImportPicker={openImportPicker}
                   setSearchQuery={setSearchQuery}
                   setSelectedUserId={setSelectedUserId}
                   exportSelectedUserProfile={exportSelectedUserProfile}
                   exportCurrentUserProfile={exportCurrentUserProfile}
+                  renameContact={renameContact}
+                  removeContact={removeContact}
+                  renewCredentials={renewCredentials}
+                  resetCredentials={resetCredentials}
+                  updateProfile={completeOnboarding}
+                  credentials={credentials}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>

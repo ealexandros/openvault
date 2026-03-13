@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/shadcn/button";
 import { motion } from "framer-motion";
 import { Download, UserPlus } from "lucide-react";
-import { MessageUserProfile } from "../../useMessagesPage";
+import { type MessageContact } from "@/types/messages";
 
 type UserSidebarActionsProps = {
   openImportPicker: () => void;
   exportSelectedUserProfile: () => void;
   exportCurrentUserProfile: () => void;
-  selectedUser: MessageUserProfile | null;
+  selectedUser: MessageContact | null;
   importError: string | null;
 };
 

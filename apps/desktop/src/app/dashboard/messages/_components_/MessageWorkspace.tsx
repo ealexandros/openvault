@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/shadcn/tooltip";
+import { type MessageContact } from "@/types/messages";
 import { cn } from "@/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -31,7 +32,7 @@ import {
   Unlock,
 } from "lucide-react";
 import { useState } from "react";
-import { MessageAlgorithm, MessageMode, MessageUserProfile } from "../useMessagesPage";
+import { MessageAlgorithm, MessageMode } from "../useMessagesPage";
 
 type MessageWorkspaceProps = {
   algorithm: MessageAlgorithm;
@@ -44,8 +45,9 @@ type MessageWorkspaceProps = {
   messageOutput: string;
   transformError: string | null;
   clearMessageFields: () => void;
+  swapMessageFields: () => void;
   handlePrimaryAction: () => void;
-  selectedUser: MessageUserProfile | null;
+  selectedUser: MessageContact | null;
 };
 
 export const MessageWorkspace = ({
@@ -59,6 +61,7 @@ export const MessageWorkspace = ({
   messageOutput,
   transformError,
   clearMessageFields,
+  swapMessageFields,
   handlePrimaryAction,
   selectedUser,
 }: MessageWorkspaceProps) => {
@@ -73,7 +76,7 @@ export const MessageWorkspace = ({
 
   const toggleMode = () => {
     setMode(mode === "encrypt" ? "decrypt" : "encrypt");
-    clearMessageFields();
+    swapMessageFields();
   };
 
   return (
@@ -131,10 +134,10 @@ export const MessageWorkspace = ({
               {selectedUser ? (
                 <>
                   <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-xs font-bold text-primary">
-                    {selectedUser.displayName.charAt(0)}
+                    {selectedUser.name.charAt(0)}
                   </div>
-                  <span className="text-sm font-medium">{selectedUser.displayName}</span>
-                  {selectedUser.trusted && !selectedUser.isExpired && (
+                  <span className="text-sm font-medium">{selectedUser.name}</span>
+                  {selectedUser.secure && (
                     <ShieldCheck className="ml-auto h-4 w-4 text-primary" />
                   )}
                 </>
@@ -181,11 +184,14 @@ export const MessageWorkspace = ({
           <div className="group relative flex-1">
             <Textarea
               placeholder={
-                mode === "encrypt"
+                !selectedUser 
+                ? "Select a recipient first..." 
+                : mode === "encrypt"
                   ? "Type your sensitive message here..."
                   : "Paste the base64 encoded sequence..."
               }
-              className="h-full min-h-[300px] resize-none rounded-xl border-border/50 bg-muted/10 p-4 font-mono text-sm leading-relaxed transition-all focus:border-primary/30 focus-visible:ring-0 focus-visible:ring-offset-0"
+              disabled={!selectedUser}
+              className="h-full min-h-[300px] resize-none rounded-xl border-border/50 bg-muted/10 p-4 font-mono text-sm leading-relaxed transition-all focus:border-primary/30 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
               value={messageInput}
               onChange={e => setMessageInput(e.target.value)}
             />
@@ -198,7 +204,7 @@ export const MessageWorkspace = ({
             onClick={handlePrimaryAction}
             disabled={
               !messageInput ||
-              (mode === "encrypt" && (!selectedUser || selectedUser.isExpired))
+              (mode === "encrypt" && (!selectedUser || (selectedUser.expiresAt !== null && new Date(selectedUser.expiresAt) < new Date())))
             }
             variant="default"
             className="h-12 gap-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg hover:shadow-primary/20">
@@ -221,6 +227,11 @@ export const MessageWorkspace = ({
             <Label className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
               {mode === "encrypt" ? "Cryptographic Output" : "Revealed Message"}
             </Label>
+            {messageOutput && (
+              <Badge variant="outline" className="h-6 px-2 text-xs font-medium tracking-tight">
+                {messageOutput.length} chars
+              </Badge>
+            )}
           </div>
           <div className="group relative flex-1 overflow-hidden rounded-xl border border-border/50 bg-muted/5 p-1">
             <AnimatePresence mode="wait">
