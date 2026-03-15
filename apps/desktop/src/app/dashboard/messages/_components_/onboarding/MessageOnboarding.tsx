@@ -25,7 +25,7 @@ export function MessageOnboarding({ currentUserName, onComplete, openImportPicke
   const [displayName, setDisplayName] = useState(currentUserName);
   const [rotationMonths, setRotationMonths] = useState(12);
 
-  const step = STEPS[stepIndex];
+  const step = STEPS[stepIndex] ?? "identity";
 
   const next = () => {
     if (step === "ready") {

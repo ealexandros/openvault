@@ -29,7 +29,10 @@ type MessageUserProfileImport = {
   expiresAt?: string | null;
 };
 
-const ALGORITHM_OPTIONS = [{ value: "xchacha20-poly1305", label: "XChaCha20-Poly1305" }];
+const ALGORITHM_OPTIONS: {
+  value: MessageAlgorithm;
+  label: string;
+}[] = [{ value: "xchacha20-poly1305", label: "XChaCha20-Poly1305" }];
 
 const downloadJson = (filename: string, payload: unknown) => {
   const blob = new Blob([JSON.stringify(payload, null)], {
