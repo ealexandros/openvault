@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
+import { cn } from "@/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Textarea } from "./textarea";
-import { cn } from "@/utils/cn";
 
 const InputGroup = ({ className, ...props }: React.ComponentProps<"div">) => (
   <div
@@ -129,7 +129,7 @@ export {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupText,
   InputGroupInput,
+  InputGroupText,
   InputGroupTextarea,
 };

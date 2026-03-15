@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cn } from "@/utils/cn";
+import * as React from "react";
 
 export const Textarea = ({ className, ...props }: React.ComponentProps<"textarea">) => (
   <textarea

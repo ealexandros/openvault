@@ -1,12 +1,12 @@
 "use client";
 
+import { cn } from "@/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { Label } from "./label";
 import { Separator } from "./separator";
-import { cn } from "@/utils/cn";
 
-const FieldSet = ({ className, ...props }: React.ComponentProps<"fieldset">) => (
+const FieldSet = ({ className, ...props }: React.ComponentPropsWithoutRef<"fieldset">) => (
   <fieldset
     data-slot="field-set"
     className={cn(
@@ -21,7 +21,7 @@ const FieldLegend = ({
   className,
   variant = "legend",
   ...props
-}: React.ComponentProps<"legend"> & { variant?: "legend" | "label" }) => (
+}: React.ComponentPropsWithoutRef<"legend"> & { variant?: "legend" | "label" }) => (
   <legend
     data-slot="field-legend"
     data-variant={variant}
@@ -33,7 +33,7 @@ const FieldLegend = ({
   />
 );
 
-const FieldGroup = ({ className, ...props }: React.ComponentProps<"div">) => (
+const FieldGroup = ({ className, ...props }: React.ComponentPropsWithoutRef<"div">) => (
   <div
     data-slot="field-group"
     className={cn(
@@ -66,7 +66,7 @@ const Field = ({
   className,
   orientation = "vertical",
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) => (
+}: React.ComponentPropsWithoutRef<"div"> & VariantProps<typeof fieldVariants>) => (
   <div
     role="group"
     data-slot="field"
@@ -76,7 +76,7 @@ const Field = ({
   />
 );
 
-const FieldContent = ({ className, ...props }: React.ComponentProps<"div">) => (
+const FieldContent = ({ className, ...props }: React.ComponentPropsWithoutRef<"div">) => (
   <div
     data-slot="field-content"
     className={cn("group/field-content flex flex-1 flex-col gap-0.5 leading-snug", className)}
@@ -84,7 +84,7 @@ const FieldContent = ({ className, ...props }: React.ComponentProps<"div">) => (
   />
 );
 
-const FieldLabel = ({ className, ...props }: React.ComponentProps<typeof Label>) => (
+const FieldLabel = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof Label>) => (
   <Label
     data-slot="field-label"
     className={cn(
@@ -96,7 +96,7 @@ const FieldLabel = ({ className, ...props }: React.ComponentProps<typeof Label>)
   />
 );
 
-const FieldTitle = ({ className, ...props }: React.ComponentProps<"div">) => (
+const FieldTitle = ({ className, ...props }: React.ComponentPropsWithoutRef<"div">) => (
   <div
     data-slot="field-label"
     className={cn(
@@ -107,7 +107,7 @@ const FieldTitle = ({ className, ...props }: React.ComponentProps<"div">) => (
   />
 );
 
-const FieldDescription = ({ className, ...props }: React.ComponentProps<"p">) => (
+const FieldDescription = ({ className, ...props }: React.ComponentPropsWithoutRef<"p">) => (
   <p
     data-slot="field-description"
     className={cn(
@@ -124,7 +124,7 @@ const FieldSeparator = ({
   children,
   className,
   ...props
-}: React.ComponentProps<"div"> & {
+}: React.ComponentPropsWithoutRef<"div"> & {
   children?: React.ReactNode;
 }) => (
   <div
@@ -151,7 +151,7 @@ const FieldError = ({
   children,
   errors,
   ...props
-}: React.ComponentProps<"div"> & {
+}: React.ComponentPropsWithoutRef<"div"> & {
   errors?: Array<{ message?: string } | undefined>;
 }) => {
   const content = useMemo(() => {

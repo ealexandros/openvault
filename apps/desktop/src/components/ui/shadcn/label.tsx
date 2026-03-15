@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@/utils/cn";
 import { Label as LabelPrimitive } from "radix-ui";
 import * as React from "react";
-import { cn } from "@/utils/cn";
 
 const Label = ({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) => (
   <LabelPrimitive.Root
