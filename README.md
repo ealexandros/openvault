@@ -24,6 +24,8 @@
 
 <br />
 
+## 🛡️ What is OpenVault?
+
 OpenVault is a secure, open-source vault application focused on strong cryptography, performance, and simplicity. It combines Rust’s memory-safe backend with modern frontend technologies to deliver a fast, reliable, and cross-platform desktop experience.
 
 ## ✨ Features
@@ -41,7 +43,7 @@ All information stored in the vault is encrypted to ensure privacy and security.
 
 > **Note:** Features marked with ⚠️ are currently under development.
 
-## 👇 Requirements
+## ⚙️ Requirements
 
 Before getting started, make sure you have the following prerequisites installed on your system:
 
