@@ -107,7 +107,7 @@ Please see our [Contributing Guidelines](CONTRIBUTING.md) for detailed instructi
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-#### Branding
+### Branding
 
 The OpenVault logo and brand assets are not covered by the MIT License.
 

@@ -66,8 +66,8 @@ General guidelines:
 If formatting tools are configured, run:
 
 ```bash
-bun run lint:check
-bun run format:check
+$ bun run lint:check
+$ bun run format:check
 ```
 
 ---
