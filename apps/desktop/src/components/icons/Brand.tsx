@@ -71,3 +71,5 @@ export const Brand = ({
     )}
   </span>
 );
+
+export const BrandIcon = Brand;
