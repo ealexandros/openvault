@@ -50,9 +50,9 @@ Before getting started, make sure you have the following prerequisites installed
 
 ## 🚀 Installation
 
-#### Manual Build
+### Manual Build
 
-### 1. Clone the Repository
+#### 1. Clone the Repository
 
 ```bash
 $ git clone https://github.com/ealexandros/openvault.git
@@ -64,7 +64,7 @@ Navigate to the project directory:
 $ cd openvault
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
 The project uses Bun for package management:
 
@@ -72,7 +72,7 @@ The project uses Bun for package management:
 $ bun install
 ```
 
-### 3. Build & Run
+#### 3. Build & Run
 
 To run the development environment across all packages and the main desktop app:
 
