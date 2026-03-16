@@ -1,0 +1,1 @@
+export { OpenVaultLogo } from "./OpenVaultLogo";

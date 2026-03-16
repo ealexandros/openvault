@@ -1,6 +1,6 @@
+import { OpenVaultLogo } from "@/components/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { truncateLeft } from "@/utils/format";
-import { ShieldIcon } from "lucide-react";
 
 type UnlockedVaultHeaderProps = {
   path: string;
@@ -9,7 +9,7 @@ type UnlockedVaultHeaderProps = {
 export const UnlockedVaultHeader = ({ path }: UnlockedVaultHeaderProps) => (
   <div className="flex flex-col items-center space-y-12 text-center">
     <div>
-      <ShieldIcon className="size-12 text-primary" strokeWidth={2.5} />
+      <OpenVaultLogo logoClassName="size-18" hideName />
     </div>
 
     <div className="space-y-4">

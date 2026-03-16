@@ -1,4 +1,4 @@
-import { ShieldIcon } from "lucide-react";
+import { OpenVaultLogo } from "@/components/icons";
 
 type SidebarHeaderProps = {
   vaultName?: string;
@@ -6,10 +6,7 @@ type SidebarHeaderProps = {
 
 export const SidebarHeader = ({ vaultName }: SidebarHeaderProps) => (
   <header className="flex flex-col gap-8 py-5">
-    <h1 className="flex cursor-default items-center gap-2 text-2xl font-semibold tracking-tight">
-      <ShieldIcon className="size-8 text-primary" strokeWidth={2.5} />
-      <span className="mt-0.5">OpenVault</span>
-    </h1>
+    <OpenVaultLogo nameClassName="text-[22px]" />
 
     {vaultName != null && (
       <div className="relative flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
