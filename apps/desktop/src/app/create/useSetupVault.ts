@@ -2,20 +2,27 @@ import { getPasswordStrength } from "@/components/ui/password-strength";
 import { hrefs } from "@/config/hrefs";
 import { useVault } from "@/context/VaultContext";
 import { tauriApi } from "@/libraries/tauri-api";
+import { useForm } from "@tanstack/react-form";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import z from "zod";
-import { toFormikValidationSchema } from "zod-formik-adapter";
 
-const setupVaultSchema = z.object({
+const setupVaultFormSchema = z.object({
   path: z.string().min(1, "Please select a location"),
   name: z.string().min(1, "Vault name is required"),
   encryption: z.enum(["xchacha20"]).default("xchacha20"),
   compression: z.enum(["zstd"]).default("zstd"),
 });
-export type SetupVaultType = z.infer<typeof setupVaultSchema>;
+
+export type SetupVaultFormValues = z.infer<typeof setupVaultFormSchema>;
+
+const defaultFormValues: SetupVaultFormValues = {
+  path: "",
+  name: "",
+  encryption: "xchacha20",
+  compression: "zstd",
+};
 
 export const useSetupVault = () => {
   const { setIsUnlocked } = useVault();
@@ -36,15 +43,15 @@ export const useSetupVault = () => {
     }
   };
 
-  const formik = useFormik<SetupVaultType>({
-    initialValues: {
-      path: "",
-      name: "",
-      encryption: "xchacha20",
-      compression: "zstd",
+  const form = useForm({
+    defaultValues: defaultFormValues,
+    validators: {
+      onBlur: ({ value }) => {
+        const result = setupVaultFormSchema.safeParse(value);
+        return !result.success ? result.error.issues[0]?.message : undefined;
+      },
     },
-    validationSchema: toFormikValidationSchema(setupVaultSchema),
-    onSubmit: async values => {
+    onSubmit: async ({ value }) => {
       setPasswordError(null);
       const password = passwordRef.current?.value ?? "";
       const verifyPassword = verifyPasswordRef.current?.value ?? "";
@@ -64,11 +71,11 @@ export const useSetupVault = () => {
       const passwordBytes = encoder.encode(password);
 
       const result = await tauriApi.createVault({
-        path: values.path,
-        name: values.name,
+        path: value.path,
+        name: value.name,
         password: Array.from(passwordBytes),
-        encryption: values.encryption,
-        compression: values.compression,
+        encryption: value.encryption,
+        compression: value.compression,
       });
 
       passwordBytes.fill(0);
@@ -85,6 +92,12 @@ export const useSetupVault = () => {
     },
   });
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    void form.handleSubmit();
+  };
+
   const chooseFolder = async () => {
     const selected = await open({
       directory: true,
@@ -93,12 +106,12 @@ export const useSetupVault = () => {
     });
 
     if (selected != null && typeof selected === "string") {
-      await formik.setFieldValue("path", selected);
+      form.setFieldValue("path", selected);
     }
   };
 
   return {
-    formik,
+    form,
     isEncrypting,
     router,
     passwordRef,
@@ -106,6 +119,7 @@ export const useSetupVault = () => {
     passwordError,
     showPassword,
     passwordStrengthScore,
+    handleSubmit,
     toggleShowPassword,
     handlePasswordChange,
     setIsEncrypting,

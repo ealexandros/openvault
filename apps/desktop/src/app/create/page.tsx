@@ -9,20 +9,21 @@ import { EncryptionProgress } from "./_components_/EncryptionProgress";
 import { LocationSelector } from "./_components_/LocationSelector";
 import { PasswordSection } from "./_components_/PasswordSection";
 import { VaultNameInput } from "./_components_/VaultNameInput";
-import { useSetupVault } from "./useSetupVault";
+import { useSetupVault, type SetupVaultFormValues } from "./useSetupVault";
 
 import { Separator } from "@/components/ui/shadcn/separator";
 import Link from "next/link";
 
 const SetupVaultPage = () => {
   const {
-    formik,
+    form,
     isEncrypting,
     passwordRef,
     verifyPasswordRef,
     passwordError,
     showPassword,
     passwordStrengthScore,
+    handleSubmit,
     chooseFolder,
     setIsEncrypting,
     toggleShowPassword,
@@ -50,21 +51,32 @@ const SetupVaultPage = () => {
           </div>
         </header>
 
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
-          <LocationSelector
-            path={formik.values.path}
-            error={formik.errors.path}
-            touched={formik.touched.path}
-            chooseFolder={chooseFolder}
-          />
-          <VaultNameInput
-            value={formik.values.name}
-            error={formik.errors.name}
-            touched={formik.touched.name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <form.Field name="path">
+            {field => (
+              <LocationSelector
+                path={field.state.value}
+                error={(field.state.meta.errors as unknown as string[])[0]}
+                touched={Boolean(field.state.meta.isTouched)}
+                chooseFolder={chooseFolder}
+              />
+            )}
+          </form.Field>
+
+          <form.Field name="name">
+            {field => (
+              <VaultNameInput
+                value={field.state.value}
+                error={(field.state.meta.errors as unknown as string[])[0]}
+                touched={Boolean(field.state.meta.isTouched)}
+                onChange={e => field.handleChange((e.target as HTMLInputElement).value)}
+                onBlur={field.handleBlur}
+              />
+            )}
+          </form.Field>
+
           <Separator className="my-7" />
+
           <PasswordSection
             passwordRef={passwordRef}
             verifyPasswordRef={verifyPasswordRef}
@@ -74,21 +86,33 @@ const SetupVaultPage = () => {
             toggleShowPassword={toggleShowPassword}
             handlePasswordChange={handlePasswordChange}
           />
-          <AdvancedSettings
-            encryption={formik.values.encryption}
-            compression={formik.values.compression}
-            setFieldValue={formik.setFieldValue}
-          />
 
-          <Button
-            type="submit"
-            disabled={formik.isSubmitting}
-            className="relative h-14 w-full overflow-hidden bg-primary text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100">
-            <span className="relative flex items-center justify-center gap-2">
-              <ShieldCheckIcon className="size-4" />
-              Encrypt Vault
-            </span>
-          </Button>
+          <form.Subscribe
+            selector={state => [state.values.encryption, state.values.compression]}>
+            {([encryption, compression]) => (
+              <AdvancedSettings
+                encryption={encryption as string}
+                compression={compression as string}
+                setFieldValue={(name, value) =>
+                  form.setFieldValue(name as keyof SetupVaultFormValues, value)
+                }
+              />
+            )}
+          </form.Subscribe>
+
+          <form.Subscribe selector={state => [state.canSubmit, state.isSubmitting]}>
+            {([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                disabled={canSubmit === false || isSubmitting === true}
+                className="relative h-14 w-full overflow-hidden bg-primary text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-30 disabled:hover:scale-100">
+                <span className="relative flex items-center justify-center gap-2">
+                  <ShieldCheckIcon className="size-4" />
+                  Encrypt Vault
+                </span>
+              </Button>
+            )}
+          </form.Subscribe>
         </form>
 
         <div className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-4">
