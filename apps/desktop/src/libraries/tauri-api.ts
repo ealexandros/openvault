@@ -14,7 +14,7 @@ export const safeInvokeTauri = async <T>(
     const data = await invoke<T>(command, args);
     return { success: true, data };
   } catch (error) {
-    logger.error(errorMessage ?? `Failed to execute ${command}`, error);
+    logger.warn(errorMessage ?? `Failed to execute ${command}`, error);
     return { success: false, error };
   }
 };
