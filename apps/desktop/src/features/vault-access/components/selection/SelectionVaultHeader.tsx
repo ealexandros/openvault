@@ -1,4 +1,4 @@
-import { OpenVaultLogo } from "@/components/icons";
+import { Brand } from "@/components/icons";
 import { Button } from "@/components/ui/shadcn/button";
 import { hrefs } from "@/config/hrefs";
 import { PlusIcon } from "lucide-react";
@@ -8,7 +8,7 @@ export const SelectionVaultHeader = () => (
   <div className="flex flex-col gap-8">
     <div className="flex items-center justify-between">
       <div className="space-y-4">
-        <OpenVaultLogo />
+        <Brand />
         <p className="text-base text-muted-foreground/60">
           Secure your data with geometric precision.
         </p>

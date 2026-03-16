@@ -1,6 +1,6 @@
 import { cn } from "@/utils/cn";
 
-type OpenVaultLogoProps = {
+type BrandProps = {
   logoSize?: number;
   logoClassName?: string;
   nameClassName?: string;
@@ -9,14 +9,14 @@ type OpenVaultLogoProps = {
   hideName?: boolean;
 };
 
-export const OpenVaultLogo = ({
+export const Brand = ({
   logoSize,
   nameClassName,
   logoClassName,
   wrapperClassName,
   hideLogo = false,
   hideName = false,
-}: OpenVaultLogoProps) => (
+}: BrandProps) => (
   <span className={cn("flex items-center space-x-1", wrapperClassName)}>
     {!hideLogo && (
       <svg

@@ -1,1 +1,1 @@
-export { OpenVaultLogo } from "./OpenVaultLogo";
+export { Brand } from "./Brand";

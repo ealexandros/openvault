@@ -1,4 +1,4 @@
-import { OpenVaultLogo } from "@/components/icons";
+import { Brand } from "@/components/icons";
 
 type SidebarHeaderProps = {
   vaultName?: string;
@@ -6,7 +6,7 @@ type SidebarHeaderProps = {
 
 export const SidebarHeader = ({ vaultName }: SidebarHeaderProps) => (
   <header className="flex flex-col gap-8 py-5">
-    <OpenVaultLogo nameClassName="text-[22px]" />
+    <Brand nameClassName="text-[22px]" />
 
     {vaultName != null && (
       <div className="relative flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
