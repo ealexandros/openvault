@@ -14,20 +14,20 @@ Please read the guidelines below to help keep the project consistent and easy to
 2. Clone your fork
 
 ```bash
-$ git clone https://github.com/ealexandros/openvault.git
-$ cd openvault
+git clone https://github.com/ealexandros/openvault.git
+cd openvault
 ```
 
 3. Install dependencies
 
 ```bash
-$ bun install
+bun install
 ```
 
 4. Start the development environment
 
 ```bash
-$ bun dev
+bun dev
 ```
 
 ---
@@ -37,7 +37,7 @@ $ bun dev
 Create a new branch for your changes.
 
 ```bash
-$ git checkout -b feature/my-feature
+git checkout -b feature/my-feature
 ```
 
 Recommended branch prefixes:
@@ -66,8 +66,8 @@ General guidelines:
 If formatting tools are configured, run:
 
 ```bash
-$ bun run lint:check
-$ bun run format:check
+bun run lint:check
+bun run format:check
 ```
 
 ---
