@@ -99,12 +99,9 @@ In the meantime, you can find technical details here:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow the steps below to contribute:
+We welcome bug reports, feature requests, documentation improvements, and code contributions!
 
-1. Fork the repository and create your feature branch.
-2. Ensure Husky is installed and configured correctly.
-3. Commit your changes and push the branch.
-4. Submit a Pull Request detailing your enhancements or bug fixes.
+Please see our [Contributing Guidelines](CONTRIBUTING.md) for detailed instructions on how to get started, branch naming conventions, code style guidelines, and how to submit a pull request.
 
 ## 📝 License
 
