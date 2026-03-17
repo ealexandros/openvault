@@ -1,83 +1,170 @@
-use std::collections::hash_map::Keys;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::error::{Result, SecretError};
-use super::models::{LoginEntry, normalize_folder_path};
+use super::models::{LoginEntry, SecretFolder, SECRETS_ROOT_FOLDER_ID};
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub(crate) struct StoreIndexes {
-    folder_entries: HashMap<String, BTreeSet<Uuid>>,
-    entry_names: HashMap<(String, String), Uuid>,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum NameOwner {
+    Folder(Uuid),
+    Entry(Uuid),
 }
 
-impl StoreIndexes {
-    pub(crate) fn rebuild(&mut self, entries: &HashMap<Uuid, LoginEntry>) -> Result {
-        self.folder_entries.clear();
-        self.entry_names.clear();
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct SecretIndex {
+    folders_by_parent: HashMap<Uuid, Vec<Uuid>>,
+    entries_by_parent: HashMap<Uuid, Vec<Uuid>>,
+    names: HashMap<(Uuid, String), NameOwner>,
+}
+
+impl SecretIndex {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn build(
+        folders: &HashMap<Uuid, SecretFolder>,
+        entries: &HashMap<Uuid, LoginEntry>,
+    ) -> Result<Self> {
+        let mut index = Self::new();
+
+        for folder in folders.values() {
+            index.track_folder(folder)?;
+        }
 
         for entry in entries.values() {
-            self.track_entry(entry)?;
+            index.track_entry(entry)?;
         }
 
-        Ok(())
+        Ok(index)
     }
 
-    pub(crate) fn track_entry(&mut self, entry: &LoginEntry) -> Result {
-        let folder = normalize_folder_path(&entry.folder);
-        self.ensure_name_available(&folder, &entry.name, Some(&entry.id))?;
+    pub fn folders(&self, parent_id: &Uuid) -> &[Uuid] {
+        self.folders_by_parent
+            .get(parent_id)
+            .map(Vec::as_slice)
+            .unwrap_or(&[])
+    }
 
-        self.entry_names
-            .insert((folder.clone(), entry.name.clone()), entry.id);
-        self.folder_entries
-            .entry(folder)
+    pub fn entries(&self, parent_id: &Uuid) -> &[Uuid] {
+        self.entries_by_parent
+            .get(parent_id)
+            .map(Vec::as_slice)
+            .unwrap_or(&[])
+    }
+
+    pub fn track_folder(&mut self, folder: &SecretFolder) -> Result {
+        if folder.id == SECRETS_ROOT_FOLDER_ID {
+            return Ok(());
+        }
+
+        let parent_id = folder
+            .parent_id
+            .ok_or_else(|| SecretError::FolderMustHaveParent(folder.id))?;
+
+        self.ensure_name_available(parent_id, &folder.name, Some(NameOwner::Folder(folder.id)))?;
+
+        self.names.insert(
+            (parent_id, folder.name.clone()),
+            NameOwner::Folder(folder.id),
+        );
+
+        self.folders_by_parent
+            .entry(parent_id)
             .or_default()
-            .insert(entry.id);
+            .push(folder.id);
 
         Ok(())
     }
 
-    pub(crate) fn untrack_entry(&mut self, entry: &LoginEntry) {
-        let folder = normalize_folder_path(&entry.folder);
-        self.entry_names
-            .remove(&(folder.clone(), entry.name.clone()));
+    pub fn untrack_folder(&mut self, folder: &SecretFolder) {
+        if folder.id == SECRETS_ROOT_FOLDER_ID {
+            return;
+        }
 
-        let should_remove = if let Some(entry_ids) = self.folder_entries.get_mut(&folder) {
-            entry_ids.remove(&entry.id);
-            entry_ids.is_empty()
-        } else {
-            false
-        };
-
-        if should_remove {
-            self.folder_entries.remove(&folder);
+        if let Some(parent_id) = folder.parent_id {
+            self.names
+                .remove(&(parent_id, folder.name.clone()));
+            Self::remove_child(&mut self.folders_by_parent, parent_id, folder.id);
         }
     }
 
-    pub(crate) fn ensure_name_available(
+    pub fn rename_folder(&mut self, parent_id: Uuid, id: Uuid, old_name: &str, new_name: &str) {
+        self.names.remove(&(parent_id, old_name.to_string()));
+        self.names
+            .insert((parent_id, new_name.to_string()), NameOwner::Folder(id));
+    }
+
+    pub fn track_entry(&mut self, entry: &LoginEntry) -> Result {
+        self.ensure_name_available(
+            entry.folder_id,
+            &entry.name,
+            Some(NameOwner::Entry(entry.id)),
+        )?;
+
+        self.names.insert(
+            (entry.folder_id, entry.name.clone()),
+            NameOwner::Entry(entry.id),
+        );
+
+        self.entries_by_parent
+            .entry(entry.folder_id)
+            .or_default()
+            .push(entry.id);
+
+        Ok(())
+    }
+
+    pub fn untrack_entry(&mut self, entry: &LoginEntry) {
+        self.names
+            .remove(&(entry.folder_id, entry.name.clone()));
+        Self::remove_child(&mut self.entries_by_parent, entry.folder_id, entry.id);
+    }
+
+    pub fn ensure_entry_name_available(
         &self,
-        folder: &str,
+        parent_id: Uuid,
         name: &str,
-        current_id: Option<&Uuid>,
+        current_id: Option<Uuid>,
     ) -> Result {
-        if let Some(existing_id) = self
-            .entry_names
-            .get(&(folder.to_string(), name.to_string()))
-        {
-            let is_same_entry = current_id.is_some_and(|id| id == existing_id);
-            if !is_same_entry {
-                return Err(SecretError::AlreadyExists(name.to_string()));
+        let current = current_id.map(NameOwner::Entry);
+        self.ensure_name_available(parent_id, name, current)
+    }
+
+    pub fn ensure_folder_name_available(
+        &self,
+        parent_id: Uuid,
+        name: &str,
+        current_id: Option<Uuid>,
+    ) -> Result {
+        let current = current_id.map(NameOwner::Folder);
+        self.ensure_name_available(parent_id, name, current)
+    }
+
+    fn ensure_name_available(
+        &self,
+        parent_id: Uuid,
+        name: &str,
+        current: Option<NameOwner>,
+    ) -> Result {
+        if let Some(existing) = self.names.get(&(parent_id, name.to_string())) {
+            if Some(*existing) != current {
+                return Err(SecretError::name_conflict(parent_id, name));
             }
         }
 
         Ok(())
     }
 
-    pub(crate) fn entry_ids_in_folder(&self, folder: &str) -> Option<&BTreeSet<Uuid>> {
-        self.folder_entries.get(folder)
-    }
+    fn remove_child(map: &mut HashMap<Uuid, Vec<Uuid>>, parent_id: Uuid, child_id: Uuid) {
+        let Some(children) = map.get_mut(&parent_id) else {
+            return;
+        };
 
-    pub(crate) fn folder_paths(&self) -> Keys<'_, String, BTreeSet<Uuid>> {
-        self.folder_entries.keys()
+        children.retain(|&id| id != child_id);
+
+        if children.is_empty() {
+            map.remove(&parent_id);
+        }
     }
 }

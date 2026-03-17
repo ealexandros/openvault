@@ -1,5 +1,6 @@
 pub mod filesystem;
 pub mod messages;
+pub mod secrets;
 pub mod shared;
 
 use serde::{Deserialize, Serialize};
@@ -7,7 +8,7 @@ use strum_macros::Display;
 
 use crate::errors::{Error, Result};
 use crate::operations::compact::{CompactionBundle, build_bundle_for};
-use crate::repositories::{FilesystemRepository, MessagesRepository};
+use crate::repositories::{FilesystemRepository, MessagesRepository, SecretsRepository};
 use crate::vault::runtime::VaultSession;
 
 #[repr(u16)]
@@ -15,6 +16,7 @@ use crate::vault::runtime::VaultSession;
 pub enum FeatureType {
     Filesystem = 1,
     Messages = 2,
+    Secrets = 3,
 }
 
 impl FeatureType {
@@ -22,6 +24,7 @@ impl FeatureType {
         match self {
             FeatureType::Filesystem => build_bundle_for::<FilesystemRepository>(session, *self),
             FeatureType::Messages => build_bundle_for::<MessagesRepository>(session, *self),
+            FeatureType::Secrets => build_bundle_for::<SecretsRepository>(session, *self),
         }
     }
 }
@@ -33,6 +36,7 @@ impl TryFrom<u16> for FeatureType {
         match v {
             1 => Ok(Self::Filesystem),
             2 => Ok(Self::Messages),
+            3 => Ok(Self::Secrets),
             _ => Err(Error::InvalidVaultFormat),
         }
     }

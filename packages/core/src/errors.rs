@@ -12,6 +12,9 @@ pub enum Error {
     Messages(#[from] crate::features::messages::MessagesError),
 
     #[error(transparent)]
+    Secrets(#[from] crate::features::secrets::SecretError),
+
+    #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]

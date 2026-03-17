@@ -12,10 +12,13 @@ use crate::errors::Result;
 pub use errors::Error;
 pub use vault::Vault;
 
-pub use openvault_core::features::filesystem::ROOT_FOLDER_ID;
-
-pub use openvault_core::features::filesystem::{FileMetadata, FolderMetadata};
+pub use openvault_core::features::filesystem::{
+    FILESYSEM_ROOT_FOLDER_ID, FileMetadata, FolderMetadata,
+};
 pub use openvault_core::features::messages::{MessageContact, MessageCredentials};
+pub use openvault_core::features::secrets::{
+    LoginEntry, LoginEntryView, SECRETS_ROOT_FOLDER_ID, SecretFolder, TOTP,
+};
 pub use openvault_core::operations::config::CreateConfig;
 pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;

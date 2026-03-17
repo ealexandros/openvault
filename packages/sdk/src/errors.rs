@@ -12,6 +12,9 @@ pub enum Error {
     Messages(#[from] openvault_core::features::messages::MessagesError),
 
     #[error(transparent)]
+    Secrets(#[from] openvault_core::features::secrets::SecretError),
+
+    #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error("Invalid path")]

@@ -1,8 +1,10 @@
 pub mod filesystem;
 pub mod messages;
+pub mod secrets;
 
 pub use filesystem::FilesystemRepository;
 pub use messages::MessagesRepository;
+pub use secrets::SecretsRepository;
 
 use std::collections::HashMap;
 

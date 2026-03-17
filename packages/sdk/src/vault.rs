@@ -2,8 +2,11 @@ use std::path::Path;
 
 use openvault_core::features::filesystem::FilesystemStore;
 use openvault_core::features::messages::MessagesStore;
+use openvault_core::features::secrets::SecretStore;
 use openvault_core::operations::{compact, history, replay};
-use openvault_core::repositories::{FeatureRepository, FilesystemRepository, MessagesRepository};
+use openvault_core::repositories::{
+    FeatureRepository, FilesystemRepository, MessagesRepository, SecretsRepository,
+};
 use openvault_core::vault::runtime::VaultSession;
 use openvault_core::vault::versions::shared::checkpoint::Checkpoint;
 use zeroize::Zeroize;
@@ -11,6 +14,7 @@ use zeroize::Zeroize;
 use crate::errors::Result;
 use crate::features::filesystem::FilesystemService;
 use crate::features::messages::MessagesService;
+use crate::features::secrets::SecretsService;
 
 // @todo-soon fix the OCP problem on commit, commit_checkpoint, compact
 // @todo-soon return the checkpoint from the compact
@@ -20,6 +24,7 @@ pub struct Vault {
     session: VaultSession,
     filesystem: FilesystemStore,
     messages: MessagesStore,
+    secrets: SecretStore,
 }
 
 impl Vault {
@@ -28,11 +33,13 @@ impl Vault {
 
         let filesystem = FilesystemRepository::restore_from_replay(&replay)?;
         let messages = MessagesRepository::restore_from_replay(&replay)?;
+        let secrets = SecretsRepository::restore_from_replay(&replay)?;
 
         Ok(Self {
             session,
             filesystem,
             messages,
+            secrets,
         })
     }
 
@@ -43,6 +50,7 @@ impl Vault {
     pub fn commit(&mut self) -> Result {
         FilesystemRepository::commit(&mut self.session, &mut self.filesystem)?;
         MessagesRepository::commit(&mut self.session, &mut self.messages)?;
+        SecretsRepository::commit(&mut self.session, &mut self.secrets)?;
 
         if !history::should_create_checkpoint(&mut self.session)? {
             return Ok(());
@@ -55,6 +63,7 @@ impl Vault {
         let checkpoint_features = vec![
             FilesystemRepository::create_checkpoint(&self.filesystem)?,
             MessagesRepository::create_checkpoint(&self.messages)?,
+            SecretsRepository::create_checkpoint(&self.secrets)?,
         ];
 
         let mut checkpoint = Checkpoint::new(checkpoint_features);
@@ -70,6 +79,7 @@ impl Vault {
 
         self.filesystem = FilesystemRepository::load(&mut self.session)?;
         self.messages = MessagesRepository::load(&mut self.session)?;
+        self.secrets = SecretsRepository::load(&mut self.session)?;
 
         Ok(())
     }
@@ -86,5 +96,10 @@ impl Vault {
     #[inline]
     pub fn messages(&mut self) -> MessagesService<'_> {
         MessagesService::new(&mut self.session, &mut self.messages)
+    }
+
+    #[inline]
+    pub fn secrets(&mut self) -> SecretsService<'_> {
+        SecretsService::new(&mut self.session, &mut self.secrets)
     }
 }

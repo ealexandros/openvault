@@ -6,7 +6,7 @@ use zeroize::Zeroize;
 
 use crate::features::shared::BlobRef;
 
-pub const ROOT_FOLDER_ID: Uuid = Uuid::nil();
+pub const FILESYSEM_ROOT_FOLDER_ID: Uuid = Uuid::nil();
 pub const ROOT_FOLDER_NAME: &str = "/";
 pub const DEFAULT_FOLDER_ICON: &str = "folder";
 
@@ -41,7 +41,7 @@ impl FolderMetadata {
     pub fn root() -> Self {
         let now = Utc::now();
         Self {
-            id: ROOT_FOLDER_ID,
+            id: FILESYSEM_ROOT_FOLDER_ID,
             parent_id: None,
             name: ROOT_FOLDER_NAME.to_string(),
             icon: DEFAULT_FOLDER_ICON.to_string(),

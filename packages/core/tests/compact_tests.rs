@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use uuid::Uuid;
 
-use openvault_core::features::filesystem::ROOT_FOLDER_ID;
+use openvault_core::features::filesystem::FILESYSEM_ROOT_FOLDER_ID;
 use openvault_core::operations::blob::{read_blob, write_blob};
 use openvault_core::operations::compact::compact_vault;
 use openvault_core::operations::vault::create_and_open_vault;
@@ -29,7 +29,7 @@ fn compaction_rewrites_blob_refs_and_preserves_latest_state() {
 
     let stale_file = store
         .add_file(
-            ROOT_FOLDER_ID,
+            FILESYSEM_ROOT_FOLDER_ID,
             "stale.bin".to_string(),
             "bin".to_string(),
             stale_blob,
@@ -46,7 +46,7 @@ fn compaction_rewrites_blob_refs_and_preserves_latest_state() {
 
     let live_file = store
         .add_file(
-            ROOT_FOLDER_ID,
+            FILESYSEM_ROOT_FOLDER_ID,
             "live.txt".to_string(),
             "txt".to_string(),
             live_blob,

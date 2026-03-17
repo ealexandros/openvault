@@ -4,7 +4,7 @@ use validator::ValidationError;
 
 use crate::features::filesystem::errors::{FilesystemError, Result};
 use crate::features::filesystem::models::{
-    FileMetadata, FolderMetadata, ROOT_FOLDER_ID, ROOT_FOLDER_NAME,
+    FileMetadata, FolderMetadata, FILESYSEM_ROOT_FOLDER_ID, ROOT_FOLDER_NAME,
 };
 
 pub fn validate_snapshot(
@@ -13,7 +13,7 @@ pub fn validate_snapshot(
 ) -> Result {
     validate_root(folders)?;
 
-    for folder in folders.values().filter(|f| f.id != ROOT_FOLDER_ID) {
+    for folder in folders.values().filter(|f| f.id != FILESYSEM_ROOT_FOLDER_ID) {
         validate_folder_invariants(folder, folders)?;
     }
 
@@ -33,7 +33,7 @@ fn validate_unique_names(
     let mut occupied = HashSet::<(Uuid, &str)>::new();
 
     for folder in folders.values() {
-        if folder.id == ROOT_FOLDER_ID {
+        if folder.id == FILESYSEM_ROOT_FOLDER_ID {
             continue;
         }
 
@@ -79,7 +79,7 @@ pub fn validate_no_cycle(
 
 fn validate_root(folders: &HashMap<Uuid, FolderMetadata>) -> Result {
     let root = folders
-        .get(&ROOT_FOLDER_ID)
+        .get(&FILESYSEM_ROOT_FOLDER_ID)
         .ok_or(FilesystemError::RootFolderInvariant(
             "root folder is missing".into(),
         ))?;
@@ -182,6 +182,6 @@ pub fn is_folder_name_taken(
     folders: &HashMap<Uuid, FolderMetadata>,
 ) -> bool {
     folders.values().any(|folder| {
-        folder.id != ROOT_FOLDER_ID && folder.parent_id == Some(parent_id) && folder.name == name
+        folder.id != FILESYSEM_ROOT_FOLDER_ID && folder.parent_id == Some(parent_id) && folder.name == name
     })
 }

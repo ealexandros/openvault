@@ -2,13 +2,17 @@ mod codec;
 mod error;
 mod indexes;
 mod models;
+mod patch;
 mod records;
 mod store;
+mod validate;
 
 pub use codec::{SECRETS_FEATURE_ID, SecretCodec};
 pub use error::{Result, SecretError};
 pub use models::{
-    EncryptedField, LoginEntry, LoginEntryPatch, ROOT_FOLDER, TOTP, normalize_folder_path,
+    EncryptedField, EncryptedTotp, LoginEntry, LoginEntryView, ROOT_FOLDER_NAME,
+    SECRETS_ROOT_FOLDER_ID, SecretFolder, TOTP,
 };
-pub use records::{SECRETS_WIRE_VERSION_V1, SecretDelta, SecretSnapshot, SecretsChange};
+pub use patch::{LoginEntryPatch, SecretFolderPatch};
+pub use records::{SECRETS_WIRE_VERSION, SecretDelta, SecretSnapshot, SecretsChange};
 pub use store::SecretStore;
