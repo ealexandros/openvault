@@ -165,8 +165,8 @@ impl MessagesStore {
         name: String,
         expires_at: Option<DateTime<Utc>>,
     ) -> Result<MessageCredentials> {
-        let signing_keys = SigningKeyPair::generate();
-        let ephemeral_keys = EphemeralKeyPair::generate();
+        let signing_keys = SigningKeyPair::generate()?;
+        let ephemeral_keys = EphemeralKeyPair::generate()?;
         let credentials = MessageCredentials::new(name, signing_keys, ephemeral_keys, expires_at);
 
         credentials.validate()?;

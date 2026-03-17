@@ -36,7 +36,7 @@ pub fn sign_then_encrypt_with(
     let compressor = config.compression.resolve();
     let compressed = compressor.compress(&payload)?;
 
-    let ephemeral = EphemeralKeyPair::generate();
+    let ephemeral = EphemeralKeyPair::generate()?;
     let shared_secret = ephemeral.private.shared_secret(recipient_pub);
 
     let header = MessageHeader {

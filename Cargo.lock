@@ -2647,6 +2647,7 @@ dependencies = [
  "crc32fast",
  "ed25519-dalek",
  "hkdf",
+ "libc",
  "postcard",
  "serde",
  "sha2",

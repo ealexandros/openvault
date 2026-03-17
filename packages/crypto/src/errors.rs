@@ -46,6 +46,9 @@ pub enum Error {
 
     #[error("Failed to base64 decode")]
     DecodeBase64,
+
+    #[error("Failed to lock memory")]
+    MemoryLockFailed,
 }
 
 pub type Result<T = ()> = std::result::Result<T, Error>;

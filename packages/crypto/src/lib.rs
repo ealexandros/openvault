@@ -5,4 +5,6 @@ pub mod keys;
 pub mod protocols;
 pub mod signature;
 
+mod internal;
+
 pub mod errors;

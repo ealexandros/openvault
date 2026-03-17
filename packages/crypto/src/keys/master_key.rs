@@ -1,33 +1,39 @@
 use argon2::{Algorithm, Argon2, Params, Version};
 use hkdf::Hkdf;
 use sha2::Sha256;
-use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::errors::{Error, Result};
+use crate::internal::secure_memory::SecureMemory;
 use crate::keys::derived_key::DerivedKey;
 use crate::keys::salt::Salt;
 
 pub const MKEY_SIZE: usize = 32;
 
 #[derive(Zeroize, ZeroizeOnDrop)]
-pub struct MasterKey(Zeroizing<[u8; MKEY_SIZE]>);
+pub struct MasterKey {
+    key: SecureMemory<MKEY_SIZE>,
+}
 
 impl MasterKey {
-    pub fn new(key: [u8; MKEY_SIZE]) -> Self {
-        Self(Zeroizing::new(key))
+    pub fn new(bytes: [u8; MKEY_SIZE]) -> Result<Self> {
+        let key = SecureMemory::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
+        Ok(Self { key })
     }
 
     pub fn derive(password: &[u8], salt: &Salt) -> Result<Self> {
         let params = Params::default();
-
         let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
 
-        let mut key = [0u8; MKEY_SIZE];
+        let mut raw = [0u8; MKEY_SIZE];
         argon2
-            .hash_password_into(password, salt.as_bytes(), &mut key)
+            .hash_password_into(password, salt.as_bytes(), &mut raw)
             .map_err(|_| Error::KeyDerivationFailed)?;
 
-        Ok(Self(Zeroizing::new(key)))
+        let master = Self::new(raw)?;
+        raw.zeroize();
+
+        Ok(master)
     }
 
     pub fn derive_with_random_salt(password: &[u8]) -> Result<(Self, Salt)> {
@@ -43,11 +49,11 @@ impl MasterKey {
         hkdf.expand(info, &mut okm)
             .map_err(|_| Error::HkdfExpandFailed)?;
 
-        Ok(DerivedKey::new(okm))
+        DerivedKey::new(okm)
     }
 
     pub fn as_bytes(&self) -> &[u8] {
-        self.0.as_ref()
+        self.key.as_ref()
     }
 }
 
@@ -57,13 +63,13 @@ mod tests {
 
     #[test]
     fn test_master_key_new() {
-        let key = MasterKey::new([0u8; MKEY_SIZE]);
-        assert_eq!(key.as_bytes(), [0u8; MKEY_SIZE]);
+        let key = MasterKey::new([0u8; MKEY_SIZE]).unwrap();
+        assert_eq!(key.as_bytes(), &[0u8; MKEY_SIZE]);
     }
 
     #[test]
     fn test_master_key_as_ref() {
-        let key = MasterKey::new([0u8; MKEY_SIZE]);
-        assert_eq!(key.as_bytes(), [0u8; MKEY_SIZE]);
+        let key = MasterKey::new([0u8; MKEY_SIZE]).unwrap();
+        assert_eq!(key.as_bytes(), &[0u8; MKEY_SIZE]);
     }
 }
