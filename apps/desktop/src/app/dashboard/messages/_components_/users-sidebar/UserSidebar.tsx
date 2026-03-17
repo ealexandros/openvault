@@ -72,7 +72,7 @@ export const UserSidebar = ({
     />
 
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="px-6 pt-6 pb-2">
+      <div className="px-6 pt-4 pb-2">
         <div className="relative">
           <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input

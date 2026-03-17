@@ -14,6 +14,8 @@ import { cn } from "@/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, User, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
+import { useKeyListeners } from "@/hooks/useKeyListeners";
+import { KeyCode } from "@/config/keycodes";
 
 type MessageOnboardingProps = {
   currentUserName: string;
@@ -49,12 +51,19 @@ export const MessageOnboarding = ({
 
   const currentStepIndex = steps.indexOf(step);
 
+  const isNextDisabled = step === "identity" && !displayName.trim();
+
   const handleNext = () => {
+    if (isNextDisabled) return;
     if (step === "intro") setStep("identity");
     else if (step === "identity") setStep("peers");
     else if (step === "peers") setStep("ready");
     else onComplete({ name: displayName, rotationMonths });
   };
+
+  useKeyListeners({
+    [KeyCode.Enter]: handleNext,
+  });
 
   const handleBack = () => {
     if (step === "identity") setStep("intro");

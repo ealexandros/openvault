@@ -18,7 +18,7 @@ export const UserSidebarActions = ({
   selectedUser,
   importError,
 }: UserSidebarActionsProps) => (
-  <div className="grid grid-cols-1 gap-2 px-6 pb-4">
+  <div className="grid grid-cols-1 gap-2 px-6 pb-2">
     <Button
       variant="outline"
       size="sm"

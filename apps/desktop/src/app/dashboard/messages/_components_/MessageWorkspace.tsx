@@ -3,13 +3,6 @@
 import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/shadcn/select";
 import { Textarea } from "@/components/ui/shadcn/textarea";
 import {
   Tooltip,
@@ -32,12 +25,9 @@ import {
   Unlock,
 } from "lucide-react";
 import { useState } from "react";
-import { MessageAlgorithm, MessageMode } from "../useMessagesPage";
+import { MessageMode } from "../useMessagesPage";
 
 type MessageWorkspaceProps = {
-  algorithm: MessageAlgorithm;
-  algorithmOptions: { value: MessageAlgorithm; label: string }[];
-  setAlgorithm: (value: MessageAlgorithm) => void;
   mode: MessageMode;
   setMode: (mode: MessageMode) => void;
   messageInput: string;
@@ -51,9 +41,6 @@ type MessageWorkspaceProps = {
 };
 
 export const MessageWorkspace = ({
-  algorithm,
-  algorithmOptions,
-  setAlgorithm,
   mode,
   setMode,
   messageInput,
@@ -149,25 +136,6 @@ export const MessageWorkspace = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
-              Encryption Protocol
-            </Label>
-            <Select
-              value={algorithm}
-              onValueChange={value => setAlgorithm(value as MessageAlgorithm)}>
-              <SelectTrigger className="h-12 w-full bg-muted/30 px-4 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {algorithmOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
       </div>
 
