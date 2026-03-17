@@ -9,7 +9,7 @@ use openvault_crypto::keys::derived_key::DerivedKey;
 
 use super::super::error::Result;
 use super::super::patch::LoginEntryPatch;
-use super::{EncryptedField, EncryptedTotp, TOTP};
+use super::{EncryptedTotp, SealedValue, TOTP};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Validate)]
 pub struct LoginEntry {
@@ -18,10 +18,10 @@ pub struct LoginEntry {
     #[validate(length(min = 1, max = 255))]
     #[validate(custom(function = "super::super::validate::validate_safe_name"))]
     pub name: String,
-    pub username: EncryptedField,
-    pub password: EncryptedField,
-    pub website: EncryptedField,
-    pub comments: EncryptedField,
+    pub username: SealedValue,
+    pub password: SealedValue,
+    pub website: SealedValue,
+    pub comments: SealedValue,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub totp: Option<EncryptedTotp>,
@@ -41,15 +41,19 @@ pub struct LoginEntryView {
     pub totp: Option<TOTP>,
 }
 
+pub struct NewLoginSecret {
+    pub folder_id: Uuid,
+    pub name: String,
+    pub username: String,
+    pub password: String,
+    pub website: Option<String>,
+    pub comments: Option<String>,
+    pub totp: Option<TOTP>,
+}
+
 impl LoginEntry {
     pub fn seal(
-        folder_id: Uuid,
-        name: String,
-        username: String,
-        password: String,
-        website: Option<String>,
-        comments: Option<String>,
-        totp: Option<TOTP>,
+        input: NewLoginSecret,
         key: &DerivedKey,
         cipher: EncryptionAlgorithm,
     ) -> Result<Self> {
@@ -57,17 +61,18 @@ impl LoginEntry {
 
         Ok(Self {
             id: Uuid::new_v4(),
-            folder_id,
-            name,
-            username: EncryptedField::seal_string(username, key, cipher)?,
-            password: EncryptedField::seal_string(password, key, cipher)?,
-            website: EncryptedField::seal_string(website.unwrap_or_default(), key, cipher)?,
-            comments: EncryptedField::seal_string(comments.unwrap_or_default(), key, cipher)?,
+            folder_id: input.folder_id,
+            name: input.name,
+            username: SealedValue::seal_string(input.username, key, cipher)?,
+            password: SealedValue::seal_string(input.password, key, cipher)?,
+            website: SealedValue::seal_string(input.website.unwrap_or_default(), key, cipher)?,
+            comments: SealedValue::seal_string(input.comments.unwrap_or_default(), key, cipher)?,
             created_at: now,
             updated_at: now,
-            totp: totp
+            totp: input
+                .totp
                 .as_ref()
-                .map(|value| EncryptedTotp::seal(value, key, cipher))
+                .map(|v| EncryptedTotp::seal(v, key, cipher))
                 .transpose()?,
         })
     }

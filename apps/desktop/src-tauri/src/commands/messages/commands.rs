@@ -177,7 +177,7 @@ pub async fn encrypt_file(state: TauriState<'_>, params: EncryptFileParams) -> R
 
     let id = parse_uuid(&params.contact_id)?;
 
-    let bytes = std::fs::read(&params.source_path).map_err(|e| Error::Io(e))?;
+    let bytes = std::fs::read(&params.source_path).map_err(Error::Io)?;
 
     if bytes.len() > 10 * 1024 * 1024 {
         return Err(Error::InvalidInput("File too large (max 10MB)".to_string()));
@@ -185,7 +185,7 @@ pub async fn encrypt_file(state: TauriState<'_>, params: EncryptFileParams) -> R
 
     let encrypted = messages.encrypt_for_contact(id, &bytes)?;
 
-    std::fs::write(&params.destination_path, encrypted.as_bytes()).map_err(|e| Error::Io(e))?;
+    std::fs::write(&params.destination_path, encrypted.as_bytes()).map_err(Error::Io)?;
 
     Ok(())
 }
@@ -196,11 +196,11 @@ pub async fn decrypt_file(state: TauriState<'_>, params: DecryptFileParams) -> R
 
     let id = parse_uuid(&params.contact_id)?;
 
-    let ciphertext = std::fs::read_to_string(&params.source_path).map_err(|e| Error::Io(e))?;
+    let ciphertext = std::fs::read_to_string(&params.source_path).map_err(Error::Io)?;
 
     let decrypted = messages.decrypt_from_contact(id, ciphertext.as_bytes())?;
 
-    std::fs::write(&params.destination_path, decrypted.as_bytes()).map_err(|e| Error::Io(e))?;
+    std::fs::write(&params.destination_path, decrypted.as_bytes()).map_err(Error::Io)?;
 
     Ok(())
 }

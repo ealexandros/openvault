@@ -1,8 +1,8 @@
 use uuid::Uuid;
 
 use openvault_core::features::secrets::{
-    LoginEntry, LoginEntryPatch, LoginEntryView, SecretFolder, SecretStore, TOTP,
-    SECRETS_FEATURE_ID,
+    LoginEntry, LoginEntryPatch, LoginEntryView, NewLoginSecret, NewLoginSecretPatch,
+    SECRETS_FEATURE_ID, SecretFolder, SecretStore,
 };
 use openvault_core::vault::runtime::VaultSession;
 use openvault_crypto::keys::derived_key::DerivedKey;
@@ -53,61 +53,22 @@ impl<'a> SecretsService<'a> {
         self.store.remove_folder(id).map_err(Error::from)
     }
 
-    pub fn add_login(
-        &mut self,
-        folder_id: Uuid,
-        name: String,
-        username: String,
-        password: String,
-        website: Option<String>,
-        comments: Option<String>,
-        totp: Option<TOTP>,
-    ) -> Result<Uuid> {
+    pub fn add_login(&mut self, input: NewLoginSecret) -> Result<Uuid> {
         let key = self.secrets_key()?;
-        let entry = LoginEntry::seal(
-            folder_id,
-            name,
-            username,
-            password,
-            website,
-            comments,
-            totp,
-            &key,
-            self.session.cipher(),
-        )?;
-
+        let entry = LoginEntry::seal(input, &key, self.session.cipher())?;
         self.store.add_entry(entry).map_err(Error::from)
     }
 
-    pub fn update_login(
-        &mut self,
-        id: Uuid,
-        folder_id: Option<Uuid>,
-        name: Option<String>,
-        username: Option<String>,
-        password: Option<String>,
-        website: Option<String>,
-        comments: Option<String>,
-        totp: Option<Option<TOTP>>,
-    ) -> Result {
+    pub fn update_login(&mut self, id: Uuid, input: NewLoginSecretPatch) -> Result {
         let key = self.secrets_key()?;
-        let patch = LoginEntryPatch::from_plaintext(
-            folder_id,
-            name,
-            username,
-            password,
-            website,
-            comments,
-            totp,
-            &key,
-            self.session.cipher(),
-        )?;
-
+        let patch = LoginEntryPatch::from_plaintext(input, &key, self.session.cipher())?;
         self.store.update_entry(id, patch).map_err(Error::from)
     }
 
     pub fn move_entry(&mut self, id: Uuid, new_folder_id: Uuid) -> Result {
-        self.store.move_entry(id, new_folder_id).map_err(Error::from)
+        self.store
+            .move_entry(id, new_folder_id)
+            .map_err(Error::from)
     }
 
     pub fn remove_entry(&mut self, id: Uuid) -> Result {

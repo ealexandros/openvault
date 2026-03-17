@@ -7,7 +7,7 @@ use openvault_crypto::encryption::EncryptionAlgorithm;
 use openvault_crypto::keys::derived_key::DerivedKey;
 
 use super::error::Result;
-use super::models::{EncryptedField, EncryptedTotp, TOTP};
+use super::models::{EncryptedTotp, SealedValue, TOTP};
 
 // #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 // pub struct ApiKeyEntryPatch {
@@ -77,10 +77,10 @@ use super::models::{EncryptedField, EncryptedTotp, TOTP};
 pub struct LoginEntryPatch {
     pub folder_id: Option<Uuid>,
     pub name: Option<String>,
-    pub username: Option<EncryptedField>,
-    pub password: Option<EncryptedField>,
-    pub website: Option<EncryptedField>,
-    pub comments: Option<EncryptedField>,
+    pub username: Option<SealedValue>,
+    pub password: Option<SealedValue>,
+    pub website: Option<SealedValue>,
+    pub comments: Option<SealedValue>,
     pub totp: Option<Option<EncryptedTotp>>,
     pub updated_at: DateTime<Utc>,
 }
@@ -100,6 +100,17 @@ impl Default for LoginEntryPatch {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NewLoginSecretPatch {
+    pub folder_id: Option<Uuid>,
+    pub name: Option<String>,
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub website: Option<String>,
+    pub comments: Option<String>,
+    pub totp: Option<Option<TOTP>>,
+}
+
 impl LoginEntryPatch {
     pub fn rename(name: impl Into<String>) -> Self {
         Self {
@@ -116,32 +127,30 @@ impl LoginEntryPatch {
     }
 
     pub fn from_plaintext(
-        folder_id: Option<Uuid>,
-        name: Option<String>,
-        username: Option<String>,
-        password: Option<String>,
-        website: Option<String>,
-        comments: Option<String>,
-        totp: Option<Option<TOTP>>,
+        input: NewLoginSecretPatch,
         key: &DerivedKey,
         cipher: EncryptionAlgorithm,
     ) -> Result<Self> {
         Ok(Self {
-            folder_id,
-            name,
-            username: username
-                .map(|value| EncryptedField::seal_string(value, key, cipher))
+            folder_id: input.folder_id,
+            name: input.name,
+            username: input
+                .username
+                .map(|value| SealedValue::seal_string(value, key, cipher))
                 .transpose()?,
-            password: password
-                .map(|value| EncryptedField::seal_string(value, key, cipher))
+            password: input
+                .password
+                .map(|value| SealedValue::seal_string(value, key, cipher))
                 .transpose()?,
-            website: website
-                .map(|value| EncryptedField::seal_string(value, key, cipher))
+            website: input
+                .website
+                .map(|value| SealedValue::seal_string(value, key, cipher))
                 .transpose()?,
-            comments: comments
-                .map(|value| EncryptedField::seal_string(value, key, cipher))
+            comments: input
+                .comments
+                .map(|value| SealedValue::seal_string(value, key, cipher))
                 .transpose()?,
-            totp: match totp {
+            totp: match input.totp {
                 Some(Some(value)) => Some(Some(EncryptedTotp::seal(&value, key, cipher)?)),
                 Some(None) => Some(None),
                 None => None,

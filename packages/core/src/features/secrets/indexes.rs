@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use super::error::{Result, SecretError};
-use super::models::{LoginEntry, SecretFolder, SECRETS_ROOT_FOLDER_ID};
+use super::models::{LoginEntry, SECRETS_ROOT_FOLDER_ID, SecretFolder};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum NameOwner {
@@ -60,7 +60,7 @@ impl SecretIndex {
 
         let parent_id = folder
             .parent_id
-            .ok_or_else(|| SecretError::FolderMustHaveParent(folder.id))?;
+            .ok_or(SecretError::FolderMustHaveParent(folder.id))?;
 
         self.ensure_name_available(parent_id, &folder.name, Some(NameOwner::Folder(folder.id)))?;
 
@@ -83,8 +83,7 @@ impl SecretIndex {
         }
 
         if let Some(parent_id) = folder.parent_id {
-            self.names
-                .remove(&(parent_id, folder.name.clone()));
+            self.names.remove(&(parent_id, folder.name.clone()));
             Self::remove_child(&mut self.folders_by_parent, parent_id, folder.id);
         }
     }
@@ -116,8 +115,7 @@ impl SecretIndex {
     }
 
     pub fn untrack_entry(&mut self, entry: &LoginEntry) {
-        self.names
-            .remove(&(entry.folder_id, entry.name.clone()));
+        self.names.remove(&(entry.folder_id, entry.name.clone()));
         Self::remove_child(&mut self.entries_by_parent, entry.folder_id, entry.id);
     }
 
@@ -147,10 +145,10 @@ impl SecretIndex {
         name: &str,
         current: Option<NameOwner>,
     ) -> Result {
-        if let Some(existing) = self.names.get(&(parent_id, name.to_string())) {
-            if Some(*existing) != current {
-                return Err(SecretError::name_conflict(parent_id, name));
-            }
+        if let Some(existing) = self.names.get(&(parent_id, name.to_string()))
+            && Some(*existing) != current
+        {
+            return Err(SecretError::name_conflict(parent_id, name));
         }
 
         Ok(())

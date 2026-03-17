@@ -6,7 +6,7 @@ use zeroize::Zeroize;
 
 use super::error::{Result, SecretError};
 use super::indexes::SecretIndex;
-use super::models::{LoginEntry, SecretFolder, SECRETS_ROOT_FOLDER_ID};
+use super::models::{LoginEntry, SECRETS_ROOT_FOLDER_ID, SecretFolder};
 use super::patch::{LoginEntryPatch, SecretFolderPatch};
 use super::records::{SecretDelta, SecretSnapshot, SecretsChange};
 use super::validate;
@@ -211,7 +211,7 @@ impl SecretStore {
 
         let parent_id = folder
             .parent_id
-            .ok_or_else(|| SecretError::FolderMustHaveParent(folder.id))?;
+            .ok_or(SecretError::FolderMustHaveParent(folder.id))?;
 
         if !self.folders.contains_key(&parent_id) {
             return Err(SecretError::ParentFolderNotFound(parent_id));

@@ -75,7 +75,9 @@ pub fn validate_no_cycle(
 fn validate_root(folders: &HashMap<Uuid, SecretFolder>) -> Result {
     let root = folders
         .get(&SECRETS_ROOT_FOLDER_ID)
-        .ok_or_else(|| SecretError::RootFolderInvariant("root folder is missing".into()))?;
+        .ok_or(SecretError::RootFolderInvariant(
+            "root folder is missing".into(),
+        ))?;
 
     if root.parent_id.is_some() {
         return Err(SecretError::RootFolderMustNotHaveParent);
@@ -94,7 +96,7 @@ fn validate_folder_invariants(
 ) -> Result {
     let parent_id = folder
         .parent_id
-        .ok_or_else(|| SecretError::FolderMustHaveParent(folder.id))?;
+        .ok_or(SecretError::FolderMustHaveParent(folder.id))?;
 
     if !folders.contains_key(&parent_id) {
         return Err(SecretError::ParentFolderNotFound(parent_id));

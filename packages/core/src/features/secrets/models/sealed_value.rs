@@ -6,12 +6,10 @@ use openvault_crypto::keys::derived_key::DerivedKey;
 
 use super::super::error::{Result, SecretError};
 
-// @todo-now rename to SealedValue
-
 #[derive(Clone, Debug, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, PartialEq, Eq)]
-pub struct EncryptedField(Vec<u8>);
+pub struct SealedValue(Vec<u8>);
 
-impl EncryptedField {
+impl SealedValue {
     pub const fn new(ciphertext: Vec<u8>) -> Self {
         Self(ciphertext)
     }

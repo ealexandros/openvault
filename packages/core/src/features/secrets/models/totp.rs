@@ -6,8 +6,8 @@ use zeroize::{Zeroize, ZeroizeOnDrop};
 use openvault_crypto::encryption::EncryptionAlgorithm;
 use openvault_crypto::keys::derived_key::DerivedKey;
 
-use super::encrypted_field::EncryptedField;
 use super::super::error::{Result, SecretError};
+use super::sealed_value::SealedValue;
 
 const DEFAULT_PERIOD: NonZeroU64 = NonZeroU64::new(30).unwrap();
 const DEFAULT_DIGITS: NonZeroU8 = NonZeroU8::new(6).unwrap();
@@ -60,7 +60,7 @@ impl Default for TOTP {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Zeroize, ZeroizeOnDrop)]
 pub struct EncryptedTotp {
-    pub secret: EncryptedField,
+    pub secret: SealedValue,
     pub period: NonZeroU64,
     pub digits: NonZeroU8,
 }
@@ -68,7 +68,7 @@ pub struct EncryptedTotp {
 impl EncryptedTotp {
     pub fn seal(totp: &TOTP, key: &DerivedKey, cipher: EncryptionAlgorithm) -> Result<Self> {
         Ok(Self {
-            secret: EncryptedField::seal_string(&totp.secret, key, cipher)?,
+            secret: SealedValue::seal_string(&totp.secret, key, cipher)?,
             period: totp.period,
             digits: totp.digits,
         })
