@@ -2,6 +2,9 @@
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
   "tasks": {
+    "build": {
+      "outputs": [".next/**", "out/**", "target/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true

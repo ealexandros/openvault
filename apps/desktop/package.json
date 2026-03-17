@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tauri dev",
     "dev:next": "next dev -p 8080",
-    "build": "tauri build",
+    "build": "bun run build:next && cargo build",
+    "bundle": "tauri build",
     "build:next": "next build",
     "lint:check": "eslint src --max-warnings=0",
     "lint:fix": "eslint --fix src",
