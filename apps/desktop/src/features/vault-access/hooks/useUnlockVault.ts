@@ -53,7 +53,7 @@ export const useUnlockVault = (selectedVaultPath: string | null) => {
 
     if (!result.success) {
       toast.error("Incorrect password", {
-        description: (result.error ?? "Failed to open vault") as string,
+        description: "The password was incorrect. Please try again.",
       });
       setIsUnlocking(false);
       return;
