@@ -1,9 +1,12 @@
 .DEFAULT_GOAL := help
 
-.PHONY: devcli help
+.PHONY: devcli help 
 
 devcli: ## Enter the devcontainer shell
 	docker exec -it --user vscode --workdir /workspaces/openvault openvault-devtainer /bin/zsh
+
+dev-desktop: ## Run the desktop application in development
+	bun run dev --filter @openvault/desktop
 
 help: ## Display this help screen
 	@echo
