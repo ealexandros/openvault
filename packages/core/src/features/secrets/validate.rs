@@ -3,7 +3,7 @@ use uuid::Uuid;
 use validator::ValidationError;
 
 use super::error::{Result, SecretError};
-use super::models::{LoginEntry, SecretFolder, SECRETS_ROOT_FOLDER_ID, ROOT_FOLDER_NAME};
+use super::models::{LoginEntry, SECRETS_ROOT_FOLDER_ID, SECRETS_ROOT_FOLDER_NAME, SecretFolder};
 
 pub fn validate_snapshot(
     folders: &HashMap<Uuid, SecretFolder>,
@@ -44,7 +44,10 @@ fn validate_unique_names(
 
     for entry in entries.values() {
         if !occupied.insert((entry.folder_id, &entry.name)) {
-            return Err(SecretError::name_conflict(entry.folder_id, entry.name.as_str()));
+            return Err(SecretError::name_conflict(
+                entry.folder_id,
+                entry.name.as_str(),
+            ));
         }
     }
 
@@ -78,7 +81,7 @@ fn validate_root(folders: &HashMap<Uuid, SecretFolder>) -> Result {
         return Err(SecretError::RootFolderMustNotHaveParent);
     }
 
-    if root.name != ROOT_FOLDER_NAME {
+    if root.name != SECRETS_ROOT_FOLDER_NAME {
         return Err(SecretError::RootFolderMustHaveName);
     }
 
@@ -102,10 +105,7 @@ fn validate_folder_invariants(
     Ok(())
 }
 
-fn validate_entry_invariants(
-    entry: &LoginEntry,
-    folders: &HashMap<Uuid, SecretFolder>,
-) -> Result {
+fn validate_entry_invariants(entry: &LoginEntry, folders: &HashMap<Uuid, SecretFolder>) -> Result {
     if !folders.contains_key(&entry.folder_id) {
         return Err(SecretError::ParentFolderNotFound(entry.folder_id));
     }

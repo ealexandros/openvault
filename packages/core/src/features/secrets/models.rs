@@ -12,7 +12,7 @@ use super::error::{Result, SecretError};
 use super::patch::LoginEntryPatch;
 
 pub const SECRETS_ROOT_FOLDER_ID: Uuid = Uuid::nil();
-pub const ROOT_FOLDER_NAME: &str = "/";
+pub const SECRETS_ROOT_FOLDER_NAME: &str = "/";
 
 #[derive(Clone, Debug, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, PartialEq, Eq)]
 pub struct EncryptedField(Vec<u8>);
@@ -178,7 +178,7 @@ impl SecretFolder {
         Self {
             id: SECRETS_ROOT_FOLDER_ID,
             parent_id: None,
-            name: ROOT_FOLDER_NAME.to_string(),
+            name: SECRETS_ROOT_FOLDER_NAME.to_string(),
             created_at: now,
             updated_at: now,
         }

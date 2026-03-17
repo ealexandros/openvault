@@ -12,7 +12,7 @@ mod validate;
 pub use codec::{FILESYSTEM_WIRE_VERSION, FilesystemCodec};
 pub use errors::{FilesystemError, Result};
 pub use events::{FilesystemChange, FilesystemDelta, FilesystemSnapshot};
-pub use models::{FILESYSEM_ROOT_FOLDER_ID, FileMetadata, FolderMetadata};
+pub use models::{FILESYSTEM_ROOT_FOLDER_ID, FileMetadata, FolderMetadata};
 pub use patch::{FileMetadataPatch, FolderMetadataPatch};
 pub use store::FilesystemStore;
 

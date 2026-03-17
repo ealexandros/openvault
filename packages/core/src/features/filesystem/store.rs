@@ -10,7 +10,7 @@ use super::index::FilesystemIndex;
 use super::models::{FileMetadata, FolderMetadata};
 use super::patch::{FileMetadataPatch, FolderMetadataPatch};
 use super::validate;
-use crate::features::filesystem::FILESYSEM_ROOT_FOLDER_ID;
+use crate::features::filesystem::FILESYSTEM_ROOT_FOLDER_ID;
 use crate::features::filesystem::namings::{generate_file_name, generate_folder_name};
 use crate::features::shared::{BlobRef, DEFAULT_SNAPSHOT_THRESHOLD};
 
@@ -237,7 +237,7 @@ impl FilesystemStore {
     }
 
     fn apply_folder_added(&mut self, folder: FolderMetadata) -> Result {
-        if folder.id == FILESYSEM_ROOT_FOLDER_ID {
+        if folder.id == FILESYSTEM_ROOT_FOLDER_ID {
             return Err(FilesystemError::RootFolderReserved);
         }
 
@@ -264,7 +264,7 @@ impl FilesystemStore {
     }
 
     fn apply_folder_deleted(&mut self, id: Uuid) -> Result {
-        if id == FILESYSEM_ROOT_FOLDER_ID {
+        if id == FILESYSTEM_ROOT_FOLDER_ID {
             return Err(FilesystemError::CannotDeleteRootFolder);
         }
 
@@ -296,7 +296,7 @@ impl FilesystemStore {
     }
 
     fn apply_folder_updated(&mut self, id: Uuid, patch: &FolderMetadataPatch) -> Result {
-        if id == FILESYSEM_ROOT_FOLDER_ID {
+        if id == FILESYSTEM_ROOT_FOLDER_ID {
             return Err(FilesystemError::RootFolderImmutable);
         }
 

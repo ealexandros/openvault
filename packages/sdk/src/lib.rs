@@ -13,7 +13,7 @@ pub use errors::Error;
 pub use vault::Vault;
 
 pub use openvault_core::features::filesystem::{
-    FILESYSEM_ROOT_FOLDER_ID, FileMetadata, FolderMetadata,
+    FILESYSTEM_ROOT_FOLDER_ID, FileMetadata, FolderMetadata,
 };
 pub use openvault_core::features::messages::{MessageContact, MessageCredentials};
 pub use openvault_core::features::secrets::{
