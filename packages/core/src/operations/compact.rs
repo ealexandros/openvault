@@ -20,7 +20,7 @@ use crate::vault::versions::shared::replay::ReplayState;
 
 const COMPACT_TEMP_SUFFIX: &str = ".compact-tmp";
 
-// @todo-soon clean this up
+// @todo-soon clean this up & change salt on compact
 
 type RemapFn = Box<dyn FnOnce(&HashMap<BlobRef, BlobRef>) -> Result<CheckpointFeature>>;
 
