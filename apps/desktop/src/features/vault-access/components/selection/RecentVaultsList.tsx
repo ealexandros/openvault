@@ -1,12 +1,12 @@
 import { Empty, EmptyHeader } from "@/components/ui/shadcn/empty";
 import { cn } from "@/utils/cn";
 import { History } from "lucide-react";
-import { RecentVault } from "../../hooks/useSelectVault";
+import { RecentVaultProps } from "../../hooks/useRecentVault";
 import { RecentVaultItem } from "./RecentVaultItem";
 import { RecentVaultListSkeleton } from "./Skeletons";
 
 type RecentVaultsListProps = {
-  vaults: RecentVault[];
+  vaults: RecentVaultProps[];
   onConnect: (path: string) => void;
   onRemove: (id: string) => void;
   onClear: () => void;
