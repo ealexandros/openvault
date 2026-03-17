@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use openvault_core::features::filesystem::FilesystemStore;
 use openvault_core::features::messages::MessagesStore;
 use openvault_core::operations::{compact, history, replay};
@@ -70,6 +72,10 @@ impl Vault {
         self.messages = MessagesRepository::load(&mut self.session)?;
 
         Ok(())
+    }
+
+    pub fn path(&self) -> &Path {
+        self.session.file_path()
     }
 
     #[inline]

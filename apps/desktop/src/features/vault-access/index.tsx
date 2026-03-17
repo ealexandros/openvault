@@ -5,6 +5,8 @@ import { SelectionView } from "./components/selection/SelectionView";
 import { UnlockView } from "./components/unlock/UnlockView";
 import { useVaultAccess } from "./hooks/useVaultAccess";
 
+export { useRecentVault, type RecentVaultProps } from "./hooks/useRecentVault";
+
 export const VaultAccessScreen = () => {
   const { view, selectedVaultPath, handleConnect, handleBack } = useVaultAccess();
 

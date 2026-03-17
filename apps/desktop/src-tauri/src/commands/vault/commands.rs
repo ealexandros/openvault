@@ -4,12 +4,16 @@ use std::str::FromStr;
 use zeroize::Zeroize;
 
 use super::contracts::{CreateVaultParams, OpenVaultParams};
+use crate::commands::vault::contracts::CreateVaultResult;
 use crate::errors::{Error, Result};
 use crate::internal::format::string_from_bytes;
 use crate::state::TauriState;
 
 #[tauri::command]
-pub async fn create_vault(state: TauriState<'_>, params: CreateVaultParams) -> Result {
+pub async fn create_vault(
+    state: TauriState<'_>,
+    params: CreateVaultParams,
+) -> Result<CreateVaultResult> {
     let encryption = EncryptionAlgorithm::from_str(&params.encryption)
         .map_err(|e| Error::InvalidEncryption(e.to_string()))?;
     let compression = CompressionAlgorithm::from_str(&params.compression)
@@ -26,10 +30,14 @@ pub async fn create_vault(state: TauriState<'_>, params: CreateVaultParams) -> R
         openvault_sdk::create_and_open_vault(PathBuf::from(params.path), &password, config)?;
     password.zeroize();
 
+    let path = vault.path().to_path_buf();
+
     let mut vault_state = state.vault.lock().unwrap();
     *vault_state = Some(vault);
 
-    Ok(())
+    Ok(CreateVaultResult {
+        path: path.to_string_lossy().to_string(),
+    })
 }
 
 #[tauri::command]

@@ -20,7 +20,7 @@ import {
 import { FilesSection } from "./_components_/FilesSection";
 import { FoldersSection } from "./_components_/FoldersSection";
 
-// @todo-soon implement the move functionality
+// @todo-later implement the move functionality
 
 const BrowsePage = () => {
   const { browseState, folderState, fileState, dialogState } = useBrowse();

@@ -1,6 +1,7 @@
 import { getPasswordStrength } from "@/components/ui/password-strength";
 import { hrefs } from "@/config/hrefs";
 import { useVault } from "@/context/VaultContext";
+import { useRecentVault } from "@/features/vault-access";
 import { tauriApi } from "@/libraries/tauri-api";
 import { useForm } from "@tanstack/react-form";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -34,6 +35,8 @@ export const useSetupVault = () => {
 
   const passwordRef = useRef<HTMLInputElement>(null);
   const verifyPasswordRef = useRef<HTMLInputElement>(null);
+
+  const { addVaultToRecents } = useRecentVault();
 
   const toggleShowPassword = () => setShowPassword(prev => !prev);
 
@@ -85,6 +88,7 @@ export const useSetupVault = () => {
 
       if (result.success) {
         setIsUnlocked(true);
+        addVaultToRecents(result.data.path);
         router.push(hrefs.dashboard.get());
       }
 

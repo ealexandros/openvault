@@ -1,11 +1,10 @@
 import { hrefs } from "@/config/hrefs";
 import { useVault } from "@/context/VaultContext";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { tauriApi } from "@/libraries/tauri-api";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { RECENT_VAULTS_KEY, type RecentVault } from "./useSelectVault";
+import { useRecentVault } from "./useRecentVault";
 
 export const getVaultName = (path: string) =>
   path
@@ -24,10 +23,7 @@ export const useUnlockVault = (selectedVaultPath: string | null) => {
   const router = useRouter();
   const { setSelectedPath, setIsUnlocked } = useVault();
 
-  const [_, setRecentVaults] = useLocalStorage<RecentVault[]>({
-    key: RECENT_VAULTS_KEY,
-    defaultValue: [],
-  });
+  const { addVaultToRecents } = useRecentVault();
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasPassword(e.target.value.length > 0);
@@ -60,17 +56,7 @@ export const useUnlockVault = (selectedVaultPath: string | null) => {
     }
 
     if (rememberVault) {
-      const newRecent: RecentVault = {
-        id: crypto.randomUUID(),
-        name: getVaultName(selectedVaultPath.split("/").pop() ?? ""),
-        path: selectedVaultPath,
-        accessAt: new Date().toISOString(),
-      };
-
-      setRecentVaults(prev => {
-        const withoutDuplicate = prev.filter(v => v.path !== selectedVaultPath);
-        return [newRecent, ...withoutDuplicate].slice(0, 3);
-      });
+      addVaultToRecents(selectedVaultPath);
     }
 
     setIsUnlocked(true);
