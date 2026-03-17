@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "openvault",
   "version": "1.0.0",
-  "identifier": "com.openvault.desktop",
+  "identifier": "com.openvault",
   "build": {
     "beforeDevCommand": "bun run dev:next",
     "devUrl": "http://localhost:8080",
@@ -25,7 +25,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "icon": []
+    "icon": ["icons/icon.icns"],
+    "targets": ["dmg"]
   }
 }
