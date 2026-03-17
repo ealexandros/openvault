@@ -32,6 +32,10 @@ export const useRecentVault = () => {
   };
 
   const addVaultToRecents = (path: string) => {
+    if (recentVaults.some(v => v.path === path)) {
+      return;
+    }
+
     setRecentVaults(prev => {
       const newRecent: RecentVaultProps = {
         id: crypto.randomUUID(),
