@@ -42,6 +42,22 @@ pub struct DecryptMessageParams {
     pub payload: String,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EncryptFileParams {
+    pub contact_id: String,
+    pub source_path: String,
+    pub destination_path: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DecryptFileParams {
+    pub contact_id: String,
+    pub source_path: String,
+    pub destination_path: String,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MessageContactItem {

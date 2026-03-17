@@ -129,4 +129,20 @@ export const tauriApi = {
   decryptMessage: (params: { id: string; payload: string }) => {
     return safeInvokeTauri<string>("decrypt_message", { params });
   },
+
+  encryptFile: (params: {
+    contactId: string;
+    sourcePath: string;
+    destinationPath: string;
+  }) => {
+    return safeInvokeTauri<void>("encrypt_file", { params });
+  },
+
+  decryptFile: (params: {
+    contactId: string;
+    sourcePath: string;
+    destinationPath: string;
+  }) => {
+    return safeInvokeTauri<void>("decrypt_file", { params });
+  },
 };

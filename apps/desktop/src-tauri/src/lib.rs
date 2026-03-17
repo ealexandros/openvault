@@ -36,6 +36,8 @@ pub fn run() {
             crate::commands::messages::remove_contact,
             crate::commands::messages::encrypt_message,
             crate::commands::messages::decrypt_message,
+            crate::commands::messages::encrypt_file,
+            crate::commands::messages::decrypt_file,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

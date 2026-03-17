@@ -6,6 +6,9 @@ pub enum Error {
     #[error(transparent)]
     Sdk(#[from] openvault_sdk::Error),
 
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
     #[error("Invalid UTF-8")]
     InvalidUtf8,
 
