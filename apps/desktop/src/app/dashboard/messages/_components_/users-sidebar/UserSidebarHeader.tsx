@@ -68,10 +68,7 @@ export const UserSidebarHeader = ({
       {credentials?.expiresAt != null && (
         <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600/80 uppercase">
           <Clock className="h-2.5 w-2.5" />
-          <span>
-            Key expires:{" "}
-            {new Date(credentials.expiresAt).toLocaleDateString()}
-          </span>
+          <span>Key expires: {new Date(credentials.expiresAt).toLocaleDateString()}</span>
         </div>
       )}
 

@@ -80,10 +80,7 @@ impl FeatureRepository for MessagesRepository {
         Vec::new()
     }
 
-    fn rewrite_blob_refs(
-        _store: &mut Self::Store,
-        _remap: &HashMap<BlobRef, BlobRef>,
-    ) -> Result {
+    fn rewrite_blob_refs(_store: &mut Self::Store, _remap: &HashMap<BlobRef, BlobRef>) -> Result {
         Ok(())
     }
 }

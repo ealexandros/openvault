@@ -184,11 +184,11 @@ export const MessageWorkspace = ({
           <div className="group relative flex-1">
             <Textarea
               placeholder={
-                !selectedUser 
-                ? "Select a recipient first..." 
-                : mode === "encrypt"
-                  ? "Type your sensitive message here..."
-                  : "Paste the base64 encoded sequence..."
+                !selectedUser
+                  ? "Select a recipient first..."
+                  : mode === "encrypt"
+                    ? "Type your sensitive message here..."
+                    : "Paste the base64 encoded sequence..."
               }
               disabled={!selectedUser}
               className="h-full min-h-[300px] resize-none rounded-xl border-border/50 bg-muted/10 p-4 font-mono text-sm leading-relaxed transition-all focus:border-primary/30 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
@@ -204,7 +204,10 @@ export const MessageWorkspace = ({
             onClick={handlePrimaryAction}
             disabled={
               !messageInput ||
-              (mode === "encrypt" && (!selectedUser || (selectedUser.expiresAt !== null && new Date(selectedUser.expiresAt) < new Date())))
+              (mode === "encrypt" &&
+                (!selectedUser ||
+                  (selectedUser.expiresAt !== null &&
+                    new Date(selectedUser.expiresAt) < new Date())))
             }
             variant="default"
             className="h-12 gap-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg hover:shadow-primary/20">

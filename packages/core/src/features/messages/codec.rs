@@ -1,6 +1,6 @@
+use super::MessagesSnapshot;
 use super::error::{MessagesError, Result};
 use super::events::MessagesChange;
-use super::MessagesSnapshot;
 use crate::features::shared::FeatureCodec;
 
 pub const MESSAGES_WIRE_VERSION: u16 = 1;
