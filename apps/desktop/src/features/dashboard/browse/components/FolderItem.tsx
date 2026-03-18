@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/shadcn/badge";
 import { FolderItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { ChevronRightIcon, FolderIcon, StarIcon, type LucideProps } from "lucide-react";
-import { FolderIconName, ICON_MAP } from "../hooks/useFolder";
+import { FOLDER_ICONS, FolderIconName } from "../data/folder-icons";
 import { FolderContextMenu } from "./FolderContextMenu";
 
 type FolderItemProps = {
@@ -17,7 +17,8 @@ type FolderItemProps = {
 };
 
 const renderFolderIcon = (iconName: string, props?: LucideProps) => {
-  const Icon = iconName in ICON_MAP ? ICON_MAP[iconName as FolderIconName] : FolderIcon;
+  const Icon =
+    iconName in FOLDER_ICONS ? FOLDER_ICONS[iconName as FolderIconName] : FolderIcon;
   return <Icon {...props} />;
 };
 

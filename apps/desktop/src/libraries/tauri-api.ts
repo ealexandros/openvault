@@ -38,11 +38,11 @@ export const tauriApi = {
     return safeInvokeTauri<void>("lock_vault", {});
   },
 
-  browseFs: (params: { parentId: string }) => {
+  browseFs: (params: { parentId?: string }) => {
     return safeInvokeTauri<BrowseResult>("browse_fs", { params });
   },
 
-  createFolder: (params: { parentId: string; name: string }) => {
+  createFolder: (params: { parentId?: string; name: string }) => {
     return safeInvokeTauri<string>("create_folder", { params });
   },
 
@@ -54,11 +54,15 @@ export const tauriApi = {
     return safeInvokeTauri<void>("rename_item", { params });
   },
 
-  uploadFile: (params: { parentId: string; sourcePath: string }) => {
+  setFavouriteItem: (params: { id: string; itemType: ItemType; isFavourite: boolean }) => {
+    return safeInvokeTauri<void>("set_favorite_item", { params });
+  },
+
+  uploadFile: (params: { parentId?: string; sourcePath: string }) => {
     return safeInvokeTauri<void>("upload_file", { params });
   },
 
-  uploadFolder: (params: { parentId: string; sourcePath: string }) => {
+  uploadFolder: (params: { parentId?: string; sourcePath: string }) => {
     return safeInvokeTauri<void>("upload_folder", { params });
   },
 
@@ -72,10 +76,6 @@ export const tauriApi = {
 
   setFolderIcon: (params: { id: string; icon: string }) => {
     return safeInvokeTauri<void>("set_folder_icon", { params });
-  },
-
-  setFavourtieItem: (params: { id: string; itemType: ItemType; isFavourite: boolean }) => {
-    return safeInvokeTauri<void>("set_favorite_item", { params });
   },
 
   exportFile: (params: { id: string; destinationPath: string }) => {

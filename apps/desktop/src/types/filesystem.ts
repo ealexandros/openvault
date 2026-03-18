@@ -1,3 +1,10 @@
+export const ItemType = {
+  FILE: "file",
+  FOLDER: "folder",
+} as const;
+
+export type ItemType = (typeof ItemType)[keyof typeof ItemType];
+
 export type FolderItemResult = {
   id: string;
   name: string;
@@ -23,10 +30,3 @@ export type BrowseResult = {
   folders: FolderItemResult[];
   files: FileItemResult[];
 };
-
-export const ItemType = {
-  FILE: "file",
-  FOLDER: "folder",
-} as const;
-
-export type ItemType = (typeof ItemType)[keyof typeof ItemType];

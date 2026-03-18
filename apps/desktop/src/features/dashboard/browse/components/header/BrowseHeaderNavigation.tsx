@@ -1,12 +1,13 @@
 "use client";
 
 import { Input } from "@/components/ui/shadcn/input";
+import { PathSegment } from "@/features/dashboard/browse/types";
 import { SearchIcon } from "lucide-react";
 import { BrowseBreadcrumbs } from "./Breadcrumbs";
 import { FileStats } from "./FileStats";
 
 type BrowseHeaderNavigationProps = {
-  currentPath: string[];
+  currentPath: PathSegment[];
   folderCount: number;
   fileCount: number;
   searchQuery: string;

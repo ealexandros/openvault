@@ -1,10 +1,12 @@
+use openvault_sdk::FILESYSTEM_ROOT_FOLDER_ID;
+
 use super::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
     ExportFileParams, ExportFolderParams, FileItem, FolderItem, ItemType, PathIsFileParams,
     ReadFileParams, RenameItemParams, SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
 };
 use crate::errors::{Error, Result};
-use crate::internal::parser::parse_uuid;
+use crate::internal::parser::{parse_optional_uuid, parse_uuid};
 use crate::state::TauriState;
 
 macro_rules! vault_fs {
@@ -24,7 +26,8 @@ pub async fn path_is_file(params: PathIsFileParams) -> Result<bool> {
 pub async fn browse_fs(state: TauriState<'_>, params: BrowseVaultParams) -> Result<BrowseResult> {
     vault_fs!(state, fs, vault);
 
-    let parent_uuid = parse_uuid(&params.parent_id)?;
+    let parent_uuid =
+        parse_optional_uuid(params.parent_id.as_deref())?.unwrap_or(FILESYSTEM_ROOT_FOLDER_ID);
 
     let (folders, files) = fs.browse(&parent_uuid)?;
 
@@ -62,7 +65,9 @@ pub async fn browse_fs(state: TauriState<'_>, params: BrowseVaultParams) -> Resu
 pub async fn create_folder(state: TauriState<'_>, params: CreateFolderParams) -> Result<String> {
     vault_fs!(state, fs, vault);
 
-    let parent_uuid = parse_uuid(&params.parent_id)?;
+    let parent_uuid =
+        parse_optional_uuid(params.parent_id.as_deref())?.unwrap_or(FILESYSTEM_ROOT_FOLDER_ID);
+
     let new_folder_id = fs.add_folder(parent_uuid, params.name)?;
 
     vault.commit()?;
@@ -106,7 +111,9 @@ pub async fn rename_item(state: TauriState<'_>, params: RenameItemParams) -> Res
 pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Result {
     vault_fs!(state, fs, vault);
 
-    let parent_uuid = parse_uuid(&params.parent_id)?;
+    let parent_uuid =
+        parse_optional_uuid(params.parent_id.as_deref())?.unwrap_or(FILESYSTEM_ROOT_FOLDER_ID);
+
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.add_file(parent_uuid, &source_path)?;
@@ -119,7 +126,9 @@ pub async fn upload_file(state: TauriState<'_>, params: UploadFileParams) -> Res
 pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) -> Result {
     vault_fs!(state, fs, vault);
 
-    let parent_uuid = parse_uuid(&params.parent_id)?;
+    let parent_uuid =
+        parse_optional_uuid(params.parent_id.as_deref())?.unwrap_or(FILESYSTEM_ROOT_FOLDER_ID);
+
     let source_path = std::path::PathBuf::from(params.source_path);
 
     fs.upload_folder(parent_uuid, &source_path)?;

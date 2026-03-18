@@ -8,20 +8,22 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/shadcn/breadcrumb";
+import { PathSegment } from "@/features/dashboard/browse/types";
 import { HomeIcon } from "lucide-react";
 import React from "react";
 
 type BrowseBreadcrumbsProps = {
-  currentPath: string[];
+  currentPath: PathSegment[];
   onPathClick: (index: number) => void;
 };
 
 export const BrowseBreadcrumbs = ({ currentPath, onPathClick }: BrowseBreadcrumbsProps) => {
   if (!currentPath.length) return null;
 
-  const lastIndex = currentPath.length - 1;
-  const lastSegment = currentPath[lastIndex];
-  const clickableSegments = currentPath.slice(0, lastIndex);
+  const pathNames = currentPath.map(pathSegment => pathSegment.name);
+  const lastIndex = pathNames.length - 1;
+  const lastSegment = pathNames[lastIndex];
+  const clickableSegments = pathNames.slice(0, lastIndex);
 
   return (
     <Breadcrumb>

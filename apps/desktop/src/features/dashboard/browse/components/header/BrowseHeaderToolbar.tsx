@@ -11,15 +11,17 @@ import { FileUp, FolderUp, LayoutGridIcon, UploadIcon } from "lucide-react";
 import { CreateFolderDialog } from "../dialogs";
 
 type BrowseHeaderToolbarProps = {
+  currentFolderId: string;
+  onFolderCreate: () => void;
   onUploadFile: () => void;
   onUploadFolder: () => void;
-  onCreateFolder: (name: string) => Promise<void>;
 };
 
 export const BrowseHeaderToolbar = ({
+  currentFolderId,
+  onFolderCreate,
   onUploadFile,
   onUploadFolder,
-  onCreateFolder,
 }: BrowseHeaderToolbarProps) => (
   <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
     <div className="flex items-center gap-4">
@@ -33,7 +35,7 @@ export const BrowseHeaderToolbar = ({
     </div>
 
     <div className="flex items-center gap-3">
-      <CreateFolderDialog onCreate={onCreateFolder} />
+      <CreateFolderDialog parentId={currentFolderId} onSuccess={onFolderCreate} />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -50,7 +52,7 @@ export const BrowseHeaderToolbar = ({
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onUploadFolder} className="cursor-pointer text-[13px]">
             <FileUp className="size-4 text-foreground/80" />
-            Upload Folder
+            Upload Folders
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

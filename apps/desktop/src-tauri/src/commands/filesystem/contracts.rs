@@ -10,13 +10,13 @@ pub enum ItemType {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BrowseVaultParams {
-    pub parent_id: String,
+    pub parent_id: Option<String>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateFolderParams {
-    pub parent_id: String,
+    pub parent_id: Option<String>,
     pub name: String,
 }
 
@@ -38,14 +38,14 @@ pub struct RenameItemParams {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UploadFileParams {
-    pub parent_id: String,
+    pub parent_id: Option<String>,
     pub source_path: String,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UploadFolderParams {
-    pub parent_id: String,
+    pub parent_id: Option<String>,
     pub source_path: String,
 }
 

@@ -1,9 +1,12 @@
+"use client";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
+import { FileItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { FileType } from "@/utils/mime-types";
 import { FileAudioIcon, FileTextIcon, FileVideoIcon, ImageIcon } from "lucide-react";
@@ -19,9 +22,7 @@ import {
 
 type FileViewerDialogProps = {
   isOpen: boolean;
-  fileName: string;
-  extension?: string;
-  content: number[] | null;
+  item: FileItemResult | null;
   onOpenChange: (open: boolean) => void;
 };
 
@@ -33,20 +34,18 @@ const IconMap: Record<NonNullable<FileType>, React.ElementType> = {
   text: FileTextIcon,
 };
 
-export const FileViewerDialog = ({
-  isOpen,
-  onOpenChange,
-  fileName,
-  extension,
-  content,
-}: FileViewerDialogProps) => {
-  const { fileType, fileUrl, text } = useFileViewerDialog(content, extension);
+export const FilePreviewDialog = ({ isOpen, item, onOpenChange }: FileViewerDialogProps) => {
+  const { fileType, fileUrl, text, content } = useFileViewerDialog({ item });
+
+  if (item == null) {
+    return null;
+  }
 
   const viewers: Record<NonNullable<FileType>, React.ReactNode> = {
-    image: <ImageViewer url={fileUrl} alt={fileName} />,
+    image: <ImageViewer url={fileUrl} alt={item.name} />,
     pdf: <PdfViewer url={fileUrl} />,
-    audio: <AudioViewer url={fileUrl} fileName={fileName} />,
-    video: <VideoViewer url={fileUrl} fileName={fileName} />,
+    audio: <AudioViewer url={fileUrl} fileName={item.name} />,
+    video: <VideoViewer url={fileUrl} fileName={item.name} />,
     text: <TextViewer text={text} />,
   };
 
@@ -62,13 +61,11 @@ export const FileViewerDialog = ({
             </div>
             <div>
               <DialogTitle className="text-base font-semibold tracking-tight">
-                {fileName}
+                {item.name}
               </DialogTitle>
-              {extension != null && (
-                <p className="mt-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  {extension} FILE
-                </p>
-              )}
+              <p className="mt-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                {item.extension} FILE
+              </p>
             </div>
           </div>
         </DialogHeader>
@@ -79,7 +76,7 @@ export const FileViewerDialog = ({
             "h-[50vh] flex-col items-center justify-center sm:h-[60vh] md:h-[70vh]",
             fileType === "text" && content && "items-start justify-start bg-zinc-950",
           )}>
-          {content ? viewers[fileType] : <ViewerLoading />}
+          {content != null ? viewers[fileType] : <ViewerLoading />}
         </div>
       </DialogContent>
     </Dialog>

@@ -7,6 +7,10 @@ pub fn parse_uuid(id: &str) -> Result<Uuid> {
     Uuid::parse_str(id).map_err(|_| Error::InvalidUuid(id.to_string()))
 }
 
+pub fn parse_optional_uuid(id: Option<&str>) -> Result<Option<Uuid>> {
+    id.map(parse_uuid).transpose()
+}
+
 pub fn parse_optional_datetime(input: Option<String>) -> Result<Option<DateTime<Utc>>> {
     input
         .map(|s| {

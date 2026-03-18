@@ -7,24 +7,18 @@ import {
 } from "@/components/ui/shadcn/dialog";
 import { type FolderItemResult } from "@/types/filesystem";
 import { formatBytes, formatFromIsoString } from "@/utils/format";
+import { PropertyRow } from "./PropertyRow";
 
 type FolderPropertiesDialogProps = {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
   item: FolderItemResult | null;
+  onOpenChange: (open: boolean) => void;
 };
-
-const PropertyRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between gap-4 rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm">
-    <span className="font-medium text-muted-foreground">{label}</span>
-    <span className="truncate text-right font-mono text-foreground/90">{value}</span>
-  </div>
-);
 
 export const FolderPropertiesDialog = ({
   isOpen,
-  onOpenChange,
   item,
+  onOpenChange,
 }: FolderPropertiesDialogProps) => (
   <Dialog open={isOpen} onOpenChange={onOpenChange}>
     <DialogContent className="sm:max-w-lg">

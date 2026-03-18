@@ -6,41 +6,43 @@ import {
   BrowseHeader,
   BrowseSkeleton,
   BrowseViewState,
-  ChangeFolderIconDialog,
-  DeleteConfirmationDialog,
+  DeleteItemDialog,
   EmptyFolder,
   EmptySearchResult,
   ExportItemDialog,
+  FilePreviewDialog,
   FilePropertiesDialog,
-  FileViewerDialog,
   FolderPropertiesDialog,
   RenameItemDialog,
   useBrowse,
 } from "@/features/dashboard/browse";
+import { UpdateFolderIconDialog } from "@/features/dashboard/browse/components/dialogs/update-folder-icon";
 import { FilesSection } from "./_components_/FilesSection";
 import { FoldersSection } from "./_components_/FoldersSection";
 
 // @todo-later implement the move functionality
 
 const BrowsePage = () => {
-  const { browseState, folderState, fileState, dialogState } = useBrowse();
+  const { browseState, dialogs, upload, toggleFileFavourite, toggleFolderFavourite, refresh } =
+    useBrowse();
 
   return (
-    <FileDropListener onDropPaths={fileState.handleDropPaths}>
+    <FileDropListener onDropPaths={upload.paths}>
       {({ isDragging }) => (
         <main className="relative mx-auto h-full max-w-7xl space-y-16 py-16">
           <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
             currentPath={browseState.currentPath}
+            currentFolderId={browseState.currentFolderId}
+            onFolderCreate={refresh}
             folderCount={browseState.folderCount}
             fileCount={browseState.fileCount}
             searchQuery={browseState.searchQuery}
             onSearchQueryChange={browseState.setSearchQuery}
-            onBreadcrumbClick={folderState.openBreadcrumb}
-            onUploadFile={fileState.uploadFile}
-            onUploadFolder={fileState.uploadFolder}
-            onCreateFolder={folderState.createFolder}
+            onBreadcrumbClick={browseState.navigateToIndex}
+            onUploadFile={upload.files}
+            onUploadFolder={upload.folders}
           />
 
           {browseState.viewState === BrowseViewState.Loading && <BrowseSkeleton />}
@@ -48,32 +50,32 @@ const BrowsePage = () => {
           {browseState.viewState === BrowseViewState.Results && (
             <section className="space-y-10 pb-20">
               <FoldersSection
-                folders={folderState.folders}
+                folders={browseState.folders}
                 canGoBack={browseState.canGoBack}
                 isNavigating={browseState.isNavigating}
-                onBackClick={folderState.goBack}
-                onFolderClick={folderState.openFolder}
-                onFolderRename={folderState.requestRename}
-                onFolderToggleFavourite={folderState.toggleFavourite}
-                onFolderProperties={folderState.requestProperties}
-                onFolderDelete={folderState.requestDelete}
-                onFolderChangeIcon={folderState.requestIconChange}
-                onFolderExport={folderState.requestExport}
+                onBackClick={browseState.goBack}
+                onFolderClick={browseState.navigateToFolder}
+                onFolderRename={dialogs.requestFolderRename}
+                onFolderToggleFavourite={toggleFolderFavourite}
+                onFolderProperties={dialogs.requestFolderProperties}
+                onFolderDelete={dialogs.requestFolderDeletion}
+                onFolderChangeIcon={dialogs.requestFolderIconChange}
+                onFolderExport={dialogs.requestFolderExport}
               />
               <FilesSection
-                files={fileState.files}
-                onFileClick={fileState.openFile}
-                onFileRename={fileState.requestRename}
-                onFileToggleFavourite={fileState.toggleFavourite}
-                onFileProperties={fileState.requestProperties}
-                onFileDelete={fileState.requestDelete}
-                onFileExport={fileState.requestExport}
+                files={browseState.files}
+                onFileClick={dialogs.filePreview.open}
+                onFileRename={dialogs.requestFileRename}
+                onFileToggleFavourite={toggleFileFavourite}
+                onFileProperties={dialogs.requestFileProperties}
+                onFileDelete={dialogs.requestFileDeletion}
+                onFileExport={dialogs.requestFileExport}
               />
             </section>
           )}
 
           {browseState.viewState === BrowseViewState.Empty && (
-            <EmptyFolder canGoBack={browseState.canGoBack} onGoBack={folderState.goBack} />
+            <EmptyFolder canGoBack={browseState.canGoBack} onGoBack={browseState.goBack} />
           )}
 
           {browseState.viewState === BrowseViewState.NoResults && (
@@ -83,49 +85,44 @@ const BrowsePage = () => {
             />
           )}
 
-          <FileViewerDialog
-            isOpen={dialogState.isFileViewerVisible}
-            onOpenChange={dialogState.toggleFileViewerVisibility}
-            fileName={dialogState.viewingItem?.name ?? ""}
-            extension={dialogState.viewingItem?.extension}
-            content={dialogState.viewingItem?.content ?? null}
-          />
-          <ChangeFolderIconDialog
-            isOpen={dialogState.isFolderIconPickerVisible}
-            onOpenChange={dialogState.toggleFolderIconPickerVisibility}
-            onSelectIcon={dialogState.selectFolderIcon}
+          <FilePreviewDialog
+            isOpen={dialogs.filePreview.isOpen}
+            item={dialogs.filePreview.item}
+            onOpenChange={dialogs.filePreview.toggle}
           />
           <FilePropertiesDialog
-            isOpen={dialogState.isFilePropertiesVisible}
-            onOpenChange={dialogState.toggleFilePropertiesVisibility}
-            item={dialogState.fileForProperties}
+            isOpen={dialogs.fileProperties.isOpen}
+            item={dialogs.fileProperties.item}
+            onOpenChange={dialogs.fileProperties.toggle}
           />
           <FolderPropertiesDialog
-            isOpen={dialogState.isFolderPropertiesVisible}
-            onOpenChange={dialogState.toggleFolderPropertiesVisibility}
-            item={dialogState.folderForProperties}
+            isOpen={dialogs.folderProperties.isOpen}
+            item={dialogs.folderProperties.item}
+            onOpenChange={dialogs.folderProperties.toggle}
+          />
+          <UpdateFolderIconDialog
+            isOpen={dialogs.folderIcon.isOpen}
+            item={dialogs.folderIcon.item}
+            onOpenChange={dialogs.folderIcon.toggle}
+            onUpdate={refresh}
           />
           <RenameItemDialog
-            key={dialogState.renameItemId}
-            isOpen={dialogState.isRenameVisible}
-            onOpenChange={dialogState.toggleRenameVisibility}
-            initialName={dialogState.renameInitialName}
-            itemType={dialogState.renameItemType}
-            onRename={dialogState.submitRename}
+            isOpen={dialogs.rename.isOpen}
+            item={dialogs.rename.item}
+            onOpenChange={dialogs.rename.toggle}
+            onRename={refresh}
           />
-          <DeleteConfirmationDialog
-            isOpen={dialogState.isDeleteConfirmationVisible}
-            onOpenChange={dialogState.toggleDeleteConfirmationVisibility}
-            itemName={dialogState.deleteItemName}
-            itemType={dialogState.deleteItemType}
-            onConfirm={dialogState.confirmDeleteSelection}
+          <DeleteItemDialog
+            isOpen={dialogs.delete.isOpen}
+            item={dialogs.delete.item}
+            onOpenChange={dialogs.delete.toggle}
+            onDelete={refresh}
           />
           <ExportItemDialog
-            isOpen={dialogState.isExportVisible}
-            onOpenChange={dialogState.toggleExportVisibility}
-            itemName={dialogState.exportItemName}
-            itemType={dialogState.exportItemType}
-            onExport={dialogState.confirmExportSelection}
+            isOpen={dialogs.export.isOpen}
+            item={dialogs.export.item}
+            onOpenChange={dialogs.export.toggle}
+            onExport={refresh}
           />
         </main>
       )}

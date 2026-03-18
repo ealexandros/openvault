@@ -1,34 +1,33 @@
-import { LucideIcon } from "lucide-react";
+import { ItemType } from "@/types/filesystem";
 
 export type PathSegment = {
-  id: string;
+  id?: string;
   name: string;
 };
 
-export type FolderRenamingItem = {
+export type RenameTarget = {
   id: string;
   name: string;
-  type: "folder";
+  type: ItemType;
 };
 
-export type FileRenamingItem = {
+export type DeletionTarget = {
   id: string;
   name: string;
-  type: "file";
+  type: ItemType;
 };
 
-export type RenamingItem = FolderRenamingItem | FileRenamingItem;
+export type ExportTarget = {
+  id: string;
+  name: string;
+  type: ItemType;
+};
 
-export type ViewingItem = {
+export type PreviewItem = {
   id: string;
   name: string;
   extension?: string;
   content: number[] | null;
-};
-
-export type FolderIconOption = {
-  name: string;
-  Icon: LucideIcon;
 };
 
 export enum BrowseViewState {
