@@ -1,5 +1,6 @@
 "use client";
 
+import { queryClient } from "@/libraries/react-query";
 import { tauriApi } from "@/libraries/tauri-api";
 import { useRouter } from "next/navigation";
 import { createContext, PropsWithChildren, useContext, useState } from "react";
@@ -27,6 +28,7 @@ export const VaultProvider = ({ children }: PropsWithChildren) => {
   const lockVault = async () => {
     const toastId = toast.loading("Locking the vault");
     await tauriApi.lockVault();
+    queryClient.clear();
     setIsUnlocked(false);
     setSelectedPath(null);
     toast.dismiss(toastId);
