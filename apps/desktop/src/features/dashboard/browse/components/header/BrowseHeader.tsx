@@ -9,7 +9,7 @@ type BrowseHeaderProps = {
   folderCount: number;
   fileCount: number;
   searchQuery: string;
-  currentFolderId: string;
+  currentFolderId?: string;
   onFolderCreate: () => void;
   onSearchQueryChange: (value: string) => void;
   onBreadcrumbClick: (index: number) => void;

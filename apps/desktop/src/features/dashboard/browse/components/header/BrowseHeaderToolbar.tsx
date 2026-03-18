@@ -11,7 +11,7 @@ import { FileUp, FolderUp, LayoutGridIcon, UploadIcon } from "lucide-react";
 import { CreateFolderDialog } from "../dialogs";
 
 type BrowseHeaderToolbarProps = {
-  currentFolderId: string;
+  currentFolderId?: string;
   onFolderCreate: () => void;
   onUploadFile: () => void;
   onUploadFolder: () => void;

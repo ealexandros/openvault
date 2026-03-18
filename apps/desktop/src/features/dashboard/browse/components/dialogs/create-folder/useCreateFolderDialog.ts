@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 type UseCreateFolderDialogParams = {
-  parentId: string;
+  parentId?: string;
   onSuccess?: () => void;
   onOpenChange: (open: boolean) => void;
 };

@@ -16,7 +16,7 @@ import { useState } from "react";
 import { useCreateFolderDialog } from "./useCreateFolderDialog";
 
 type CreateFolderDialogProps = {
-  parentId: string;
+  parentId?: string;
   onSuccess?: () => void;
 };
 
@@ -32,7 +32,7 @@ export const CreateFolderDialog = ({ parentId, onSuccess }: CreateFolderDialogPr
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-10 gap-2 px-4 shadow-xs md:flex">
+        <Button variant="outline" size="sm" className="h-10 gap-2 px-4 text-sm md:flex">
           <PlusIcon className="size-4" />
           <span>New Folder</span>
         </Button>
