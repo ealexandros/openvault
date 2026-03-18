@@ -11,6 +11,8 @@ export type RecentVaultProps = {
   path: string;
 };
 
+const MAX_RECENT_VAULTS = 2;
+
 export const useRecentVault = () => {
   const [validatedVaults, setValidatedVaults] = useState<RecentVaultProps[]>([]);
   const [isLoadingVaults, setIsLoadingVaults] = useState(true);
@@ -42,7 +44,7 @@ export const useRecentVault = () => {
         name: getVaultName(path.split("/").pop() ?? ""),
         path,
       };
-      return [newRecent, ...prev].slice(0, 3);
+      return [newRecent, ...prev].slice(0, MAX_RECENT_VAULTS);
     });
   };
 

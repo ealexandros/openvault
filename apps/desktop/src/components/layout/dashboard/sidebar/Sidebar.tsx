@@ -1,18 +1,16 @@
-import { env } from "@/config/env";
+import { Brand } from "@/components/icons";
 import { hrefs } from "@/config/hrefs";
 import { cn } from "@/utils/cn";
 import {
   ActivityIcon,
   FolderIcon,
   LockIcon,
-  LogOut,
   MessageCircle,
   NotebookIcon,
-  SettingsIcon,
   ShieldAlertIcon,
 } from "lucide-react";
+import { SidebarFooter } from "./Footer";
 import { NavItem } from "./NavItem";
-import { SidebarHeader } from "./SidebarHeader";
 
 type SidebarProps = {
   vaultName?: string;
@@ -29,46 +27,24 @@ const mainNavItems = [
   { href: hrefs.dashboard.decoy.get(), label: "Decoy Vault", icon: ShieldAlertIcon },
 ] as const;
 
-const bottomNavItems = [
-  { href: hrefs.dashboard.settings.get(), label: "Settings", icon: SettingsIcon },
-] as const;
-
 export const DashboardSidebar = ({ vaultName, isCollapsed, onLogout }: SidebarProps) => (
   <aside
     className={cn(
-      "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 p-6 transition-all duration-200 ease-in-out",
+      "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 px-6 py-10",
       isCollapsed === true ? "w-0 overflow-hidden border-r-0 p-0 opacity-0" : "w-72",
     )}>
-    <div className={cn("flex h-full flex-col", isCollapsed === true && "invisible")}>
-      <SidebarHeader vaultName={vaultName} />
+    <div className={cn("flex h-full flex-col gap-10", isCollapsed === true && "invisible")}>
+      <header className="pt-2">
+        <Brand nameClassName="text-xl font-bold tracking-tight" />
+      </header>
 
-      <nav className="flex-1 space-y-1.5 py-3">
+      <nav className="flex-1">
         {mainNavItems.map(item => (
           <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
         ))}
       </nav>
 
-      <div className="space-y-6 pb-2">
-        <div className="space-y-1.5">
-          {bottomNavItems.map(item => (
-            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
-          ))}
-          <NavItem
-            href={hrefs.samesite.get()}
-            label="Logout"
-            icon={LogOut}
-            onClick={onLogout}
-            className="hover:text-destructive"
-            iconClassName="group-hover:text-destructive"
-          />
-        </div>
-
-        <div className="px-3 text-xs font-semibold text-muted-foreground/60 uppercase">
-          OPENVAULT • V{env.VERSION}
-        </div>
-      </div>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background/40 to-transparent" />
+      <SidebarFooter vaultName={vaultName} onLogout={onLogout} />
     </div>
   </aside>
 );

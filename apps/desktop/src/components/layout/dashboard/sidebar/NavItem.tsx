@@ -30,7 +30,7 @@ export function NavItem({
         data-active={isActive}
         onClick={onClick}
         className={cn(
-          "group flex w-full items-center gap-3 p-3 transition-all duration-300",
+          "group flex w-full items-center gap-3 px-1 py-3 transition-all duration-300",
           "text-muted-foreground/80 hover:text-foreground/80",
           "data-[active=true]:text-primary",
           "data-[active=true]:backdrop-blur-sm",
@@ -50,7 +50,7 @@ export function NavItem({
       <div
         data-active={isActive}
         className={cn(
-          "absolute top-1/2 -left-3 h-6 w-1 -translate-y-1/2 rounded-full",
+          "absolute top-1/2 -left-4 h-6 w-1 -translate-y-1/2 rounded-full",
           "data-[active=true]:bg-primary",
         )}
       />
