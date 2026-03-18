@@ -137,6 +137,8 @@ pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) ->
     Ok(())
 }
 
+// @todo-now return it in a more secure way
+
 #[tauri::command]
 pub async fn read_file_bytes(state: TauriState<'_>, params: ReadFileParams) -> Result<Vec<u8>> {
     vault_fs!(state, fs, vault);

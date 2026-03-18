@@ -1,8 +1,10 @@
 mod commands;
 mod errors;
 mod internal;
+mod protocols;
 mod state;
 
+use crate::protocols::{PROTOCOL_SCHEME, handle_secure_protocol};
 use crate::state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -39,6 +41,9 @@ pub fn run() {
             crate::commands::messages::encrypt_file,
             crate::commands::messages::decrypt_file,
         ])
+        .register_uri_scheme_protocol(PROTOCOL_SCHEME, move |app, request| {
+            handle_secure_protocol(&app.app_handle(), request.uri())
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .run(tauri::generate_context!())
