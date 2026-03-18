@@ -8,7 +8,7 @@ use super::error::SecretError;
 use super::models::{LoginEntry, SecretFolder};
 use super::patch::{LoginEntryPatch, SecretFolderPatch};
 
-pub const SECRETS_WIRE_VERSION: u16 = 2;
+pub const SECRETS_WIRE_VERSION: u16 = 1;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct SecretSnapshot {
