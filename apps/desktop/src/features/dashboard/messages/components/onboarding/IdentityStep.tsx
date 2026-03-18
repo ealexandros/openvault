@@ -24,7 +24,6 @@ export const IdentityStep = ({
   <div className="space-y-6">
     <div>
       <h3 className="text-3xl font-bold tracking-tight">Set Your Identity</h3>
-
       <p className="text-muted-foreground">This identity will be visible to peers.</p>
     </div>
 
@@ -32,7 +31,6 @@ export const IdentityStep = ({
       <Label className="text-xs font-bold tracking-widest text-muted-foreground/60 uppercase">
         Display Name
       </Label>
-
       <Input
         value={displayName}
         onChange={e => setDisplayName(e.target.value)}

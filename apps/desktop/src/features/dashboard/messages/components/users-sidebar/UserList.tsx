@@ -18,25 +18,25 @@ export const UserList = ({
   setSelectedUserId,
   onRename,
   onDelete,
-}: UserListProps) => (
-  <>
-    {isLoading === true ? (
+}: UserListProps) => {
+  if (isLoading === true) {
+    return (
       <>
         <UserListItemSkeleton />
         <UserListItemSkeleton />
         <UserListItemSkeleton />
       </>
-    ) : (
-      users.map(user => (
-        <UserListItem
-          key={user.id}
-          user={user}
-          selected={selectedUserId === user.id}
-          onClick={() => setSelectedUserId(user.id)}
-          onRename={onRename}
-          onDelete={onDelete}
-        />
-      ))
-    )}
-  </>
-);
+    );
+  }
+
+  return users.map(user => (
+    <UserListItem
+      key={user.id}
+      user={user}
+      selected={selectedUserId === user.id}
+      onClick={() => setSelectedUserId(user.id)}
+      onRename={onRename}
+      onDelete={onDelete}
+    />
+  ));
+};

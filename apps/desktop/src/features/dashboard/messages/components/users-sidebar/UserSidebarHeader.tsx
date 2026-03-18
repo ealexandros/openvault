@@ -39,6 +39,8 @@ export const UserSidebarHeader = ({
   onReset,
   onUpdate,
 }: UserSidebarHeaderProps) => {
+  // @todo-now remove this..
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [name, setName] = useState(credentials?.name ?? "");
   const [rotationMonths, setRotationMonths] = useState(12);

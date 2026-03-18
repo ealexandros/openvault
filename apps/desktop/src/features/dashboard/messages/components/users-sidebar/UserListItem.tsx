@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/shadcn/button";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
-import { Button } from "@/components/ui/shadcn/button";
 import { Input } from "@/components/ui/shadcn/input";
 import { Label } from "@/components/ui/shadcn/label";
 import { type MessageContact } from "@/types/messages";
@@ -29,6 +29,8 @@ type UserListItemProps = {
   onRename: (id: string, newName: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 };
+
+// @todo-now remove this..
 
 export const UserListItem = ({
   user,

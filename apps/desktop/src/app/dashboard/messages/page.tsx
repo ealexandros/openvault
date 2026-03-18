@@ -5,13 +5,13 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/shadcn/resizable";
+import { MessageOnboarding } from "@/features/dashboard/messages/components/MessageOnboarding";
+import { MessageWorkspace } from "@/features/dashboard/messages/components/MessageWorkspace";
+import { UserSidebar } from "@/features/dashboard/messages/components/users-sidebar";
+import { useMessages } from "@/features/dashboard/messages/hooks/useMessages";
 import { AnimatePresence, motion } from "framer-motion";
 import { debounce } from "lodash-es";
 import { ChangeEvent, useEffect, useMemo, useRef } from "react";
-import { MessageOnboarding } from "./_components_/MessageOnboarding";
-import { MessageWorkspace } from "./_components_/MessageWorkspace";
-import { UserSidebar } from "./_components_/users-sidebar";
-import { useMessagesPage } from "./useMessagesPage";
 
 // @todo-now continue this..
 
@@ -30,8 +30,10 @@ const MessagesPage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
-    algorithm,
     mode,
+    workMode,
+    selectedFile,
+    fileDestination,
     messageInput,
     messageOutput,
     transformError,
@@ -40,27 +42,30 @@ const MessagesPage = () => {
     selectedUserId,
     searchQuery,
     importError,
-    algorithmOptions,
     isLoading,
     isSetup,
     credentials,
-    setAlgorithm,
     setMode,
+    setWorkMode,
+    setSelectedFile,
+    setFileDestination,
     setMessageInput,
     setSelectedUserId,
     setSearchQuery,
     transformMessage,
     clearMessageFields,
+    swapMessageFields,
+    selectComputerFile,
     importUserProfile,
     exportSelectedUserProfile,
     exportCurrentUserProfile,
     completeOnboarding,
+    setIsVaultPickerOpen,
     renameContact,
     removeContact,
     renewCredentials,
     resetCredentials,
-    swapMessageFields,
-  } = useMessagesPage();
+  } = useMessages();
 
   const transformMessageRef = useRef(transformMessage);
 
@@ -128,6 +133,16 @@ const MessagesPage = () => {
     debouncedDecrypt.flush();
   };
 
+  // const handleSelectVaultFile = (file: FileItemResult) => {
+  //   const displayName = file.extension ? `${file.name}.${file.extension}` : file.name;
+  //   setSelectedFile({
+  //     name: displayName,
+  //     size: file.size,
+  //     source: "vault",
+  //     id: file.id,
+  //   });
+  // };
+
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
       <input
@@ -162,11 +177,14 @@ const MessagesPage = () => {
               <ResizablePanel defaultSize="75%">
                 <main className="scrollbar-none h-full overflow-y-auto p-10">
                   <MessageWorkspace
-                    algorithm={algorithm}
-                    algorithmOptions={algorithmOptions}
-                    setAlgorithm={setAlgorithm}
                     mode={mode}
                     setMode={setMode}
+                    workMode={workMode}
+                    setWorkMode={setWorkMode}
+                    selectedFile={selectedFile}
+                    setSelectedFile={setSelectedFile}
+                    fileDestination={fileDestination}
+                    setFileDestination={setFileDestination}
                     messageInput={messageInput}
                     setMessageInput={setMessageInput}
                     messageOutput={messageOutput}
@@ -174,7 +192,11 @@ const MessagesPage = () => {
                     clearMessageFields={clearMessageFields}
                     swapMessageFields={swapMessageFields}
                     handlePrimaryAction={handlePrimaryAction}
+                    selectComputerFile={selectComputerFile}
+                    openVaultPicker={() => setIsVaultPickerOpen(true)}
                     selectedUser={selectedUser}
+                    users={filteredUsers}
+                    setSelectedUserId={setSelectedUserId}
                   />
                 </main>
               </ResizablePanel>

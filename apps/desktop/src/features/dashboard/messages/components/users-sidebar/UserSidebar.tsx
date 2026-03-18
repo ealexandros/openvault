@@ -1,14 +1,14 @@
 "use client";
 
+import { Button } from "@/components/ui/shadcn/button";
 import { Input } from "@/components/ui/shadcn/input";
 import { ScrollArea } from "@/components/ui/shadcn/scroll-area";
-import { AnimatePresence } from "framer-motion";
-import { Search } from "lucide-react";
 import { type MessageContact } from "@/types/messages";
+import { AnimatePresence, motion } from "framer-motion";
+import { Download, Search, UserPlus } from "lucide-react";
 import { SelectedUserDetails } from "./SelectedUserDetails";
 import { UserList } from "./UserList";
 import { UserListEmpty } from "./UserListEmpty";
-import { UserSidebarActions } from "./UserSidebarActions";
 import { UserSidebarHeader } from "./UserSidebarHeader";
 
 type UserSidebarProps = {
@@ -63,13 +63,46 @@ export const UserSidebar = ({
       onUpdate={updateProfile}
     />
 
-    <UserSidebarActions
-      openImportPicker={openImportPicker}
-      exportSelectedUserProfile={exportSelectedUserProfile}
-      exportCurrentUserProfile={exportCurrentUserProfile}
-      selectedUser={selectedUser}
-      importError={importError}
-    />
+    <div className="grid grid-cols-1 gap-2 px-6 pb-2">
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-9 justify-start gap-2 rounded-lg"
+        onClick={openImportPicker}>
+        <UserPlus className="h-4 w-4 text-primary" />
+        Import Profile
+      </Button>
+
+      <div className="flex gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex-1 gap-2"
+          onClick={exportCurrentUserProfile}>
+          <Download className="h-4 w-4" />
+          Mine
+        </Button>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          className="flex-1 gap-2"
+          disabled={!Boolean(selectedUser)}
+          onClick={exportSelectedUserProfile}>
+          <Download className="h-4 w-4" />
+          Selected
+        </Button>
+      </div>
+
+      {importError != null && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-lg border border-destructive/20 bg-destructive/10 p-2.5 text-[11px] text-destructive">
+          {importError}
+        </motion.div>
+      )}
+    </div>
 
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="px-6 pt-4 pb-2">
