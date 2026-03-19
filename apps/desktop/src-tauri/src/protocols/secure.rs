@@ -17,11 +17,9 @@ pub fn handle_secure_protocol(app: &AppHandle, request_uri: &Uri) -> Response<Ve
         .strip_prefix(&protocol_uri(""))
         .unwrap_or_default();
 
-    let mut map = state.secure_proto.lock().unwrap();
+    let mut secure_proto = state.secure_proto.lock().unwrap();
 
-    // @todo-now fix the unwraps
-
-    match map.remove(token) {
+    match secure_proto.remove(token) {
         Some(mut data) => {
             let data = std::mem::take(&mut data);
 
