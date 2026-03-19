@@ -34,7 +34,7 @@ export const DashboardSidebar = ({ vaultName, isCollapsed, onLogout }: SidebarPr
       isCollapsed === true ? "w-0 overflow-hidden border-r-0 p-0 opacity-0" : "w-72",
     )}>
     <div className={cn("flex h-full flex-col gap-10", isCollapsed === true && "invisible")}>
-      <header className="pt-2">
+      <header className="py-3">
         <Brand nameClassName="text-xl font-bold tracking-tight" />
       </header>
 
