@@ -51,11 +51,13 @@ export const SidebarFooter = ({ vaultName, onLogout }: SidebarFooterProps) => (
           <Badge variant="outline" className="size-9 rounded-md text-xs">
             {vaultName?.slice(0, 2).toUpperCase()}
           </Badge>
-          <div className="flex flex-col">
+          <div className="flex w-full flex-col">
             <span className="mb-1 text-[10px] leading-none font-bold tracking-widest text-muted-foreground/60 uppercase">
               Current Vault
             </span>
-            <span className="truncate text-sm font-bold text-foreground">{vaultName}</span>
+            <span className="w-36 truncate text-sm font-bold text-foreground">
+              {vaultName}
+            </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -36,9 +36,9 @@ export const DeleteItemDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-base">Delete {item?.type}</DialogTitle>
-          <DialogDescription className="text-sm">
-            Are you sure you want to delete <b>&ldquo;{item?.name}&rdquo;</b>? If you delete
-            it, there is nothing to undo this operation.
+          <DialogDescription className="py-2 text-sm">
+            Are you sure you want to delete <b className="text-foreground">{item?.name}</b>? If
+            you delete it, there is nothing to undo this operation.
           </DialogDescription>
         </DialogHeader>
 

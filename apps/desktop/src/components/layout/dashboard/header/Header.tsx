@@ -1,15 +1,16 @@
 "use client";
 
+import { Kbd } from "@/components/ui/shadcn/kbd";
 import { Separator } from "@/components/ui/shadcn/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { PanelLeft } from "lucide-react";
 
 type DashboardHeaderProps = {
-  onToggleSidebar: () => void;
   title?: string;
+  onToggleSidebar: () => void;
 };
 
-export const DashboardHeader = ({ onToggleSidebar, title }: DashboardHeaderProps) => (
+export const DashboardHeader = ({ title, onToggleSidebar }: DashboardHeaderProps) => (
   <header className="flex h-20 items-center gap-4 border-b border-border/40 bg-background/50 px-6">
     <Tooltip>
       <TooltipTrigger asChild>
@@ -17,7 +18,10 @@ export const DashboardHeader = ({ onToggleSidebar, title }: DashboardHeaderProps
           <PanelLeft className="size-5 text-muted-foreground/60 transition-colors hover:text-foreground" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right">Toggle Sidebar</TooltipContent>
+      <TooltipContent side="right">
+        <Kbd>m</Kbd>
+        Toggle Sidebar
+      </TooltipContent>
     </Tooltip>
 
     <div className="flex items-center gap-4">

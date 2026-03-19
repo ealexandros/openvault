@@ -12,9 +12,9 @@ export const EmptyFolder = ({ canGoBack, onGoBack }: EmptyFolderProps) => (
   <div className="col-span-full flex animate-in flex-col items-center justify-center space-y-6 py-32 text-center duration-500 fade-in slide-in-from-bottom-4">
     <div className="relative">
       <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-3xl" />
-      <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-primary/20 bg-card/50">
+      <div className="relative flex size-22 items-center justify-center rounded-3xl border border-primary/20 bg-card/50">
         <FolderIcon className="size-12 text-primary/40" strokeWidth={1.5} />
-        <div className="absolute -top-2 -right-2 flex size-8 items-center justify-center rounded-full border border-primary/50 bg-primary text-white">
+        <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border border-primary/50 bg-primary text-white">
           <PlusIcon className="size-4" />
         </div>
       </div>
@@ -27,7 +27,7 @@ export const EmptyFolder = ({ canGoBack, onGoBack }: EmptyFolderProps) => (
       </p>
     </div>
     {canGoBack && (
-      <Button variant="outline" onClick={onGoBack} className="p-3">
+      <Button variant="outline" onClick={onGoBack} className="p-4">
         Go Back
       </Button>
     )}
