@@ -19,6 +19,4 @@ export { BrowseHeader } from "./components/header";
 
 export { FOLDER_ICON_OPTIONS, FOLDER_ICONS } from "./data/folder-icons";
 
-export * from "./components/Skeletons";
-
 export { BrowseViewState } from "./types";

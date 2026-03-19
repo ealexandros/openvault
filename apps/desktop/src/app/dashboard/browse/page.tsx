@@ -4,7 +4,6 @@ import { FileDropListener } from "@/components/functional/FileDropListener";
 import { FileDropOverlayView } from "@/components/views/FileDropOverlayView";
 import {
   BrowseHeader,
-  BrowseSkeleton,
   BrowseViewState,
   DeleteItemDialog,
   EmptyFolder,
@@ -44,8 +43,6 @@ const BrowsePage = () => {
             onUploadFile={upload.files}
             onUploadFolder={upload.folders}
           />
-
-          {browseState.viewState === BrowseViewState.Loading && <BrowseSkeleton />}
 
           {browseState.viewState === BrowseViewState.Results && (
             <section className="space-y-10 pb-20">
