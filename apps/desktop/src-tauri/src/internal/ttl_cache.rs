@@ -2,32 +2,30 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 pub struct TtlCache<K, V> {
-    map: HashMap<K, (V, Instant)>,
+    entries: HashMap<K, (V, Instant)>,
     ttl: Duration,
 }
 
 impl<K: std::cmp::Eq + std::hash::Hash, V> TtlCache<K, V> {
     pub fn new(ttl: Duration) -> Self {
         Self {
-            map: HashMap::new(),
+            entries: HashMap::new(),
             ttl,
         }
     }
 
     pub fn insert(&mut self, key: K, value: V) {
-        self.map.insert(key, (value, Instant::now()));
+        self.entries.insert(key, (value, Instant::now()));
     }
 
     pub fn remove(&mut self, key: &K) -> Option<V> {
-        self.map.remove(key).map(|(v, _)| v)
+        self.entries.remove(key).map(|(v, _)| v)
     }
 
-    pub fn tidy(&mut self) {
+    pub fn purge_expired(&mut self) {
         let now = Instant::now();
 
-        // @todo-now does the other values get droped?
-
-        self.map
+        self.entries
             .retain(|_, (_, instant)| now.duration_since(*instant) < self.ttl);
     }
 }

@@ -13,7 +13,7 @@ pub fn spawn_cache_ttl_cleaner(store: TauriState) {
             interval.tick().await;
 
             if let Ok(mut cache) = store.lock() {
-                cache.tidy();
+                cache.purge_expired();
             }
         }
     });
