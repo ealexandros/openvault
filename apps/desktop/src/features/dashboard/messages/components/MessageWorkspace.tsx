@@ -4,6 +4,12 @@ import { Badge } from "@/components/ui/shadcn/badge";
 import { Button } from "@/components/ui/shadcn/button";
 import { Label } from "@/components/ui/shadcn/label";
 import { Textarea } from "@/components/ui/shadcn/textarea";
+import {
+  type FileInfo,
+  type FileSource,
+  type MessageMode,
+  type WorkMode,
+} from "@/features/dashboard/messages/hooks/useMessages";
 import { type MessageContact } from "@/types/messages";
 import { cn } from "@/utils/cn";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
@@ -22,12 +28,6 @@ import {
   Upload,
 } from "lucide-react";
 import { useState } from "react";
-import {
-  type FileInfo,
-  type FileSource,
-  type MessageMode,
-  type WorkMode,
-} from "@/features/dashboard/messages/hooks/useMessages";
 
 type MessageWorkspaceProps = {
   mode: MessageMode;

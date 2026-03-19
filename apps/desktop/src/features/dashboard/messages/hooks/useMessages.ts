@@ -123,14 +123,6 @@ export const useMessages = () => {
   };
 
   useEffect(() => {
-    void fetch("secure://localhost/test")
-      .then(res => res.blob())
-      .then(blob => {
-        console.log("File received", blob);
-      });
-  });
-
-  useEffect(() => {
     void checkSetup();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
