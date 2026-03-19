@@ -3,9 +3,13 @@ mod errors;
 mod internal;
 mod protocols;
 mod state;
+mod tasks;
+
+use tauri::Manager;
 
 use crate::protocols::{handle_secure_protocol, secure};
 use crate::state::AppState;
+use crate::tasks::spawn_cache_ttl_cleaner;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -43,6 +47,11 @@ pub fn run() {
         ])
         .register_uri_scheme_protocol(secure::PROTOCOL_SCHEME, move |app, request| {
             handle_secure_protocol(app.app_handle(), request.uri())
+        })
+        .setup(|app| {
+            let state = app.state::<AppState>();
+            spawn_cache_ttl_cleaner(state);
+            Ok(())
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

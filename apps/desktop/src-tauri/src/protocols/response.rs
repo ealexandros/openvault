@@ -1,6 +1,6 @@
 use tauri::http::{self, Response};
 
-// @todo-now change the origin
+// @todo-now change the origin to the tauri origin
 
 const TAURI_ORIGINS: &str = "*";
 
