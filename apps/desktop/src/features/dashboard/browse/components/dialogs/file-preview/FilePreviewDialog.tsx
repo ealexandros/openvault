@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
@@ -35,18 +36,18 @@ const IconMap: Record<NonNullable<FileType>, React.ElementType> = {
 };
 
 export const FilePreviewDialog = ({ isOpen, item, onOpenChange }: FileViewerDialogProps) => {
-  const { fileType, fileUrl, text, content } = useFileViewerDialog({ item });
+  const { fileType, contentUri, codeRef, isLoading } = useFileViewerDialog({ item });
 
   if (item == null) {
     return null;
   }
 
   const viewers: Record<NonNullable<FileType>, React.ReactNode> = {
-    image: <ImageViewer url={fileUrl} alt={item.name} />,
-    pdf: <PdfViewer url={fileUrl} />,
-    audio: <AudioViewer url={fileUrl} fileName={item.name} />,
-    video: <VideoViewer url={fileUrl} fileName={item.name} />,
-    text: <TextViewer text={text} />,
+    image: <ImageViewer url={contentUri} alt={item.name} />,
+    pdf: <PdfViewer url={contentUri} />,
+    audio: <AudioViewer url={contentUri} fileName={item.name} />,
+    video: <VideoViewer url={contentUri} fileName={item.name} />,
+    text: <TextViewer codeRef={codeRef} />,
   };
 
   const Icon = IconMap[fileType];
@@ -74,11 +75,18 @@ export const FilePreviewDialog = ({ isOpen, item, onOpenChange }: FileViewerDial
           className={cn(
             "relative flex w-full overflow-hidden bg-muted/10",
             "h-[50vh] flex-col items-center justify-center sm:h-[60vh] md:h-[70vh]",
-            fileType === "text" && content && "items-start justify-start bg-zinc-950",
+            fileType === "text" && "items-start justify-start bg-zinc-950",
           )}>
-          {content != null ? viewers[fileType] : <ViewerLoading />}
+          {viewers[fileType]}
+
+          {isLoading && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+              <ViewerLoading />
+            </div>
+          )}
         </div>
       </DialogContent>
+      <DialogDescription className="sr-only">{item.name}</DialogDescription>
     </Dialog>
   );
 };

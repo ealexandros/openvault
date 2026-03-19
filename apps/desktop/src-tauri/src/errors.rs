@@ -26,6 +26,12 @@ pub enum Error {
 
     #[error("Invalid input: {0}")]
     InvalidInput(String),
+
+    #[error("Internal error: {0}")]
+    Internal(String),
+
+    #[error("Lock poisoned")]
+    LockPoisoned,
 }
 
 impl Serialize for Error {

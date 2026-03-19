@@ -1,4 +1,5 @@
-use openvault_sdk::FILESYSTEM_ROOT_FOLDER_ID;
+use openvault_sdk::{FILESYSTEM_ROOT_FOLDER_ID, SecretVec};
+use uuid::Uuid;
 
 use super::contracts::{
     BrowseResult, BrowseVaultParams, ChangeFolderIconParams, CreateFolderParams, DeleteItemParams,
@@ -7,11 +8,12 @@ use super::contracts::{
 };
 use crate::errors::{Error, Result};
 use crate::internal::parser::{parse_optional_uuid, parse_uuid};
+use crate::protocols::secure;
 use crate::state::TauriState;
 
 macro_rules! vault_fs {
     ($state:expr, $fs:ident, $vault:ident) => {
-        let mut $vault = $state.vault.lock().unwrap();
+        let mut $vault = $state.vault.lock().map_err(|_| Error::LockPoisoned)?;
         let $vault = $vault.as_mut().ok_or(Error::VaultNotOpened)?;
         let mut $fs = $vault.filesystem();
     };
@@ -137,16 +139,25 @@ pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) ->
     Ok(())
 }
 
-// @todo-now return it in a more secure way
-
 #[tauri::command]
-pub async fn read_file_bytes(state: TauriState<'_>, params: ReadFileParams) -> Result<Vec<u8>> {
+pub async fn expose_file_url(state: TauriState<'_>, params: ReadFileParams) -> Result<String> {
     vault_fs!(state, fs, vault);
 
     let uuid = parse_uuid(&params.id)?;
     let content = fs.read_file_bytes(uuid)?;
 
-    Ok(content)
+    let mut inner_map = state
+        .secure_proto
+        .lock()
+        .map_err(|_| Error::Internal("Lock poisoned".to_string()))?;
+
+    let token = Uuid::new_v4().to_string();
+    let secret_vec = SecretVec::new(content)
+        .map_err(|_| Error::Internal("Failed to create secret vec".to_string()))?;
+
+    inner_map.insert(token.clone(), secret_vec);
+
+    Ok(secure::protocol_uri(&token))
 }
 
 #[tauri::command]

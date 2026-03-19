@@ -32,7 +32,7 @@ pub async fn create_vault(
 
     let path = vault.path().to_path_buf();
 
-    let mut vault_state = state.vault.lock().unwrap();
+    let mut vault_state = state.vault.lock().map_err(|_| Error::LockPoisoned)?;
     *vault_state = Some(vault);
 
     Ok(CreateVaultResult {
@@ -49,7 +49,7 @@ pub async fn open_vault(state: TauriState<'_>, params: OpenVaultParams) -> Resul
 
     password.zeroize();
 
-    let mut vault_state = state.vault.lock().unwrap();
+    let mut vault_state = state.vault.lock().map_err(|_| Error::LockPoisoned)?;
     *vault_state = Some(vault);
 
     Ok(())
@@ -57,7 +57,9 @@ pub async fn open_vault(state: TauriState<'_>, params: OpenVaultParams) -> Resul
 
 #[tauri::command]
 pub async fn lock_vault(state: TauriState<'_>) -> Result {
-    if let Some(mut vault) = state.vault.lock().unwrap().take() {
+    let mut vault_lock = state.vault.lock().map_err(|_| Error::LockPoisoned)?;
+
+    if let Some(mut vault) = vault_lock.take() {
         vault.zeroize();
     }
 
@@ -66,7 +68,7 @@ pub async fn lock_vault(state: TauriState<'_>) -> Result {
 
 #[tauri::command]
 pub async fn compact_vault(state: TauriState<'_>) -> Result {
-    let mut vault_state = state.vault.lock().unwrap();
+    let mut vault_state = state.vault.lock().map_err(|_| Error::LockPoisoned)?;
     let vault = vault_state.as_mut().ok_or(Error::VaultNotOpened)?;
 
     vault.compact()?;

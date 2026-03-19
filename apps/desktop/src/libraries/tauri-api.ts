@@ -66,8 +66,8 @@ export const tauriApi = {
     return safeInvokeTauri<void>("upload_folder", { params });
   },
 
-  readFileBytes: (params: { id: string }) => {
-    return safeInvokeTauri<number[]>("read_file_bytes", { params });
+  exposeFileUrl: (params: { id: string }) => {
+    return safeInvokeTauri<string>("expose_file_url", { params });
   },
 
   isFile: (params: { path: string }) => {

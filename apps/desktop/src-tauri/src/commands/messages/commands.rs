@@ -12,12 +12,15 @@ use crate::state::TauriState;
 
 macro_rules! vault_messages {
     ($state:expr, mut $messages:ident, $vault:ident) => {
-        let mut $vault = $state.vault.lock().unwrap();
+        let mut $vault = $state.vault.lock().map_err(|_| Error::LockPoisoned)?;
         let $vault = $vault.as_mut().ok_or(Error::VaultNotOpened)?;
         let mut $messages = $vault.messages();
     };
     ($state:expr, $messages:ident, $vault:ident) => {
-        let mut $vault = $state.vault.lock().unwrap();
+        let mut $vault = $state
+            .vault
+            .lock()
+            .map_err(|_| Error::Internal("Lock poisoned".to_string()))?;
         let $vault = $vault.as_mut().ok_or(Error::VaultNotOpened)?;
         let $messages = $vault.messages();
     };

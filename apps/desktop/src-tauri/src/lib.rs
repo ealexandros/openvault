@@ -21,7 +21,7 @@ pub fn run() {
             crate::commands::filesystem::create_folder,
             crate::commands::filesystem::upload_file,
             crate::commands::filesystem::upload_folder,
-            crate::commands::filesystem::read_file_bytes,
+            crate::commands::filesystem::expose_file_url,
             crate::commands::filesystem::set_folder_icon,
             crate::commands::filesystem::set_favorite_item,
             crate::commands::filesystem::delete_item,

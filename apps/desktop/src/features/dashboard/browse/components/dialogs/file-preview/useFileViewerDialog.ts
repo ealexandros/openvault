@@ -1,74 +1,89 @@
+import { fetchApi } from "@/libraries/fetch";
 import { tauriApi } from "@/libraries/tauri-api";
 import { FileItemResult } from "@/types/filesystem";
-import { getFileTypeOrDefault, getMimeType } from "@/utils/mime-types";
+import { getFileTypeOrDefault } from "@/utils/mime-types";
 import { safeUint8ArrayParse } from "@/utils/safe-parse";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { toast } from "sonner";
 
 type FileViewProps = {
   item: FileItemResult | null;
 };
 
-type ContentType = number[] | null;
-
 export const useFileViewerDialog = ({ item }: FileViewProps) => {
-  const [content, setContent] = useState<ContentType>(null);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [contentUri, setContentUri] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const codeRef = useRef<HTMLElement | null>(null);
 
   const fileType = item ? getFileTypeOrDefault(item.extension) : "text";
 
-  const setFileUrlEvent = useEffectEvent((url: string | null) => {
-    setFileUrl(url);
-  });
+  const showErrorToast = () => {
+    toast.error("Failed to open file", {
+      description: "The file may be corrupted or access is denied.",
+    });
+  };
 
-  const setContentEvent = useEffectEvent((content: ContentType) => {
-    setContent(content);
-  });
+  const clearContent = () => {
+    if (codeRef.current) codeRef.current.textContent = "";
+    setContentUri(null);
+  };
 
-  useEffect(() => {
-    if (item == null) {
-      setContentEvent(null);
+  const fetchContent = useEffectEvent(async () => {
+    if (item == null) return clearContent();
+
+    setIsLoading(true);
+
+    const result = await tauriApi.exposeFileUrl({ id: item.id });
+
+    if (!result.success) {
+      showErrorToast();
+      setIsLoading(false);
+      clearContent();
+      return;
+    }
+
+    const uri = result.data;
+
+    clearContent();
+
+    if (fileType !== "text") {
+      setIsLoading(false);
+      setContentUri(uri);
       return;
     }
 
     const controller = new AbortController();
+    const response = await fetchApi.get(uri, { signal: controller.signal });
 
-    const fetchContent = async () => {
-      const result = await tauriApi.readFileBytes({ id: item.id });
-      if (controller.signal.aborted) return;
-      setContent(result.success ? result.data : null);
-    };
-
-    void fetchContent();
-
-    return () => controller.abort();
-  }, [item]);
-
-  useEffect(() => {
-    if (!content || !item || fileType === "text") {
-      setFileUrlEvent(null);
-      return;
+    if (response == null || !response.ok) {
+      showErrorToast();
+      setIsLoading(false);
+      return clearContent();
     }
 
-    const bytes = new Uint8Array(content);
-    const mimeType = getMimeType(fileType, item.extension);
-    const url = URL.createObjectURL(new Blob([bytes], { type: mimeType }));
+    const buffer = await response.arrayBuffer();
+    const uint8 = new Uint8Array(buffer);
 
-    setFileUrlEvent(url);
+    if (codeRef.current) {
+      codeRef.current.textContent = safeUint8ArrayParse(uint8) ?? "Content not available.";
+    }
 
-    return () => URL.revokeObjectURL(url);
-  }, [content, fileType, item]);
+    uint8.fill(0);
+    setIsLoading(false);
 
-  let textContent: string | null = null;
+    return () => controller.abort();
+  });
 
-  if (fileType === "text" && content) {
-    const bytes = new Uint8Array(content);
-    textContent = safeUint8ArrayParse(bytes) ?? "Binary content cannot be displayed.";
-  }
+  useEffect(() => {
+    void fetchContent();
+    return () => clearContent();
+  }, [item]);
 
   return {
     fileType,
-    fileUrl,
-    text: textContent,
-    content,
+    contentUri,
+    codeRef,
+    isLoading,
   };
 };
