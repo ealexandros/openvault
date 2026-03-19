@@ -30,8 +30,8 @@ const mainNavItems = [
 export const DashboardSidebar = ({ vaultName, isCollapsed, onLogout }: SidebarProps) => (
   <aside
     className={cn(
-      "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 px-6 py-10",
-      isCollapsed === true ? "w-0 overflow-hidden border-r-0 p-0 opacity-0" : "w-72",
+      "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 px-4 py-10 lg:px-6",
+      isCollapsed === true ? "w-0 overflow-hidden border-r-0 p-0 opacity-0" : "w-64 lg:w-70",
     )}>
     <div className={cn("flex h-full flex-col gap-10", isCollapsed === true && "invisible")}>
       <header className="py-3">

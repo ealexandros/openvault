@@ -50,7 +50,7 @@ export function NavItem({
       <div
         data-active={isActive}
         className={cn(
-          "absolute top-1/2 -left-4 h-6 w-1 -translate-y-1/2 rounded-full",
+          "absolute top-1/2 -left-3 h-6 w-1 -translate-y-1/2 rounded-full lg:-left-4",
           "data-[active=true]:bg-primary",
         )}
       />

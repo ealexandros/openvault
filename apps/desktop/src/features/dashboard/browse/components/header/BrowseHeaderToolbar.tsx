@@ -23,18 +23,18 @@ export const BrowseHeaderToolbar = ({
   onUploadFile,
   onUploadFolder,
 }: BrowseHeaderToolbarProps) => (
-  <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+  <div className="flex flex-row items-center justify-between gap-6">
     <div className="flex items-center gap-4">
       <div className="rounded-xl bg-primary/10 p-4">
         <LayoutGridIcon className="size-6 text-primary" />
       </div>
-      <div>
+      <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Browse Files</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Encrypted workspace</p>
+        <p className="text-sm text-muted-foreground">Encrypted workspace</p>
       </div>
     </div>
 
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 xl:gap-3">
       <CreateFolderDialog parentId={currentFolderId} onSuccess={onFolderCreate} />
 
       <DropdownMenu>

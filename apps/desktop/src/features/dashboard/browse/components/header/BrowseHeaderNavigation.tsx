@@ -23,10 +23,10 @@ export const BrowseHeaderNavigation = ({
   onSearchQueryChange,
   onBreadcrumbClick,
 }: BrowseHeaderNavigationProps) => (
-  <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+  <div className="flex flex-col-reverse gap-5 xl:flex-row xl:items-center xl:justify-between">
     <BrowseBreadcrumbs currentPath={currentPath} onPathClick={onBreadcrumbClick} />
 
-    <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-6">
+    <div className="flex flex-row-reverse items-center gap-6 xl:flex-row">
       <FileStats folderCount={folderCount} fileCount={fileCount} />
 
       <div className="relative w-full xl:w-72">

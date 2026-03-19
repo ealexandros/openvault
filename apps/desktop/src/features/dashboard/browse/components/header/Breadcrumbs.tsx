@@ -26,7 +26,7 @@ export const BrowseBreadcrumbs = ({ currentPath, onPathClick }: BrowseBreadcrumb
   const clickableSegments = pathNames.slice(0, lastIndex);
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className="ml-0.5 xl:ml-0">
       <BreadcrumbList className="text-sm">
         {clickableSegments.map((segment, index) => (
           <React.Fragment key={`${segment}-${index}`}>

@@ -25,7 +25,7 @@ export const SidebarFooter = ({ vaultName, onLogout }: SidebarFooterProps) => (
         <Button
           variant="outline"
           className="group h-auto w-full gap-2 rounded-xl border-none py-2 focus-visible:ring-0">
-          <Badge variant="outline" className="size-10 rounded-md text-sm">
+          <Badge variant="outline" className="size-9 rounded-md text-sm lg:size-10">
             {vaultName?.slice(0, 2).toUpperCase()}
           </Badge>
           <div className="flex flex-1 flex-col items-start gap-0.5 overflow-hidden leading-tight">
@@ -34,7 +34,7 @@ export const SidebarFooter = ({ vaultName, onLogout }: SidebarFooterProps) => (
             </span>
             <span
               title={vaultName}
-              className="truncate text-[15px] font-semibold tracking-tight text-foreground/90">
+              className="w-full truncate text-[15px] font-semibold tracking-tight text-foreground/90">
               {vaultName}
             </span>
           </div>
