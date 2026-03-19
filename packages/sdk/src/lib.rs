@@ -23,6 +23,7 @@ pub use openvault_core::operations::config::CreateConfig;
 pub use openvault_crypto::compression::CompressionAlgorithm;
 pub use openvault_crypto::encryption::EncryptionAlgorithm;
 pub use openvault_crypto::keys::{EphemeralPublicKey, SigningPublicKey};
+pub use openvault_crypto::memory::{SecretSlice, SecretVec};
 
 pub fn client() -> VaultClient {
     VaultClient::new()

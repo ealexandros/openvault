@@ -4,20 +4,20 @@ use sha2::Sha256;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::errors::{Error, Result};
-use crate::internal::secure_memory::SecureMemory;
 use crate::keys::derived_key::DerivedKey;
 use crate::keys::salt::Salt;
+use crate::memory::SecretSlice;
 
 pub const MKEY_SIZE: usize = 32;
 
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct MasterKey {
-    key: SecureMemory<MKEY_SIZE>,
+    key: SecretSlice<MKEY_SIZE>,
 }
 
 impl MasterKey {
     pub fn new(bytes: [u8; MKEY_SIZE]) -> Result<Self> {
-        let key = SecureMemory::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
+        let key = SecretSlice::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
         Ok(Self { key })
     }
 

@@ -1,18 +1,18 @@
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::errors::{Error, Result};
-use crate::internal::secure_memory::SecureMemory;
+use crate::memory::SecretSlice;
 
 pub const DK_SIZE: usize = 32;
 
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct DerivedKey<const N: usize = DK_SIZE> {
-    key: SecureMemory<N>,
+    key: SecretSlice<N>,
 }
 
 impl<const N: usize> DerivedKey<N> {
     pub fn new(bytes: [u8; N]) -> Result<Self> {
-        let key = SecureMemory::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
+        let key = SecretSlice::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
         Ok(Self { key })
     }
 

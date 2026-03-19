@@ -5,19 +5,19 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::errors::{Error, Result};
-use crate::internal::secure_memory::SecureMemory;
 use crate::keys::signing::SIGNING_KEY_SIZE;
+use crate::memory::SecretSlice;
 
 pub type SigningPrivateKeyType = [u8; SIGNING_KEY_SIZE];
 
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct SigningPrivateKey {
-    key: SecureMemory<SIGNING_KEY_SIZE>,
+    key: SecretSlice<SIGNING_KEY_SIZE>,
 }
 
 impl SigningPrivateKey {
     pub fn from_bytes(bytes: SigningPrivateKeyType) -> Result<Self> {
-        let key = SecureMemory::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
+        let key = SecretSlice::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
         Ok(Self { key })
     }
 

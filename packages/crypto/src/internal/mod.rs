@@ -1,2 +1,2 @@
-pub(crate) mod secure_memory;
+pub(crate) mod memory;
 pub(crate) mod winapi;

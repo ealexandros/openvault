@@ -3,20 +3,20 @@ use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::errors::{Error, Result};
-use crate::internal::secure_memory::SecureMemory;
 use crate::keys::EphemeralPublicKey;
 use crate::keys::ephemeral::EPHEMERAL_KEY_SIZE;
+use crate::memory::SecretSlice;
 
 pub type EphemeralPrivateKeyType = [u8; EPHEMERAL_KEY_SIZE];
 
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct EphemeralPrivateKey {
-    key: SecureMemory<EPHEMERAL_KEY_SIZE>,
+    key: SecretSlice<EPHEMERAL_KEY_SIZE>,
 }
 
 impl EphemeralPrivateKey {
     pub fn from_bytes(bytes: EphemeralPrivateKeyType) -> Result<Self> {
-        let key = SecureMemory::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
+        let key = SecretSlice::new(bytes).map_err(|_| Error::MemoryLockFailed)?;
         Ok(Self { key })
     }
 
