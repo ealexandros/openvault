@@ -5,9 +5,9 @@ type TextViewerProps = {
 };
 
 export const TextViewer = ({ codeRef }: TextViewerProps) => (
-  <ScrollArea className="h-full w-full bg-zinc-950">
+  <ScrollArea className="h-full w-full bg-background text-foreground">
     <div className="min-w-max p-6">
-      <pre className="font-mono text-sm leading-relaxed text-zinc-300">
+      <pre className="font-mono text-sm leading-relaxed">
         <code ref={codeRef} />
       </pre>
     </div>

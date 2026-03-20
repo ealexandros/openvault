@@ -32,6 +32,7 @@ export const useFileUploader = ({ folderId, refresh }: UseFileUploaderProps) => 
 
   const uploadFile = async () => {
     const selected = await open({
+      title: "Upload File or Files",
       multiple: true,
       directory: false,
     });
@@ -41,6 +42,7 @@ export const useFileUploader = ({ folderId, refresh }: UseFileUploaderProps) => 
 
   const uploadFolder = async () => {
     const selected = await open({
+      title: "Upload Folder or Folders",
       multiple: true,
       directory: true,
     });

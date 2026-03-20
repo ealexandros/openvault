@@ -28,7 +28,7 @@ const BrowsePage = () => {
   return (
     <FileDropListener onDropPaths={upload.paths}>
       {({ isDragging }) => (
-        <main className="relative mx-auto h-full max-w-7xl space-y-16 p-8 py-12 lg:p-12 2xl:py-16">
+        <main className="relative mx-auto h-full space-y-16 px-20 py-12">
           <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
@@ -39,18 +39,19 @@ const BrowsePage = () => {
             fileCount={browseState.fileCount}
             searchQuery={browseState.searchQuery}
             onSearchQueryChange={browseState.setSearchQuery}
-            onBreadcrumbClick={browseState.navigateToIndex}
+            onBreadcrumbClick={browseState.navigateToBreadcrumb}
             onUploadFile={upload.files}
             onUploadFolder={upload.folders}
+            canGoBack={browseState.canGoBack}
+            canGoForward={browseState.canGoForward}
+            onBack={browseState.goBack}
+            onForward={browseState.goForward}
           />
 
           {browseState.viewState === BrowseViewState.Results && (
             <section className="space-y-10 pb-20">
               <FoldersSection
                 folders={browseState.folders}
-                canGoBack={browseState.canGoBack}
-                isNavigating={browseState.isNavigating}
-                onBackClick={browseState.goBack}
                 onFolderClick={browseState.navigateToFolder}
                 onFolderRename={dialogs.requestFolderRename}
                 onFolderToggleFavourite={toggleFolderFavourite}
@@ -72,7 +73,11 @@ const BrowsePage = () => {
           )}
 
           {browseState.viewState === BrowseViewState.Empty && (
-            <EmptyFolder canGoBack={browseState.canGoBack} onGoBack={browseState.goBack} />
+            <EmptyFolder
+              canGoBack={browseState.canGoBack}
+              onGoBack={browseState.goBack}
+              onUploadFile={upload.files}
+            />
           )}
 
           {browseState.viewState === BrowseViewState.NoResults && (

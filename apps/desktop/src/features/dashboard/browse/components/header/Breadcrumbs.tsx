@@ -9,46 +9,47 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/shadcn/breadcrumb";
 import { PathSegment } from "@/features/dashboard/browse/types";
-import { HomeIcon } from "lucide-react";
 import React from "react";
 
 type BrowseBreadcrumbsProps = {
-  currentPath: PathSegment[];
+  pathSegments: PathSegment[];
   onPathClick: (index: number) => void;
 };
 
-export const BrowseBreadcrumbs = ({ currentPath, onPathClick }: BrowseBreadcrumbsProps) => {
-  if (!currentPath.length) return null;
-
-  const pathNames = currentPath.map(pathSegment => pathSegment.name);
-  const lastIndex = pathNames.length - 1;
-  const lastSegment = pathNames[lastIndex];
-  const clickableSegments = pathNames.slice(0, lastIndex);
+export const BrowseBreadcrumbs = ({ pathSegments, onPathClick }: BrowseBreadcrumbsProps) => {
+  if (pathSegments.length === 0) return null;
 
   return (
-    <Breadcrumb className="ml-0.5 xl:ml-0">
+    <Breadcrumb>
       <BreadcrumbList className="text-sm">
-        {clickableSegments.map((segment, index) => (
-          <React.Fragment key={`${segment}-${index}`}>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <button
-                  onClick={() => onPathClick(index)}
-                  className="flex cursor-pointer items-center gap-1.5 transition-colors hover:text-foreground">
-                  {index === 0 && <HomeIcon className="size-4 shrink-0" />}
-                  <span>{segment}</span>
-                </button>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </React.Fragment>
-        ))}
-        <BreadcrumbItem>
-          <BreadcrumbPage className="flex items-center gap-1.5 font-semibold text-foreground">
-            {lastIndex === 0 && <HomeIcon className="size-4 shrink-0" />}
-            <span>{lastSegment}</span>
-          </BreadcrumbPage>
-        </BreadcrumbItem>
+        {pathSegments.map((segment, index) => {
+          const isLast = index === pathSegments.length - 1;
+          const Icon = segment.icon;
+
+          return (
+            <React.Fragment key={segment.id ?? `${segment.name}-${index}`}>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage className="flex items-center gap-1.5 font-semibold text-foreground">
+                    {Icon && <Icon className="size-4 shrink-0" />}
+                    <span>{segment.name}</span>
+                  </BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <button
+                      onClick={() => onPathClick(index)}
+                      className="flex cursor-pointer items-center gap-1.5 transition-colors hover:text-foreground">
+                      {Icon && <Icon className="size-4 shrink-0" />}
+                      <span>{segment.name}</span>
+                    </button>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+
+              {!isLast && <BreadcrumbSeparator />}
+            </React.Fragment>
+          );
+        })}
       </BreadcrumbList>
     </Breadcrumb>
   );

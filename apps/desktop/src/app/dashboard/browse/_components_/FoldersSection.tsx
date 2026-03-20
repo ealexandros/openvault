@@ -1,12 +1,9 @@
-import { BrowseSection, FolderBackButton, FolderItem } from "@/features/dashboard/browse";
+import { BrowseSection, FolderItem } from "@/features/dashboard/browse";
 import { FolderItemResult } from "@/types/filesystem";
 import { FolderIcon } from "lucide-react";
 
 type FoldersSectionProps = {
   folders: FolderItemResult[];
-  canGoBack: boolean;
-  isNavigating: boolean;
-  onBackClick: () => void;
   onFolderClick: (folder: FolderItemResult) => void;
   onFolderDelete: (folder: FolderItemResult) => void;
   onFolderRename: (folder: FolderItemResult) => void;
@@ -18,9 +15,6 @@ type FoldersSectionProps = {
 
 export const FoldersSection = ({
   folders,
-  canGoBack,
-  isNavigating,
-  onBackClick,
   onFolderClick,
   onFolderDelete,
   onFolderRename,
@@ -29,14 +23,13 @@ export const FoldersSection = ({
   onFolderProperties,
   onFolderExport,
 }: FoldersSectionProps) => {
-  if (folders.length === 0 && !canGoBack) {
+  if (folders.length === 0) {
     return null;
   }
 
   return (
     <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {canGoBack && !isNavigating && <FolderBackButton onBackClick={onBackClick} />}
+      <div className="grid grid-cols-3 gap-5 lg:grid-cols-4 xl:grid-cols-5">
         {folders.map(item => (
           <FolderItem
             key={item.id}

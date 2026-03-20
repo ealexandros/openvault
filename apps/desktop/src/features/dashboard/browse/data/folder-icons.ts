@@ -31,3 +31,7 @@ export const FOLDER_ICON_OPTIONS = Object.entries(FOLDER_ICONS).map(([name, Icon
   name: name as FolderIconName,
   Icon,
 }));
+
+export const getFolderIcon = (name: string) => {
+  return name in FOLDER_ICONS ? FOLDER_ICONS[name as FolderIconName] : FolderIcon;
+};

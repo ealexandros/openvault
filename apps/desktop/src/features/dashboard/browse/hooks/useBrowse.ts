@@ -1,22 +1,39 @@
+"use client";
+
 import { tauriApi } from "@/libraries/tauri-api";
 import { ItemType, type FileItemResult, type FolderItemResult } from "@/types/filesystem";
 import { useQuery } from "@tanstack/react-query";
+import { Home } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { getFolderIcon } from "../data/folder-icons";
 import { BrowseViewState, PathSegment } from "../types";
 import { useDialogs } from "./useDialogs";
 import { useFileUploader } from "./useFileUploader";
 import { useListings } from "./useListings";
 
-const getBrowseKey = (folderId?: string) => ["browse-key", folderId];
+const ROOT_FOLDER: PathSegment = {
+  id: undefined,
+  name: "Home",
+  icon: Home,
+};
 
-const ROOT_FOLDER: PathSegment = { id: undefined, name: "Home" };
+type BrowseHistoryState = {
+  history: PathSegment[][];
+  index: number;
+};
+
+export const getBrowseKey = (folderId?: string) => ["browse", folderId];
 
 export const useBrowse = () => {
-  const [currentPath, setCurrentPath] = useState<PathSegment[]>([ROOT_FOLDER]);
+  const [historyState, setHistoryState] = useState<BrowseHistoryState>({
+    history: [[ROOT_FOLDER]],
+    index: 0,
+  });
 
-  const currentFolder = currentPath[currentPath.length - 1];
-  const currentFolderId = currentFolder?.id;
+  const currentPath = historyState.history[historyState.index] ?? [ROOT_FOLDER];
+  const currentFolderId = currentPath[currentPath.length - 1]?.id;
 
   const browseQuery = useQuery({
     queryKey: getBrowseKey(currentFolderId),
@@ -66,24 +83,49 @@ export const useBrowse = () => {
     await refresh();
   };
 
-  const navigateToFolder = ({ id, name }: FolderItemResult) => {
-    setCurrentPath(prev => {
-      if (prev[prev.length - 1]?.id === id) return prev;
-      return [...prev, { id, name }];
+  const navigateToPath = (newPath: PathSegment[]) => {
+    setHistoryState(prev => {
+      const current = prev.history[prev.index];
+
+      if (JSON.stringify(current) === JSON.stringify(newPath)) return prev;
+      const nextHistory = prev.history.slice(0, prev.index + 1);
+
+      return { history: [...nextHistory, newPath], index: prev.index + 1 };
     });
+
     listings.clearSearch();
   };
 
-  const navigateToIndex = (index: number) => {
-    setCurrentPath(path => {
-      if (index < 0 || index >= path.length - 1) return path;
-      return path.slice(0, index + 1);
-    });
-    listings.clearSearch();
+  const navigateToFolder = (folder: FolderItemResult) => {
+    if (folder.id === currentFolderId) return;
+
+    navigateToPath([
+      ...currentPath,
+      { id: folder.id, name: folder.name, icon: getFolderIcon(folder.icon) },
+    ]);
   };
 
   const goBack = () => {
-    return navigateToIndex(currentPath.length - 2);
+    setHistoryState(prev => {
+      if (prev.index === 0) return prev;
+      return { ...prev, index: prev.index - 1 };
+    });
+    listings.clearSearch();
+  };
+
+  const goForward = () => {
+    setHistoryState(prev => {
+      if (prev.index >= prev.history.length - 1) return prev;
+      return { ...prev, index: prev.index + 1 };
+    });
+    listings.clearSearch();
+  };
+
+  const navigateToBreadcrumb = (index: number) => {
+    if (index < 0 || index >= currentPath.length) return;
+    for (let i = index + 1; i < currentPath.length; i++) {
+      goBack();
+    }
   };
 
   const resolveBrowseViewState = (): BrowseViewState => {
@@ -107,12 +149,14 @@ export const useBrowse = () => {
       fileCount: listings.fileCount,
       searchQuery: listings.searchQuery,
       isNavigating: browseQuery.isLoading,
-      canGoBack: currentPath.length > 1,
+      canGoBack: historyState.index > 0,
+      canGoForward: historyState.index < historyState.history.length - 1,
       setSearchQuery: listings.setSearchQuery,
       clearSearch: listings.clearSearch,
       goBack,
+      goForward,
       navigateToFolder,
-      navigateToIndex,
+      navigateToBreadcrumb,
     },
     upload: {
       files: fileUploader.uploadFile,

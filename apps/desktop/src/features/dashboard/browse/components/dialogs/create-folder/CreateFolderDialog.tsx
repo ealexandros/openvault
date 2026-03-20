@@ -11,16 +11,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
 import { Input } from "@/components/ui/shadcn/input";
-import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useCreateFolderDialog } from "./useCreateFolderDialog";
 
-type CreateFolderDialogProps = {
+type CreateFolderDialogProps = PropsWithChildren & {
   parentId?: string;
   onSuccess?: () => void;
 };
 
-export const CreateFolderDialog = ({ parentId, onSuccess }: CreateFolderDialogProps) => {
+export const CreateFolderDialog = ({
+  children,
+  parentId,
+  onSuccess,
+}: CreateFolderDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { form, handleSubmit, handleOpenChange } = useCreateFolderDialog({
@@ -31,12 +34,7 @@ export const CreateFolderDialog = ({ parentId, onSuccess }: CreateFolderDialogPr
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-10 gap-2 px-4 text-sm md:flex">
-          <PlusIcon className="size-4" />
-          <span>New Folder</span>
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-base font-semibold">New Folder</DialogTitle>

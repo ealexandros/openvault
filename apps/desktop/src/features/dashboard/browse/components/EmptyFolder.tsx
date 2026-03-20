@@ -1,35 +1,43 @@
 "use client";
 
 import { Button } from "@/components/ui/shadcn/button";
-import { FolderIcon, PlusIcon } from "lucide-react";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/shadcn/empty";
+import { FolderIcon, UploadIcon } from "lucide-react";
 
 type EmptyFolderProps = {
   canGoBack: boolean;
   onGoBack: () => void;
+  onUploadFile: () => void;
 };
 
-export const EmptyFolder = ({ canGoBack, onGoBack }: EmptyFolderProps) => (
-  <div className="col-span-full flex animate-in flex-col items-center justify-center space-y-6 py-32 text-center duration-500 fade-in slide-in-from-bottom-4">
-    <div className="relative">
-      <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-3xl" />
-      <div className="relative flex size-22 items-center justify-center rounded-3xl border border-primary/20 bg-card/50">
-        <FolderIcon className="size-12 text-primary/40" strokeWidth={1.5} />
-        <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border border-primary/50 bg-primary text-white">
-          <PlusIcon className="size-4" />
-        </div>
-      </div>
-    </div>
-    <div className="space-y-2">
-      <h3 className="text-xl font-bold tracking-tight text-foreground">Empty Folder</h3>
-      <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
-        This folder is currently empty. Start by creating a new folder or uploading your
-        important files to keep them secure.
-      </p>
-    </div>
-    {canGoBack && (
-      <Button variant="outline" onClick={onGoBack} className="p-4">
-        Go Back
+export const EmptyFolder = ({ canGoBack, onGoBack, onUploadFile }: EmptyFolderProps) => (
+  <Empty className="border-2 border-dashed border-muted py-52">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <FolderIcon />
+      </EmptyMedia>
+      <EmptyTitle>Empty Folder</EmptyTitle>
+      <EmptyDescription>
+        This folder is empty. Upload files or create folders to get started.
+      </EmptyDescription>
+    </EmptyHeader>
+    <EmptyContent className="flex-row justify-center gap-2">
+      {canGoBack && (
+        <Button variant="outline" className="h-8 px-3" onClick={onGoBack}>
+          Go Back
+        </Button>
+      )}
+      <Button className="h-8 px-3" onClick={onUploadFile}>
+        <UploadIcon className="size-3.5" />
+        <span className="mt-0.5">Upload Files</span>
       </Button>
-    )}
-  </div>
+    </EmptyContent>
+  </Empty>
 );

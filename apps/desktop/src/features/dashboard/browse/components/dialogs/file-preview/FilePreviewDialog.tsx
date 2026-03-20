@@ -54,7 +54,7 @@ export const FilePreviewDialog = ({ isOpen, item, onOpenChange }: FileViewerDial
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden p-0 sm:max-w-5xl">
+      <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
         <DialogHeader className="flex items-start justify-between border-b border-border/40 bg-muted/20 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl border border-border/50 bg-background shadow-xs">
@@ -73,9 +73,8 @@ export const FilePreviewDialog = ({ isOpen, item, onOpenChange }: FileViewerDial
 
         <div
           className={cn(
-            "relative flex w-full overflow-hidden bg-muted/10",
+            "relative flex w-full overflow-hidden",
             "h-[50vh] flex-col items-center justify-center sm:h-[60vh] md:h-[70vh]",
-            fileType === "text" && "items-start justify-start bg-zinc-950",
           )}>
           {viewers[fileType]}
 

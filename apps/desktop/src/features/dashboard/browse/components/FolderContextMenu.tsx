@@ -1,9 +1,9 @@
 import { ContextMenu } from "@/components/ui/shadcn-ext/ContextMenu";
 import {
   EllipsisVertical,
+  HeartIcon,
   ImageIcon,
   PencilIcon,
-  StarIcon,
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
@@ -33,7 +33,7 @@ export const FolderContextMenu = ({
   const items = [
     {
       label: isFavourite ? "Unfavourite" : "Favourite",
-      icon: StarIcon,
+      icon: HeartIcon,
       onClick: onToggleFavourite,
     },
     {

@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/shadcn/badge";
 import { type FileItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
 import { formatBytes } from "@/utils/format";
@@ -10,7 +9,7 @@ import {
   FileImageIcon,
   FileTextIcon,
   FileVideoIcon,
-  StarIcon,
+  Heart,
   type LucideIcon,
 } from "lucide-react";
 import { FileContextMenu } from "./FileContextMenu";
@@ -85,9 +84,9 @@ export const FileItem = ({
       </FileContextMenu>
 
       {file.isFavourite && (
-        <Badge variant="outline" className="absolute -top-1 -right-1 size-7 bg-card">
-          <StarIcon className="text-yellow-500" fill="currentColor" />
-        </Badge>
+        <div className="absolute -top-1 -right-1 flex size-6 items-center justify-center rounded-full border bg-card">
+          <Heart className="size-3 text-red-500" fill="currentColor" />
+        </div>
       )}
     </div>
   );

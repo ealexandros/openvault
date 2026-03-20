@@ -1,7 +1,9 @@
 import { ItemType } from "@/types/filesystem";
+import { LucideIcon } from "lucide-react";
 
 export type PathSegment = {
   id?: string;
+  icon?: LucideIcon;
   name: string;
 };
 

@@ -1,7 +1,6 @@
-import { Badge } from "@/components/ui/shadcn/badge";
 import { FolderItemResult } from "@/types/filesystem";
 import { cn } from "@/utils/cn";
-import { ChevronRightIcon, FolderIcon, StarIcon, type LucideProps } from "lucide-react";
+import { ChevronRightIcon, FolderIcon, Heart, type LucideProps } from "lucide-react";
 import { FOLDER_ICONS, FolderIconName } from "../data/folder-icons";
 import { FolderContextMenu } from "./FolderContextMenu";
 
@@ -82,9 +81,9 @@ export const FolderItem = ({
     </FolderContextMenu>
 
     {folder.isFavourite && (
-      <Badge variant="outline" className="absolute -top-1 -right-1 size-7 bg-card p-0">
-        <StarIcon className="text-yellow-500" fill="currentColor" />
-      </Badge>
+      <div className="absolute -top-1 -right-1 flex size-6 items-center justify-center rounded-full border bg-card">
+        <Heart className="size-3 text-red-500" fill="currentColor" />
+      </div>
     )}
   </div>
 );
