@@ -61,9 +61,9 @@ export const BrowseHeader = ({
   const totalItems = folderCount + fileCount;
 
   return (
-    <header className="space-y-8">
-      <section className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <header className="space-y-6">
+      <section className="items-center justify-between space-y-4 lg:flex lg:space-y-0">
+        <div className="-mx-2 flex items-center gap-4 lg:mx-0">
           <div className="flex items-center gap-2 rounded-full py-1.5">
             <Button
               variant="ghost"
@@ -89,7 +89,7 @@ export const BrowseHeader = ({
             {totalItems} item{totalItems !== 1 ? "s" : ""}
           </p>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-row-reverse items-center gap-5 lg:flex-row">
           <Tooltip>
             <TooltipTrigger className="cursor-pointer" asChild>
               <button onClick={onUploadFile}>
@@ -119,9 +119,9 @@ export const BrowseHeader = ({
             <TooltipContent>Create Folder</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="my-2" />
+          <Separator orientation="vertical" className="my-2 hidden lg:block" />
 
-          <div className="relative w-full xl:w-72">
+          <div className="relative w-full lg:w-72">
             <SearchIcon className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               ref={searchRef}

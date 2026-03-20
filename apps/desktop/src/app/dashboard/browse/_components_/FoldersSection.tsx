@@ -29,7 +29,7 @@ export const FoldersSection = ({
 
   return (
     <BrowseSection title="Folders" count={folders.length} icon={FolderIcon}>
-      <div className="grid grid-cols-3 gap-5 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {folders.map(item => (
           <FolderItem
             key={item.id}
