@@ -9,6 +9,9 @@ mod namings;
 mod patch;
 mod validate;
 
+#[cfg(test)]
+mod tests;
+
 pub use codec::{FILESYSTEM_WIRE_VERSION, FilesystemCodec};
 pub use errors::{FilesystemError, Result};
 pub use events::{FilesystemChange, FilesystemDelta, FilesystemSnapshot};

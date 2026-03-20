@@ -71,13 +71,12 @@ pub fn validate_no_cycle(
 
     while let Some(current) = cursor {
         if current == folder_id {
-            return Ok(());
+            return Err(FilesystemError::CycleDetected(folder_id));
         }
-
         cursor = folders.get(&current).and_then(|f| f.parent_id);
     }
 
-    Err(FilesystemError::CycleDetected(folder_id))
+    Ok(())
 }
 
 fn validate_root(folders: &HashMap<Uuid, FolderMetadata>) -> Result {

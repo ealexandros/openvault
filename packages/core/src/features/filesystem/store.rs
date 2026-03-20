@@ -315,8 +315,8 @@ impl FilesystemStore {
             return Err(FilesystemError::ParentFolderNotFound(target_parent));
         }
 
-        if target_parent == id {
-            validate::validate_no_cycle(&self.folders, id, target_parent)?
+        if target_parent != id {
+            validate::validate_no_cycle(&self.folders, id, target_parent)?;
         }
 
         let target_name = patch.name.clone().unwrap_or(folder.name.clone());
