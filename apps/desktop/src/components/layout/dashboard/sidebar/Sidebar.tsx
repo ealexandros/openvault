@@ -20,8 +20,8 @@ type SidebarProps = {
 
 const mainNavItems = [
   { href: hrefs.dashboard.browse.get(), label: "Browse Files", icon: FolderIcon },
+  { href: hrefs.dashboard.secrets.get(), label: "Secrets", icon: LockIcon },
   { href: hrefs.dashboard.messages.get(), label: "Messages", icon: MessageCircle },
-  { href: hrefs.dashboard.passwords.get(), label: "Passwords", icon: LockIcon },
   { href: hrefs.dashboard.notes.get(), label: "Notes", icon: NotebookIcon },
   { href: hrefs.dashboard.logs.get(), label: "Activity Logs", icon: ActivityIcon },
   { href: hrefs.dashboard.decoy.get(), label: "Decoy Vault", icon: ShieldAlertIcon },

@@ -13,7 +13,7 @@ type DashboardLayoutProps = {
 
 const routeTitleMap: Record<string, string> = {
   [hrefs.dashboard.browse.get()]: "Browse Files",
-  [hrefs.dashboard.passwords.get()]: "Passwords",
+  [hrefs.dashboard.secrets.get()]: "Secrets",
   [hrefs.dashboard.notes.get()]: "Notes",
   [hrefs.dashboard.messages.get()]: "Messages",
   [hrefs.dashboard.logs.get()]: "Activity Logs",

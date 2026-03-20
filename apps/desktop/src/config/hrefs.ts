@@ -20,8 +20,8 @@ export const hrefs = {
     notes: {
       get: () => "/dashboard/notes",
     },
-    passwords: {
-      get: () => "/dashboard/passwords",
+    secrets: {
+      get: () => "/dashboard/secrets",
     },
     messages: {
       get: () => "/dashboard/messages",
