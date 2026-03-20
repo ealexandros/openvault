@@ -28,7 +28,7 @@ const BrowsePage = () => {
   return (
     <FileDropListener onDropPaths={upload.paths}>
       {({ isDragging }) => (
-        <main className="relative mx-auto h-full space-y-16 p-8 xl:p-12 2xl:px-20">
+        <main className="relative mx-auto h-full w-full space-y-16 p-8 xl:p-14 xl:py-8">
           <FileDropOverlayView isVisible={isDragging} />
 
           <BrowseHeader
@@ -59,6 +59,7 @@ const BrowsePage = () => {
                 onFolderDelete={dialogs.requestFolderDeletion}
                 onFolderChangeIcon={dialogs.requestFolderIconChange}
                 onFolderExport={dialogs.requestFolderExport}
+                onUploadFolder={upload.folders}
               />
               <FilesSection
                 files={browseState.files}
@@ -68,6 +69,7 @@ const BrowsePage = () => {
                 onFileProperties={dialogs.requestFileProperties}
                 onFileDelete={dialogs.requestFileDeletion}
                 onFileExport={dialogs.requestFileExport}
+                onUploadFile={upload.files}
               />
             </section>
           )}

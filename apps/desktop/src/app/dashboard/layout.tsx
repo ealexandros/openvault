@@ -23,7 +23,7 @@ const Layout = ({ children }: LayoutProps) => {
   if (!isUnlocked) return null;
 
   return (
-    <DashboardLayout onLogout={lockVault} vaultName={vaultName}>
+    <DashboardLayout vaultName={vaultName} onLogout={lockVault}>
       {children}
     </DashboardLayout>
   );
