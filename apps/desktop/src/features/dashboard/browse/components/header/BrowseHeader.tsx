@@ -62,24 +62,24 @@ export const BrowseHeader = ({
 
   return (
     <header className="space-y-6">
-      <section className="items-center justify-between space-y-4 lg:flex lg:space-y-0">
-        <div className="-mx-2 flex items-center gap-4 lg:mx-0">
-          <div className="flex items-center gap-2 rounded-full py-1.5">
+      <section className="-ml-1 items-center justify-between space-y-4 lg:flex lg:space-y-0">
+        <div className="-mx-2 flex items-center gap-3 lg:mx-0">
+          <div className="flex items-center gap-1 rounded-full py-1.5">
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               className="group p-4"
               onClick={onBack}
               disabled={!canGoBack}>
-              <ChevronLeftIcon className="size-6 text-foreground group-disabled:text-muted-foreground/60" />
+              <ChevronLeftIcon className="size-6" />
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               className="group p-4"
               onClick={onForward}
               disabled={!canGoForward}>
-              <ChevronRightIcon className="size-6 text-foreground group-disabled:text-muted-foreground/60" />
+              <ChevronRightIcon className="size-6" />
             </Button>
           </div>
           <h1 className="text-2xl font-semibold">
@@ -137,9 +137,7 @@ export const BrowseHeader = ({
         </div>
       </section>
 
-      <nav className="mx-2">
-        <BrowseBreadcrumbs pathSegments={currentPath} onPathClick={onBreadcrumbClick} />
-      </nav>
+      <BrowseBreadcrumbs pathSegments={currentPath} onPathClick={onBreadcrumbClick} />
     </header>
   );
 };
