@@ -1,6 +1,6 @@
 "use client";
 
-import { UnderConstruction } from "@/features/dashboard/components/UnderConstruction";
+import { UnderConstruction } from "@/features/dashboard/shared/UnderConstruction";
 
 const NotesPage = () => <UnderConstruction title="Notes" />;
 
