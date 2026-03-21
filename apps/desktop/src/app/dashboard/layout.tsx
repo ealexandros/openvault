@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardLayout as BaseDashboardLayout } from "@/components/layout/dashboard";
+import { DashboardLayout as BaseDashboardLayout } from "@/features/dashboard/layout";
 import { ReactNode } from "react";
 
 type DashboardLayoutProps = {

@@ -9,7 +9,7 @@ import { cn } from "@/utils/cn";
 import { PinIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { usePinNavigation } from "../../usePinNavigation";
+import { usePinNavigation } from "../../../hooks/usePinNavigation";
 import { NavigationItem } from "../Sidebar";
 
 type NavigationMenuItemProps = {

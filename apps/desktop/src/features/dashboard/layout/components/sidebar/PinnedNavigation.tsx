@@ -1,6 +1,6 @@
 "use client";
 
-import { usePinNavigation } from "../usePinNavigation";
+import { usePinNavigation } from "../../hooks/usePinNavigation";
 import { NavigationGroup } from "./navigation-group/NavigationGroup";
 import { NavigationItem } from "./Sidebar";
 

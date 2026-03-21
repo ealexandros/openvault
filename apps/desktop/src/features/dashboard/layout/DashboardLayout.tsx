@@ -3,8 +3,8 @@ import { hrefs } from "@/config/hrefs";
 import { useVaultSession } from "@/context/vault-session";
 import { usePathname } from "next/navigation";
 import { PropsWithChildren } from "react";
-import { DashboardHeader } from "./Header";
-import { DashboardSidebar } from "./sidebar/Sidebar";
+import { DashboardHeader } from "./components/Header";
+import { DashboardSidebar } from "./components/sidebar/Sidebar";
 
 const routeTitleMap: Record<string, string> = {
   [hrefs.dashboard.browse.get()]: "Secure Files & Folders",
