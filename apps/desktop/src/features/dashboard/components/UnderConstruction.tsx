@@ -1,17 +1,38 @@
-import { HistoryIcon } from "lucide-react";
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/shadcn/empty";
+import { hrefs } from "@/config/hrefs";
+import { ConstructionIcon, HomeIcon } from "lucide-react";
+import Link from "next/link";
 
 type UnderConstructionProps = {
   title: string;
 };
 
 export const UnderConstruction = ({ title }: UnderConstructionProps) => (
-  <div className="flex h-screen flex-col items-center justify-center space-y-6 pb-30 text-center">
-    <div className="flex size-16 items-center justify-center rounded-full bg-muted">
-      <HistoryIcon className="size-8 text-muted-foreground" />
-    </div>
-    <div className="space-y-1">
-      <h3 className="text-lg font-medium">Under Construction</h3>
-      <p className="text-sm text-muted-foreground">The {title} module is coming soon.</p>
-    </div>
-  </div>
+  <Empty className="flex h-screen items-center justify-center pb-16">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <ConstructionIcon />
+      </EmptyMedia>
+      <EmptyTitle>Under Construction</EmptyTitle>
+      <EmptyDescription>
+        The &quot;{title}&quot; will be with you shortly. Please stay tuned for next versions.
+      </EmptyDescription>
+    </EmptyHeader>
+    <EmptyContent className="flex-row justify-center gap-2">
+      <Button className="h-8 px-3" asChild>
+        <Link href={hrefs.dashboard.home.get()}>
+          <HomeIcon className="size-3.5" />
+          <span>Go to Browse</span>
+        </Link>
+      </Button>
+    </EmptyContent>
+  </Empty>
 );
