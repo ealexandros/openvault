@@ -16,10 +16,9 @@ export const AudioViewer = ({ url, fileName }: AudioViewerProps) => {
         <h3 className="text-lg font-medium text-foreground">{fileName}</h3>
         <p className="text-sm text-muted-foreground">Audio Preview</p>
       </div>
-
       <audio
-        controls
         src={url}
+        controls
         className="w-full max-w-md rounded-md bg-muted/50 outline-hidden">
         Your browser doesn&apos;t support the audio element.
       </audio>

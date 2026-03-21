@@ -48,8 +48,8 @@ export const useFileViewerDialog = ({ item }: FileViewProps) => {
     clearContent();
 
     if (fileType !== "text") {
-      setIsLoading(false);
       setContentUri(uri);
+      setIsLoading(false);
       return;
     }
 

@@ -16,8 +16,8 @@ export const VideoViewer = ({ url, fileName }: VideoViewerProps) => {
         <h3 className="text-lg font-medium text-foreground drop-shadow-md">{fileName}</h3>
       </div>
       <video
-        controls
         src={url}
+        controls
         className="max-h-full max-w-full rounded-md bg-black shadow-sm outline-hidden">
         Your browser doesn&apos;t support the video element.
       </video>

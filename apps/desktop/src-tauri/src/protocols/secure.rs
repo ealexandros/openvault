@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use super::response;
 use crate::AppState;
+use crate::internal::mime_type::{is_mime_audio, is_mime_video};
 
 pub const PROTOCOL_SCHEME: &str = "secure";
 pub const PROTOCOL_HOST: &str = "localhost";
@@ -42,8 +43,16 @@ pub fn handle_secure_protocol(app: &AppHandle, request_uri: &Uri) -> Response<Ve
         Err(_) => return response::internal_error(),
     };
 
-    match secure_payloads.remove(&token) {
-        Some(response) => response::ok(response.data.as_bytes(), &response.content_type),
-        None => response::not_found(),
+    let payload = match secure_payloads.remove(&token) {
+        Some(payload) => payload,
+        None => return response::not_found(),
+    };
+
+    let response = response::ok(payload.data.as_bytes(), &payload.content_type);
+
+    if is_mime_video(&payload.content_type) || is_mime_audio(&payload.content_type) {
+        secure_payloads.insert(token, payload);
     }
+
+    response
 }
