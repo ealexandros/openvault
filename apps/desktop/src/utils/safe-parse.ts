@@ -26,7 +26,7 @@ export const safeUint8ArrayParse = (value?: Uint8Array | null) => {
   if (value == null) return null;
 
   try {
-    return new TextDecoder().decode(value);
+    return new TextDecoder("utf-8", { fatal: true }).decode(value);
   } catch (error) {
     logger.warn(`⚠️ Error parsing value:`, value, "Error:", error);
     return null;
