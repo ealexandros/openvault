@@ -1,53 +1,39 @@
+import { SidebarInset, SidebarProvider } from "@/components/ui/shadcn/sidebar";
 import { hrefs } from "@/config/hrefs";
+import { useVaultSession } from "@/context/vault-session";
 import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
-import { DashboardHeader } from "./header";
-import { DashboardSidebar } from "./sidebar";
-
-type DashboardLayoutProps = {
-  children: ReactNode;
-  vaultName?: string;
-  title?: string;
-  onLogout: () => Promise<void>;
-};
+import { PropsWithChildren } from "react";
+import { DashboardHeader } from "./Header";
+import { DashboardSidebar } from "./sidebar/Sidebar";
 
 const routeTitleMap: Record<string, string> = {
-  [hrefs.dashboard.browse.get()]: "Browse Files",
-  [hrefs.dashboard.secrets.get()]: "Secrets",
-  [hrefs.dashboard.notes.get()]: "Notes",
-  [hrefs.dashboard.messages.get()]: "Messages",
-  [hrefs.dashboard.logs.get()]: "Activity Logs",
+  [hrefs.dashboard.browse.get()]: "Secure Files & Folders",
+  [hrefs.dashboard.secrets.get()]: "Secure Passwords & Credentials",
+  [hrefs.dashboard.notes.get()]: "Manage Secret Notes",
+  [hrefs.dashboard.messages.get()]: "Communicate Securely (E2EE)",
+  [hrefs.dashboard.logs.get()]: "Monitor Activity Logs",
   [hrefs.dashboard.decoy.get()]: "Decoy Vault",
-  [hrefs.dashboard.settings.get()]: "Settings",
+  [hrefs.dashboard.settings.get()]: "Manage Settings",
 };
 
-export const DashboardLayout = ({
-  children,
-  vaultName,
-  title: explicitTitle,
-  onLogout,
-}: DashboardLayoutProps) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+const sidebarStyle = {
+  "--sidebar-width": "calc(var(--spacing) * 72)",
+  "--header-height": "calc(var(--spacing) * 12)",
+} as React.CSSProperties;
+
+export const DashboardLayout = ({ children }: PropsWithChildren) => {
+  const { metadata, lockVault } = useVaultSession();
   const pathname = usePathname();
 
-  const title = explicitTitle ?? (pathname ? routeTitleMap[pathname] : undefined);
+  const title = routeTitleMap[pathname] ?? metadata?.name;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      <DashboardSidebar
-        vaultName={vaultName}
-        isCollapsed={isSidebarCollapsed}
-        onLogout={onLogout}
-      />
-      <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        <DashboardHeader
-          title={title}
-          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-        <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto h-full">{children}</div>
-        </div>
-      </main>
-    </div>
+    <SidebarProvider style={sidebarStyle}>
+      <DashboardSidebar variant="inset" metadata={metadata} onLock={lockVault} />
+      <SidebarInset>
+        <DashboardHeader title={title} />
+        <section className="flex flex-1 flex-col">{children}</section>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };

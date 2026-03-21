@@ -1,7 +1,7 @@
+import { useVaultSession } from "@/context/vault-session";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { tauriApi } from "@/libraries/tauri-api";
 import { useEffect, useState } from "react";
-import { getVaultName } from "./useUnlockVault";
 
 export const RECENT_VAULTS_KEY = "recent-vaults";
 
@@ -14,6 +14,8 @@ export type RecentVaultProps = {
 const MAX_RECENT_VAULTS = 2;
 
 export const useRecentVault = () => {
+  const { metadata } = useVaultSession();
+
   const [validatedVaults, setValidatedVaults] = useState<RecentVaultProps[]>([]);
   const [isLoadingVaults, setIsLoadingVaults] = useState(true);
 
@@ -33,16 +35,18 @@ export const useRecentVault = () => {
     return results.filter((v): v is RecentVaultProps => v !== null);
   };
 
-  const addVaultToRecents = (path: string) => {
-    if (recentVaults.some(v => v.path === path)) {
+  const addVaultToRecents = () => {
+    if (!metadata) return;
+
+    if (recentVaults.some(v => v.path === metadata.path)) {
       return;
     }
 
     setRecentVaults(prev => {
       const newRecent: RecentVaultProps = {
         id: crypto.randomUUID(),
-        name: getVaultName(path.split("/").pop() ?? ""),
-        path,
+        name: metadata.name,
+        path: metadata.path,
       };
       return [newRecent, ...prev].slice(0, MAX_RECENT_VAULTS);
     });

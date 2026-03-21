@@ -1,84 +1,79 @@
-import { Badge } from "@/components/ui/shadcn/badge";
-import { Button } from "@/components/ui/shadcn/button";
+"use client";
+
+import { Avatar, AvatarFallback } from "@/components/ui/shadcn/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/shadcn/dropdown-menu";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/shadcn/sidebar";
 import { env } from "@/config/env";
 import { hrefs } from "@/config/hrefs";
-import { LogOut, MoreVertical, Settings } from "lucide-react";
+import { BoxIcon, EllipsisVerticalIcon, LogOutIcon, Settings2Icon } from "lucide-react";
 import Link from "next/link";
 
-type SidebarFooterProps = {
+type DashboardFooterProps = {
   vaultName?: string;
-  onLogout: () => Promise<void>;
+  onLogout: () => void;
 };
 
-export const SidebarFooter = ({ vaultName, onLogout }: SidebarFooterProps) => (
-  <section className="flex flex-col gap-4">
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="group h-auto w-full gap-2 rounded-xl border-none py-2 focus-visible:ring-0">
-          <Badge variant="outline" className="size-9 rounded-md text-sm lg:size-10">
-            {vaultName?.slice(0, 2).toUpperCase()}
-          </Badge>
-          <div className="flex flex-1 flex-col items-start gap-0.5 overflow-hidden leading-tight">
-            <span className="text-xs font-bold text-muted-foreground/60 uppercase">
-              Current Vault
-            </span>
-            <span
-              title={vaultName}
-              className="w-full truncate text-[15px] font-semibold tracking-tight text-foreground/90">
-              {vaultName}
-            </span>
-          </div>
-          <MoreVertical className="size-4 shrink-0 text-muted-foreground/60" />
-        </Button>
-      </DropdownMenuTrigger>
+export function DashboardFooter({ vaultName, onLogout }: DashboardFooterProps) {
+  const { isMobile } = useSidebar();
 
-      <DropdownMenuContent
-        align="end"
-        side="left"
-        sideOffset={12}
-        className="w-56 animate-in overflow-hidden">
-        <DropdownMenuLabel className="flex items-center gap-2">
-          <Badge variant="outline" className="size-9 rounded-md text-xs">
-            {vaultName?.slice(0, 2).toUpperCase()}
-          </Badge>
-          <div className="flex w-full flex-col">
-            <span className="mb-1 text-[10px] leading-none font-bold tracking-widest text-muted-foreground/60 uppercase">
-              Current Vault
-            </span>
-            <span className="w-36 truncate text-sm font-bold text-foreground">
-              {vaultName}
-            </span>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <Link href={hrefs.dashboard.settings.get()}>
-          <DropdownMenuItem className="text-sm">
-            <Settings className="size-4" />
-            Settings
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={onLogout}
-          className="text-sm text-destructive! hover:bg-destructive/5!">
-          <LogOut className="size-4" color="var(--color-destructive)" />
-          Logout
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton size="lg" className="cursor-pointer">
+              <Avatar className="size-10 grayscale">
+                <AvatarFallback>
+                  <BoxIcon className="size-5!" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left leading-tight">
+                <span className="truncate text-base font-medium">{vaultName}</span>
+                <span className="truncate text-sm font-medium text-muted-foreground">
+                  version {env.VERSION}
+                </span>
+              </div>
+              <EllipsisVerticalIcon className="ml-auto size-4" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
 
-    <span className="mx-auto text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase">
-      OPENVAULT • V{env.VERSION}
-    </span>
-  </section>
-);
+          <DropdownMenuContent
+            className="min-w-56 rounded-lg shadow-none ring-gray-200/80"
+            side={isMobile ? "bottom" : "right"}
+            align="end"
+            sideOffset={12}>
+            <DropdownMenuGroup>
+              <DropdownMenuItem className="text-sm" asChild>
+                <Link href={hrefs.dashboard.settings.get()}>
+                  <Settings2Icon className="size-4" />
+                  Settings
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+              onClick={onLogout}
+              className="group text-sm text-destructive hover:bg-destructive/5! hover:text-destructive!">
+              <LogOutIcon className="size-4" color="var(--color-destructive)" />
+              Lock Vault
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}

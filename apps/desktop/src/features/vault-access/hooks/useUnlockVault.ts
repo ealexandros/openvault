@@ -1,17 +1,10 @@
 import { hrefs } from "@/config/hrefs";
-import { useVault } from "@/context/VaultContext";
+import { useVaultSession } from "@/context/vault-session";
 import { tauriApi } from "@/libraries/tauri-api";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useRecentVault } from "./useRecentVault";
-
-export const getVaultName = (path: string) =>
-  path
-    .replace(/\\/g, "/")
-    .split("/")
-    .pop()
-    ?.replace(/\.[^/.]+$/, "") ?? "";
 
 export const useUnlockVault = (selectedVaultPath: string | null) => {
   const [hasPassword, setHasPassword] = useState(false);
@@ -21,7 +14,7 @@ export const useUnlockVault = (selectedVaultPath: string | null) => {
 
   const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { setSelectedPath, setIsUnlocked } = useVault();
+  const { unlockVault } = useVaultSession();
 
   const { addVaultToRecents } = useRecentVault();
 
@@ -55,12 +48,18 @@ export const useUnlockVault = (selectedVaultPath: string | null) => {
       return;
     }
 
-    if (rememberVault) {
-      addVaultToRecents(selectedVaultPath);
+    if (rememberVault) addVaultToRecents();
+
+    const isUnlocked = await unlockVault();
+
+    if (!isUnlocked) {
+      toast.error("Failed to Unlock", {
+        description: "Something went wrong while unlocking the vault. Please try again.",
+      });
+      setIsUnlocking(false);
+      return;
     }
 
-    setIsUnlocked(true);
-    setSelectedPath(selectedVaultPath);
     router.push(hrefs.dashboard.get());
   };
 

@@ -1,5 +1,5 @@
 import { logger } from "@/libraries/logger";
-import { ItemType, type BrowseResult } from "@/types/filesystem";
+import { ItemType, VaultMetaResult, type BrowseResult } from "@/types/filesystem";
 import { type MessageContact, type MessageCredentials } from "@/types/messages";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -36,6 +36,10 @@ export const tauriApi = {
 
   lockVault: () => {
     return safeInvokeTauri<void>("lock_vault", {});
+  },
+
+  getVaultMeta: () => {
+    return safeInvokeTauri<VaultMetaResult>("get_vault_meta", {});
   },
 
   browseFs: (params: { parentId?: string }) => {

@@ -1,3 +1,4 @@
+import { useVaultSession } from "@/context/vault-session";
 import { tauriApi } from "@/libraries/tauri-api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { toast } from "sonner";
@@ -8,14 +9,20 @@ type UseFileUploaderProps = {
 };
 
 export const useFileUploader = ({ folderId, refresh }: UseFileUploaderProps) => {
+  const { refreshMeta } = useVaultSession();
+
   const uploadPath = async (path: string) => {
     const isFile = await tauriApi.isFile({ path });
 
     if (isFile.success && !isFile.data) {
-      return await tauriApi.uploadFolder({ parentId: folderId, sourcePath: path });
+      const result = await tauriApi.uploadFolder({ parentId: folderId, sourcePath: path });
+      void refreshMeta();
+      return result;
     }
 
-    return await tauriApi.uploadFile({ parentId: folderId, sourcePath: path });
+    const result = await tauriApi.uploadFile({ parentId: folderId, sourcePath: path });
+    void refreshMeta();
+    return result;
   };
 
   const uploadPaths = async (paths: string[]) => {

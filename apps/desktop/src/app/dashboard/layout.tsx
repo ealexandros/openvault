@@ -1,32 +1,14 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/dashboard";
-import { hrefs } from "@/config/hrefs";
-import { useVault } from "@/context/VaultContext";
-import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
+import { DashboardLayout as BaseDashboardLayout } from "@/components/layout/dashboard";
+import { ReactNode } from "react";
 
-type LayoutProps = {
+type DashboardLayoutProps = {
   children: ReactNode;
 };
 
-const Layout = ({ children }: LayoutProps) => {
-  const { vaultName, isUnlocked, lockVault } = useVault();
-  const router = useRouter();
+const DashboardLayout = ({ children }: DashboardLayoutProps) => (
+  <BaseDashboardLayout>{children}</BaseDashboardLayout>
+);
 
-  useEffect(() => {
-    if (!isUnlocked) {
-      router.push(hrefs.home.get());
-    }
-  }, [isUnlocked, router]);
-
-  if (!isUnlocked) return null;
-
-  return (
-    <DashboardLayout vaultName={vaultName} onLogout={lockVault}>
-      {children}
-    </DashboardLayout>
-  );
-};
-
-export default Layout;
+export default DashboardLayout;

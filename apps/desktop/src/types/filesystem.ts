@@ -30,3 +30,10 @@ export type BrowseResult = {
   folders: FolderItemResult[];
   files: FileItemResult[];
 };
+
+export type VaultMetaResult = {
+  name: string;
+  path: string;
+  sizeInBytes: number;
+  version: number;
+};

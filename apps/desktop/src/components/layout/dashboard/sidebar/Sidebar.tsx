@@ -1,52 +1,115 @@
-import { Brand } from "@/components/icons";
-import { hrefs } from "@/config/hrefs";
-import { cn } from "@/utils/cn";
+"use client";
+
+import { BrandIcon } from "@/components/icons";
 import {
-  ActivityIcon,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+} from "@/components/ui/shadcn/sidebar";
+import { hrefs } from "@/config/hrefs";
+import { VaultMetadata } from "@/context/vault-session";
+import {
+  AlertTriangle,
+  ChartBarIcon,
+  Code,
+  DatabaseIcon,
+  FileTextIcon,
   FolderIcon,
-  LockIcon,
-  MessageCircle,
-  NotebookIcon,
+  MessageCircleIcon,
   ShieldAlertIcon,
 } from "lucide-react";
-import { SidebarFooter } from "./Footer";
-import { NavItem } from "./NavItem";
+import Link from "next/link";
+import * as React from "react";
+import { DashboardFooter } from "./Footer";
+import { NavigationGroup } from "./navigation-group";
+import { PinnedNavigation } from "./PinnedNavigation";
+import { StorageIndicator } from "./StorageIndicator";
 
-type SidebarProps = {
-  vaultName?: string;
-  isCollapsed?: boolean;
-  onLogout: () => Promise<void>;
+type DashboardSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  metadata: VaultMetadata | null;
+  onLock: () => void;
 };
 
-const mainNavItems = [
-  { href: hrefs.dashboard.browse.get(), label: "Browse Files", icon: FolderIcon },
-  { href: hrefs.dashboard.secrets.get(), label: "Secrets", icon: LockIcon },
-  { href: hrefs.dashboard.messages.get(), label: "Messages", icon: MessageCircle },
-  { href: hrefs.dashboard.notes.get(), label: "Notes", icon: NotebookIcon },
-  { href: hrefs.dashboard.logs.get(), label: "Activity Logs", icon: ActivityIcon },
-  { href: hrefs.dashboard.decoy.get(), label: "Decoy Vault", icon: ShieldAlertIcon },
-] as const;
+export type NavigationItem = {
+  title: string;
+  url: string;
+  blank?: boolean;
+  icon?: React.ReactNode;
+};
 
-export const DashboardSidebar = ({ vaultName, isCollapsed, onLogout }: SidebarProps) => (
-  <aside
-    className={cn(
-      "relative flex h-screen flex-col border-r border-muted-foreground/10 bg-foreground/1 py-10",
-      isCollapsed === true
-        ? "w-0 overflow-hidden border-r-0 p-0 opacity-0"
-        : "w-64 px-4 lg:w-70 lg:px-6",
-    )}>
-    <div className={cn("flex h-full flex-col gap-10", isCollapsed === true && "invisible")}>
-      <header className="py-3">
-        <Brand nameClassName="text-xl font-bold tracking-tight" />
-      </header>
+export const navigation = {
+  features: [
+    {
+      title: "Browse Files",
+      url: hrefs.dashboard.browse.get(),
+      icon: <FolderIcon />,
+    },
+    {
+      title: "Secrets",
+      url: hrefs.dashboard.secrets.get(),
+      icon: <DatabaseIcon />,
+    },
+    {
+      title: "Notes",
+      url: hrefs.dashboard.notes.get(),
+      icon: <FileTextIcon />,
+    },
+    {
+      title: "Messages",
+      url: hrefs.dashboard.messages.get(),
+      icon: <MessageCircleIcon />,
+    },
+    {
+      title: "Activity Logs",
+      url: hrefs.dashboard.logs.get(),
+      icon: <ChartBarIcon />,
+    },
+    {
+      title: "Decoy Vault",
+      url: hrefs.dashboard.decoy.get(),
+      icon: <ShieldAlertIcon />,
+    },
+  ],
+  info: [
+    {
+      title: "Source Code",
+      url: hrefs.github.get(),
+      blank: true,
+      icon: <Code />,
+    },
+    {
+      title: "Report Issue",
+      url: hrefs.github.issue.get(),
+      blank: true,
+      icon: <AlertTriangle />,
+    },
+  ],
+} satisfies Record<string, NavigationItem[]>;
 
-      <nav className="flex-1">
-        {mainNavItems.map(item => (
-          <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
-        ))}
-      </nav>
-
-      <SidebarFooter vaultName={vaultName} onLogout={onLogout} />
-    </div>
-  </aside>
+export const DashboardSidebar = ({ metadata, onLock, ...props }: DashboardSidebarProps) => (
+  <Sidebar className="py-5" collapsible="offcanvas" {...props}>
+    <SidebarHeader>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <Link href={hrefs.dashboard.home.get()}>
+            <BrandIcon nameClassName="text-xl" logoClassName="size-7!" />
+          </Link>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarHeader>
+    <SidebarContent className="gap-2 pt-4">
+      <PinnedNavigation items={navigation.features} />
+      <NavigationGroup items={navigation.features} title="Features" pinnable={true} />
+      <section className="mt-auto">
+        <NavigationGroup items={navigation.info} />
+      </section>
+    </SidebarContent>
+    <SidebarFooter className="gap-3">
+      <StorageIndicator sizeInBytes={metadata?.sizeInBytes} />
+      <DashboardFooter vaultName={metadata?.name} onLogout={onLock} />
+    </SidebarFooter>
+  </Sidebar>
 );

@@ -2,15 +2,21 @@ export const hrefs = {
   home: {
     get: () => "/",
   },
+
   create: {
     get: () => "/create",
   },
+
   samesite: {
     get: () => "#",
   },
+
   dashboard: {
     get: () => "/dashboard",
 
+    home: {
+      get: () => "/dashboard/browse",
+    },
     browse: {
       get: () => "/dashboard/browse",
     },
@@ -31,6 +37,14 @@ export const hrefs = {
     },
     settings: {
       get: () => "/dashboard/settings",
+    },
+  },
+
+  github: {
+    get: () => "https://github.com/ealexandros/openvault",
+
+    issue: {
+      get: () => "https://github.com/ealexandros/openvault/issues",
     },
   },
 };

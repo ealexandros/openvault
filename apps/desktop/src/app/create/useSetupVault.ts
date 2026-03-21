@@ -1,12 +1,13 @@
 import { getPasswordStrength } from "@/components/ui/password-strength";
 import { hrefs } from "@/config/hrefs";
-import { useVault } from "@/context/VaultContext";
+import { useVaultSession } from "@/context/vault-session";
 import { useRecentVault } from "@/features/vault-access";
 import { tauriApi } from "@/libraries/tauri-api";
 import { useForm } from "@tanstack/react-form";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import z from "zod";
 
 const setupVaultFormSchema = z.object({
@@ -26,8 +27,6 @@ const defaultFormValues: SetupVaultFormValues = {
 };
 
 export const useSetupVault = () => {
-  const { setIsUnlocked } = useVault();
-  const router = useRouter();
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordStrengthScore, setPasswordStrengthScore] = useState(0);
@@ -35,6 +34,9 @@ export const useSetupVault = () => {
 
   const passwordRef = useRef<HTMLInputElement>(null);
   const verifyPasswordRef = useRef<HTMLInputElement>(null);
+
+  const { unlockVault } = useVaultSession();
+  const router = useRouter();
 
   const { addVaultToRecents } = useRecentVault();
 
@@ -73,7 +75,7 @@ export const useSetupVault = () => {
       const encoder = new TextEncoder();
       const passwordBytes = encoder.encode(password);
 
-      const result = await tauriApi.createVault({
+      const createResult = await tauriApi.createVault({
         path: value.path,
         name: value.name,
         password: Array.from(passwordBytes),
@@ -86,11 +88,25 @@ export const useSetupVault = () => {
       if (verifyPasswordRef.current) verifyPasswordRef.current.value = "";
       setPasswordStrengthScore(0);
 
-      if (result.success) {
-        setIsUnlocked(true);
-        addVaultToRecents(result.data.path);
-        router.push(hrefs.dashboard.get());
+      if (!createResult.success) {
+        toast.error("Failed to Create Vault", {
+          description: "Something went wrong while creating the vault. Please try again.",
+        });
+        setIsEncrypting(false);
+        return;
       }
+
+      const unlockResult = await unlockVault();
+
+      if (unlockResult) {
+        addVaultToRecents();
+        router.push(hrefs.dashboard.get());
+        return;
+      }
+
+      toast.error("Failed to Unlock", {
+        description: "Something went wrong while unlocking the vault. Please try again.",
+      });
 
       setIsEncrypting(false);
     },
