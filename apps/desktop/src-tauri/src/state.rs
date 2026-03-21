@@ -1,15 +1,14 @@
-use openvault_sdk::{SecretVec, Vault};
-use std::{
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use openvault_sdk::Vault;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tauri::State;
 
 use crate::internal::ttl_cache::TtlCache;
+use crate::protocols::SecurePayload;
 
 pub struct AppState {
     pub vault: Mutex<Option<Vault>>,
-    pub secure_proto: Arc<Mutex<TtlCache<String, SecretVec>>>,
+    pub secure_payloads: Arc<Mutex<TtlCache<String, SecurePayload>>>,
 }
 
 impl Default for AppState {
@@ -18,7 +17,7 @@ impl Default for AppState {
 
         Self {
             vault: Mutex::new(None),
-            secure_proto: Arc::new(Mutex::new(ttl_cache)),
+            secure_payloads: Arc::new(Mutex::new(ttl_cache)),
         }
     }
 }

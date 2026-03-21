@@ -24,11 +24,12 @@ pub fn not_found() -> Response<Vec<u8>> {
         .unwrap_or_else(|_| internal_error())
 }
 
-pub fn ok(body: &[u8]) -> Response<Vec<u8>> {
-    let len = body.len();
+pub fn ok(body: &[u8], content_type: &str) -> Response<Vec<u8>> {
+    let body_size = body.len();
 
     with_default_headers(Response::builder().status(200))
-        .header("Content-Length", len)
+        .header("Content-Length", body_size)
+        .header("Content-Type", content_type)
         .body(body.to_vec())
         .unwrap_or_else(|_| internal_error())
 }

@@ -29,6 +29,11 @@ impl<'a> FilesystemService<'a> {
         blob::read_blob(self.session, &blob_ref).map_err(Error::from)
     }
 
+    pub fn get_file_extension(&self, id: Uuid) -> Result<String> {
+        let file = self.get_file(&id)?;
+        Ok(file.extension.clone())
+    }
+
     pub fn browse(&mut self, parent_id: &Uuid) -> Result<(Vec<FolderMetadata>, Vec<FileMetadata>)> {
         self.store.browse(parent_id).map_err(Error::from)
     }

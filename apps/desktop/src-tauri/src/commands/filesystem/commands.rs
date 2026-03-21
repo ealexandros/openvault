@@ -7,8 +7,9 @@ use super::contracts::{
     ReadFileParams, RenameItemParams, SetFavoriteItemParams, UploadFileParams, UploadFolderParams,
 };
 use crate::errors::{Error, Result};
+use crate::internal::mime_type;
 use crate::internal::parser::{parse_optional_uuid, parse_uuid};
-use crate::protocols::secure;
+use crate::protocols::{SecurePayload, secure};
 use crate::state::TauriState;
 
 macro_rules! vault_fs {
@@ -143,19 +144,23 @@ pub async fn upload_folder(state: TauriState<'_>, params: UploadFolderParams) ->
 pub async fn expose_file_url(state: TauriState<'_>, params: ReadFileParams) -> Result<String> {
     vault_fs!(state, fs, vault);
 
-    let uuid = parse_uuid(&params.id)?;
-    let content = fs.read_file_bytes(uuid)?;
-
-    let mut inner_map = state
-        .secure_proto
+    let mut secure_payloads = state
+        .secure_payloads
         .lock()
         .map_err(|_| Error::Internal("Lock poisoned".to_string()))?;
+
+    let uuid = parse_uuid(&params.id)?;
+    let content = fs.read_file_bytes(uuid)?;
 
     let token = Uuid::new_v4().to_string();
     let secret_vec = SecretVec::new(content)
         .map_err(|_| Error::Internal("Failed to create secret vec".to_string()))?;
 
-    inner_map.insert(token.clone(), secret_vec);
+    let extension = fs.get_file_extension(uuid)?;
+    let mime_type = mime_type::mime_from_extension(&extension);
+
+    let secure_payload = SecurePayload::new(secret_vec, mime_type);
+    secure_payloads.insert(token.clone(), secure_payload);
 
     Ok(secure::protocol_uri(&token))
 }
