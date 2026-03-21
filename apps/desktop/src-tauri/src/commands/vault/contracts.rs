@@ -16,6 +16,15 @@ pub struct CreateVaultResult {
     pub path: String,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VaultMetaResult {
+    pub name: String,
+    pub path: String,
+    pub size_in_bytes: u64,
+    pub version: u16,
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenVaultParams {

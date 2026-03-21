@@ -20,6 +20,7 @@ pub fn run() {
             crate::commands::vault::open_vault,
             crate::commands::vault::compact_vault,
             crate::commands::vault::lock_vault,
+            crate::commands::vault::get_vault_meta,
             crate::commands::filesystem::path_is_file,
             crate::commands::filesystem::browse_fs,
             crate::commands::filesystem::create_folder,

@@ -47,6 +47,14 @@ impl Vault {
         self.session.version()
     }
 
+    pub fn name(&self) -> String {
+        self.session.name()
+    }
+
+    pub fn size(&self) -> u64 {
+        self.session.size().unwrap_or_default()
+    }
+
     pub fn commit(&mut self) -> Result {
         FilesystemRepository::commit(&mut self.session, &mut self.filesystem)?;
         MessagesRepository::commit(&mut self.session, &mut self.messages)?;

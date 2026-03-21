@@ -42,12 +42,24 @@ impl VaultSession {
         &self.file
     }
 
+    pub fn name(&self) -> String {
+        self.file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_string()
+    }
+
     pub fn file_mut(&mut self) -> &mut File {
         &mut self.file
     }
 
     pub fn file_path(&self) -> &PathBuf {
         &self.file_path
+    }
+
+    pub fn size(&self) -> Result<u64> {
+        Ok(self.file_path.metadata()?.len())
     }
 
     pub fn version(&self) -> u16 {

@@ -4,7 +4,7 @@ use std::str::FromStr;
 use zeroize::Zeroize;
 
 use super::contracts::{CreateVaultParams, OpenVaultParams};
-use crate::commands::vault::contracts::CreateVaultResult;
+use crate::commands::vault::contracts::{CreateVaultResult, VaultMetaResult};
 use crate::errors::{Error, Result};
 use crate::internal::format::string_from_bytes;
 use crate::state::TauriState;
@@ -74,4 +74,17 @@ pub async fn compact_vault(state: TauriState<'_>) -> Result {
     vault.compact()?;
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_vault_meta(state: TauriState<'_>) -> Result<VaultMetaResult> {
+    let vault_state = state.vault.lock().map_err(|_| Error::LockPoisoned)?;
+    let vault = vault_state.as_ref().ok_or(Error::VaultNotOpened)?;
+
+    Ok(VaultMetaResult {
+        name: vault.name(),
+        path: vault.path().to_string_lossy().to_string(),
+        size_in_bytes: vault.size(),
+        version: vault.version(),
+    })
 }
