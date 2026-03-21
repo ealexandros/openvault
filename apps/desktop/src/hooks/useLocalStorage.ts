@@ -1,53 +1,65 @@
-import { safeJsonParse, safeJsonStringify } from "@/utils/safe-parse";
-import { useEffect, useEffectEvent, useState } from "react";
+import { safeJsonParse } from "@/utils/safe-parse";
+import { useEffect, useSyncExternalStore } from "react";
 
-type UseLocalStorageProps<T> = {
+type UseLocalStorageOptions<T> = {
   key: string;
   defaultValue: T;
 };
 
-type UseLocalStorageReturn<T> = [T, React.Dispatch<React.SetStateAction<T>>];
+const localStorageSubscribers = new Set<() => void>();
 
-export const useLocalStorage = <T>({
+const subscribe = (callback: () => void) => {
+  localStorageSubscribers.add(callback);
+  return () => localStorageSubscribers.delete(callback);
+};
+
+const notify = () => {
+  localStorageSubscribers.forEach(callback => callback());
+};
+
+export const useLocalStorage = <T = unknown>({
   key,
   defaultValue,
-}: UseLocalStorageProps<T>): UseLocalStorageReturn<T> => {
-  const [storedValue, setStoredValue] = useState<T>(defaultValue);
-  const [isInitialized, setIsInitialized] = useState(false);
+}: UseLocalStorageOptions<T>) => {
+  const getSnapshot = () => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(key);
+  };
 
-  const setStoredValueEvent = useEffectEvent((value: T) => {
-    setStoredValue(value);
-  });
+  const getServerSnapshot = () => null;
 
-  const setIsInitializedEvent = useEffectEvent((value: boolean) => {
-    setIsInitialized(value);
-  });
+  const storageValue = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const value = safeJsonParse<T>(storageValue) ?? defaultValue;
+
+  const setValue = (callback: (value: T) => T) => {
+    const newValue = callback(value);
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(key, JSON.stringify(newValue));
+    notify();
+  };
+
+  const removeValue = () => {
+    if (typeof window === "undefined") return;
+    window.localStorage.removeItem(key);
+    notify();
+  };
 
   useEffect(() => {
-    const item = window.localStorage.getItem(key);
-    const value = item != null ? safeJsonParse<T>(item) : null;
+    if (typeof window === "undefined") return;
 
-    if (value !== null) {
-      setStoredValueEvent(value);
-    }
+    const handleStorage = () => notify();
 
-    setIsInitializedEvent(true);
-  }, [key]);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", notify);
+    document.addEventListener("visibilitychange", notify);
 
-  useEffect(() => {
-    if (!isInitialized) return;
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", notify);
+      document.removeEventListener("visibilitychange", notify);
+    };
+  }, []);
 
-    if (storedValue == null) {
-      window.localStorage.removeItem(key);
-      return;
-    }
-
-    const serialized = safeJsonStringify(storedValue);
-
-    if (serialized != null) {
-      window.localStorage.setItem(key, serialized);
-    }
-  }, [isInitialized, key, storedValue]);
-
-  return [storedValue, setStoredValue];
+  return [value, setValue, removeValue] as const;
 };
