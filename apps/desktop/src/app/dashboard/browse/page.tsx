@@ -111,6 +111,7 @@ const BrowsePage = () => {
             onUpdate={refresh}
           />
           <RenameItemDialog
+            key={dialogs.rename.item?.id}
             isOpen={dialogs.rename.isOpen}
             item={dialogs.rename.item}
             onOpenChange={dialogs.rename.toggle}
