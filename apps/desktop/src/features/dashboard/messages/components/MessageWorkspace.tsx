@@ -84,7 +84,7 @@ export const MessageWorkspace = ({
   };
 
   return (
-    <div className="mx-auto flex h-full max-w-5xl flex-col rounded-3xl border border-border/20 bg-background/50 p-6">
+    <div className="mx-auto flex h-full flex-col p-8">
       <div className="mb-10 flex flex-col gap-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">

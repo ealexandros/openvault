@@ -11,11 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/shadcn/select";
 import { cn } from "@/utils/cn";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, User, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
-import { useKeyListeners } from "@/hooks/useKeyListeners";
-import { KeyCode } from "@/config/keycodes";
 
 type MessageOnboardingProps = {
   currentUserName: string;
@@ -61,9 +60,7 @@ export const MessageOnboarding = ({
     else onComplete({ name: displayName, rotationMonths });
   };
 
-  useKeyListeners({
-    [KeyCode.Enter]: handleNext,
-  });
+  useHotkey("Enter", handleNext);
 
   const handleBack = () => {
     if (step === "identity") setStep("intro");

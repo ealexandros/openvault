@@ -16,8 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/shadcn/select";
-import { Clock, Settings } from "lucide-react";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+} from "@/components/ui/shadcn/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/shadcn/tooltip";
+import { Clock, Download, Settings } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/utils/cn";
 
 type UserCredentials = {
   name: string;
@@ -31,6 +42,7 @@ type UserSidebarHeaderProps = {
   onRenew: () => Promise<void>;
   onReset: () => Promise<void>;
   onUpdate: (data: { name: string; rotationMonths: number }) => Promise<void>;
+  onExport: () => void;
 };
 
 export const UserSidebarHeader = ({
@@ -38,9 +50,8 @@ export const UserSidebarHeader = ({
   onRenew,
   onReset,
   onUpdate,
+  onExport,
 }: UserSidebarHeaderProps) => {
-  // @todo-now remove this..
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [name, setName] = useState(credentials?.name ?? "");
   const [rotationMonths, setRotationMonths] = useState(12);
@@ -50,29 +61,79 @@ export const UserSidebarHeader = ({
     setIsSettingsOpen(false);
   };
 
+  const isExpired = credentials?.expiresAt != null && new Date(credentials.expiresAt) < new Date();
+
   return (
-    <div className="flex flex-col gap-4 border-b border-border bg-muted/20 p-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h3 className="text-lg font-semibold tracking-tight">User Profiles</h3>
-          <p className="text-xs text-muted-foreground">Manage identities and keys.</p>
-        </div>
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent/30 p-2">
+            <div className="relative">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
+                {credentials?.name.charAt(0).toUpperCase() ?? "M"}
+              </div>
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-background shadow-xs",
+                        isExpired ? "bg-destructive" : "bg-emerald-500",
+                      )}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-[10px]">
+                    <p>{isExpired ? "Identity Expired" : "Identity Active"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsSettingsOpen(true)}
-          className="h-8 w-8 text-muted-foreground">
-          <Settings className="h-4 w-4" />
-        </Button>
-      </div>
+            <div className="flex flex-1 flex-col overflow-hidden px-1">
+              <span className="truncate text-sm font-bold tracking-tight">
+                {credentials?.name ?? "My Profile"}
+              </span>
+              <span className="truncate text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">
+                Active Session
+              </span>
+            </div>
 
-      {credentials?.expiresAt != null && (
-        <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600/80 uppercase">
-          <Clock className="h-2.5 w-2.5" />
-          <span>Key expires: {new Date(credentials.expiresAt).toLocaleDateString()}</span>
-        </div>
-      )}
+            <div className="flex items-center gap-0.5">
+              <TooltipProvider delayDuration={400}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                      onClick={onExport}>
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Export Identity</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                      onClick={() => setIsSettingsOpen(true)}>
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Settings</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent className="sm:max-w-md">
@@ -117,10 +178,15 @@ export const UserSidebarHeader = ({
               <div className="space-y-1 text-xs">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Expires:</span>
-                  <span className="font-medium">
-                    {credentials?.expiresAt != null
-                      ? new Date(credentials.expiresAt).toLocaleDateString()
-                      : "Never"}
+                  <span className="flex items-center gap-1.5 font-medium">
+                    {credentials?.expiresAt != null ? (
+                      <>
+                        <Clock className={cn("size-3", isExpired ? "text-destructive" : "text-emerald-600")} />{" "}
+                        {new Date(credentials.expiresAt).toLocaleDateString()}
+                      </>
+                    ) : (
+                      "Never"
+                    )}
                   </span>
                 </div>
               </div>
@@ -148,6 +214,7 @@ export const UserSidebarHeader = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
+

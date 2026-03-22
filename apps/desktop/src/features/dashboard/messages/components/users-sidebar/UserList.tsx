@@ -1,3 +1,4 @@
+import { SidebarMenu } from "@/components/ui/shadcn/sidebar";
 import { type MessageContact } from "@/types/messages";
 import { UserListItem } from "./UserListItem";
 import { UserListItemSkeleton } from "./UserListItemSkeleton";
@@ -21,22 +22,26 @@ export const UserList = ({
 }: UserListProps) => {
   if (isLoading === true) {
     return (
-      <>
+      <SidebarMenu>
         <UserListItemSkeleton />
         <UserListItemSkeleton />
         <UserListItemSkeleton />
-      </>
+      </SidebarMenu>
     );
   }
 
-  return users.map(user => (
-    <UserListItem
-      key={user.id}
-      user={user}
-      selected={selectedUserId === user.id}
-      onClick={() => setSelectedUserId(user.id)}
-      onRename={onRename}
-      onDelete={onDelete}
-    />
-  ));
+  return (
+    <SidebarMenu>
+      {users.map(user => (
+        <UserListItem
+          key={user.id}
+          user={user}
+          selected={selectedUserId === user.id}
+          onClick={() => setSelectedUserId(user.id)}
+          onRename={onRename}
+          onDelete={onDelete}
+        />
+      ))}
+    </SidebarMenu>
+  );
 };

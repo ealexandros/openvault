@@ -15,8 +15,8 @@ export type FileInfo = {
   name: string;
   size: number;
   source: FileSource;
-  id?: string; // For vault items
-  path?: string; // For computer files
+  id?: string;
+  path?: string;
 };
 
 type UserPresence = "online" | "offline";
@@ -42,16 +42,19 @@ type MessageUserProfileImport = {
 
 const ROOT_FOLDER_ID = "00000000-0000-0000-0000-000000000000";
 
-const toSafeFilename = (value: string) =>
-  value.trim().replace(/[\\/:*?"<>|]+/g, "_") || "openvault-file";
+const toSafeFilename = (value: string) => {
+  return value.trim().replace(/[\\/:*?"<>|]+/g, "_") || "openvault-file";
+};
 
 const createTempFilePath = async (fileName: string) => {
   const dir = await tempDir();
+
   const unique =
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unnecessary-condition
     typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
   return await join(dir, `openvault-${unique}-${toSafeFilename(fileName)}`);
 };
 

@@ -5,10 +5,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/shadcn/resizable";
+import { SidebarInset } from "@/components/ui/shadcn/sidebar";
+import { useMessages } from "@/features/dashboard/messages";
 import { MessageOnboarding } from "@/features/dashboard/messages/components/MessageOnboarding";
 import { MessageWorkspace } from "@/features/dashboard/messages/components/MessageWorkspace";
 import { UserSidebar } from "@/features/dashboard/messages/components/users-sidebar";
-import { useMessages } from "@/features/dashboard/messages/hooks/useMessages";
 import { AnimatePresence, motion } from "framer-motion";
 import { debounce } from "lodash-es";
 import { ChangeEvent, useEffect, useMemo, useRef } from "react";
@@ -57,7 +58,6 @@ const MessagesPage = () => {
     swapMessageFields,
     selectComputerFile,
     importUserProfile,
-    exportSelectedUserProfile,
     exportCurrentUserProfile,
     completeOnboarding,
     setIsVaultPickerOpen,
@@ -168,53 +168,18 @@ const MessagesPage = () => {
             />
           </motion.div>
         ) : (
-          <motion.div
-            key="workspace"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex h-full w-full">
+          <div key="workspace" className="flex h-full w-full">
             <ResizablePanelGroup orientation="horizontal" className="h-full">
-              <ResizablePanel defaultSize="75%">
-                <main className="scrollbar-none h-full overflow-y-auto p-10">
-                  <MessageWorkspace
-                    mode={mode}
-                    setMode={setMode}
-                    workMode={workMode}
-                    setWorkMode={setWorkMode}
-                    selectedFile={selectedFile}
-                    setSelectedFile={setSelectedFile}
-                    fileDestination={fileDestination}
-                    setFileDestination={setFileDestination}
-                    messageInput={messageInput}
-                    setMessageInput={setMessageInput}
-                    messageOutput={messageOutput}
-                    transformError={transformError}
-                    clearMessageFields={clearMessageFields}
-                    swapMessageFields={swapMessageFields}
-                    handlePrimaryAction={handlePrimaryAction}
-                    selectComputerFile={selectComputerFile}
-                    openVaultPicker={() => setIsVaultPickerOpen(true)}
-                    selectedUser={selectedUser}
-                    users={filteredUsers}
-                    setSelectedUserId={setSelectedUserId}
-                  />
-                </main>
-              </ResizablePanel>
-
-              <ResizableHandle withHandle />
-
-              <ResizablePanel defaultSize="25%">
+              <ResizablePanel defaultSize="20%" minSize={300}>
                 <UserSidebar
                   searchQuery={searchQuery}
                   filteredUsers={filteredUsers}
                   selectedUserId={selectedUserId}
-                  selectedUser={selectedUser}
                   importError={importError}
                   isLoading={isLoading}
                   openImportPicker={openImportPicker}
                   setSearchQuery={setSearchQuery}
                   setSelectedUserId={setSelectedUserId}
-                  exportSelectedUserProfile={exportSelectedUserProfile}
                   exportCurrentUserProfile={exportCurrentUserProfile}
                   renameContact={renameContact}
                   removeContact={removeContact}
@@ -224,8 +189,39 @@ const MessagesPage = () => {
                   credentials={credentials}
                 />
               </ResizablePanel>
+
+              <ResizableHandle className="w-px bg-gray-100" />
+
+              <ResizablePanel defaultSize="80%">
+                <SidebarInset className="h-full w-full border-none">
+                  <main className="scrollbar-none h-full overflow-y-auto">
+                    <MessageWorkspace
+                      mode={mode}
+                      setMode={setMode}
+                      workMode={workMode}
+                      setWorkMode={setWorkMode}
+                      selectedFile={selectedFile}
+                      setSelectedFile={setSelectedFile}
+                      fileDestination={fileDestination}
+                      setFileDestination={setFileDestination}
+                      messageInput={messageInput}
+                      setMessageInput={setMessageInput}
+                      messageOutput={messageOutput}
+                      transformError={transformError}
+                      clearMessageFields={clearMessageFields}
+                      swapMessageFields={swapMessageFields}
+                      handlePrimaryAction={handlePrimaryAction}
+                      selectComputerFile={selectComputerFile}
+                      openVaultPicker={() => setIsVaultPickerOpen(true)}
+                      selectedUser={selectedUser}
+                      users={filteredUsers}
+                      setSelectedUserId={setSelectedUserId}
+                    />
+                  </main>
+                </SidebarInset>
+              </ResizablePanel>
             </ResizablePanelGroup>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
