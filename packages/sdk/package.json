@@ -7,6 +7,6 @@
     "format:check": "cargo fmt --check",
     "format:write": "cargo fmt --all",
     "check": "cargo check",
-    "test": "cargo test"
+    "test": "cargo test --dots"
   }
 }
