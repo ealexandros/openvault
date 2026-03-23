@@ -8,7 +8,7 @@ export const CenterLayout = ({
 }: PropsWithChildren<PropsWithClassName>) => (
   <div
     className={cn(
-      "flex h-screen w-full items-center justify-center bg-background",
+      "flex h-screen w-full items-center justify-center overflow-hidden bg-background",
       className,
     )}>
     {children}

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/shadcn/button";
 import { Input } from "@/components/ui/shadcn/input";
-import { Kbd } from "@/components/ui/shadcn/kbd";
+import { Kbd, KbdGroup } from "@/components/ui/shadcn/kbd";
 import { Separator } from "@/components/ui/shadcn/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/shadcn/tooltip";
 import { PathSegment } from "@/features/dashboard/browse/types";
@@ -130,9 +130,10 @@ export const BrowseHeader = ({
               placeholder="Search files and folders"
               className="h-9.5 bg-gray-50/30 pr-16 pl-8 text-sm"
             />
-            <Kbd className="absolute top-1/2 right-3 -translate-y-1/2 text-sm">
-              {isMacintosh() ? "⌘ + f" : "Ctrl + f"}
-            </Kbd>
+            <KbdGroup className="absolute top-1/2 right-3 -translate-y-1/2 text-sm">
+              <Kbd>{isMacintosh() ? "⌘" : "Ctrl"}</Kbd>
+              <Kbd>f</Kbd>
+            </KbdGroup>
           </div>
         </div>
       </section>
